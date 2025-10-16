@@ -17,7 +17,8 @@ const Notepad = () => {
   };
 
   return (
-    <div className="h-full flex flex-col bg-background/50 backdrop-blur-sm border-l border-border/60">
+    <div className="h-full overflow-hidden border  max-h-screen flex flex-col bg-background/50 backdrop-blur-sm border-l border-border/60">
+      <div className="overflow-y-auto h-full">
       <div className="p-4 border-b border-border/60">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="grid w-full grid-cols-2">
@@ -61,8 +62,9 @@ const Notepad = () => {
           
           <TabsContent value="projects" className="h-full m-0">
             <Projects />
-          </TabsContent>
-        </Tabs>
+            </TabsContent>
+          </Tabs>
+        </div>
       </div>
     </div>
   );
