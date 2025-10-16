@@ -10,12 +10,14 @@ interface SettingsState {
   showRightSidebar: boolean;
   cardSize: number;
   cardRadius: number;
+  backgroundImage: string | null;
   setTheme: (theme: Theme) => void;
   toggleAutoOrderTabs: () => void;
   toggleShowClock: () => void;
   toggleShowRightSidebar: () => void;
   setCardSize: (size: number) => void;
   setCardRadius: (radius: number) => void;
+  setBackgroundImage: (image: string | null) => void;
 }
 
 export const useSettingsStore = create<SettingsState>()(
