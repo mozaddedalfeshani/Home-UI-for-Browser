@@ -201,9 +201,9 @@ const SortableShortcutCard = ({
                     variant="ghost"
                     size="icon-sm"
                     aria-label={`Shortcut options for ${tab.title || hostname}`}
-                    className="absolute right-2 top-2 rounded-full bg-background/80 text-muted-foreground opacity-0 shadow-sm transition hover:bg-muted focus-visible:opacity-100 group-hover:opacity-100"
+                    className="absolute right-1 top-0 rounded-full  text-muted-foreground opacity-0  transition hover:bg-muted focus-visible:opacity-100 group-hover:opacity-100"
                     onClick={(e) => e.stopPropagation()}>
-                    <MoreVertical className="h-4 w-4" />
+                    <MoreVertical className="h-2 w-2" />
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-44">
