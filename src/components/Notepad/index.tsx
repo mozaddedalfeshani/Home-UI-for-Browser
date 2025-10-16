@@ -7,10 +7,14 @@ import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useNotepadStore } from "@/store/notepadStore";
 import { Projects } from "@/components/Projects";
+import { useSettingsStore } from "@/store/settingsStore";
+import { useTranslation } from "@/constants/languages";
 
 const Notepad = () => {
   const { content, setContent, clearContent } = useNotepadStore();
+  const { language } = useSettingsStore();
   const [activeTab, setActiveTab] = useState("notes");
+  const t = useTranslation(language);
 
   const handleClear = () => {
     clearContent();
@@ -22,8 +26,8 @@ const Notepad = () => {
       <div className="p-4 border-b border-border/60">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="notes">Notes</TabsTrigger>
-            <TabsTrigger value="projects">Projects</TabsTrigger>
+            <TabsTrigger value="notes">{t("notes")}</TabsTrigger>
+            <TabsTrigger value="projects">{t("projects")}</TabsTrigger>
           </TabsList>
         </Tabs>
       </div>
@@ -34,7 +38,7 @@ const Notepad = () => {
             <div className="h-full flex flex-col">
               <div className="p-4 border-b border-border/60">
                 <div className="flex items-center justify-between">
-                  <h2 className="text-lg font-semibold text-foreground">Notepad</h2>
+                  <h2 className="text-lg font-semibold text-foreground">{t("notepad")}</h2>
                   {content && (
                     <Button
                       variant="outline"
@@ -43,7 +47,7 @@ const Notepad = () => {
                       className="h-8 text-destructive hover:text-destructive"
                     >
                       <Trash2 className="h-3 w-3 mr-1" />
-                      Clear
+                      {t("clear")}
                     </Button>
                   )}
                 </div>
@@ -53,7 +57,7 @@ const Notepad = () => {
                 <Textarea
                   value={content}
                   onChange={(e) => setContent(e.target.value)}
-                  placeholder="Write your notes here..."
+                  placeholder={t("writeYourNotesHere")}
                   className="h-full resize-none border-0 bg-transparent text-foreground placeholder:text-muted-foreground focus-visible:ring-0 focus-visible:ring-offset-0"
                 />
               </div>

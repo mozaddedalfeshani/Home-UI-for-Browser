@@ -1,11 +1,14 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
+import { Language } from "@/constants/languages";
+
 export type Theme = "light" | "dark" | "system";
 export type ClockPosition = "top-left" | "top-center" | "top-right";
 
 interface SettingsState {
   theme: Theme;
+  language: Language;
   autoOrderTabs: boolean;
   showClock: boolean;
   showRightSidebar: boolean;
@@ -34,6 +37,7 @@ interface SettingsState {
   setClockFormat: (format: '12h' | '24h') => void;
   setShowSeconds: (show: boolean) => void;
   setClockPosition: (position: ClockPosition) => void;
+  setLanguage: (language: Language) => void;
   setHydrated: (hydrated: boolean) => void;
 }
 
@@ -41,6 +45,7 @@ export const useSettingsStore = create<SettingsState>()(
   persist(
     (set) => ({
       theme: "system",
+      language: "bn",
       autoOrderTabs: false,
       showClock: true,
       showRightSidebar: true,
@@ -69,6 +74,7 @@ export const useSettingsStore = create<SettingsState>()(
       setClockFormat: (format) => set({ clockFormat: format }),
       setShowSeconds: (show) => set({ showSeconds: show }),
       setClockPosition: (position) => set({ clockPosition: position }),
+      setLanguage: (language) => set({ language }),
       setHydrated: (hydrated) => set({ isHydrated: hydrated }),
     }),
     {

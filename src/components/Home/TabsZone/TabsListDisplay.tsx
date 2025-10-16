@@ -257,7 +257,7 @@ export const TabsList = () => {
 
   if (tabs.length === 0) {
     return (
-      <div className="h-full flex flex-col p-6">
+      <div className="h-full flex flex-col p-6 overflow-y-auto ">
         <div className="flex justify-end mb-6">
           <AddTabDialog />
         </div>

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Settings, Monitor, Sun, Moon, Maximize2, Image as ImageIcon, Clock, Move } from "lucide-react";
+import { Settings, Monitor, Sun, Moon, Maximize2, Image as ImageIcon, Clock, Move, Languages } from "lucide-react";
 import { useTheme } from "next-themes";
 import { Button } from "@/components/ui/button";
 import {
@@ -19,6 +19,7 @@ import {
   DropdownMenuCheckboxItem,
 } from "@/components/ui/dropdown-menu";
 import { useSettingsStore, Theme } from "@/store/settingsStore";
+import { Language, useTranslation } from "@/constants/languages";
 import { ResizeShortcutsDialog } from "./ResizeShortcutsDialog";
 import { BackgroundImageDialog } from "./BackgroundImageDialog";
 import { ClockColorDialog } from "./ClockColorDialog";
@@ -32,10 +33,12 @@ const SettingsMenu = () => {
   const [clockPositionDialogOpen, setClockPositionDialogOpen] = useState(false);
   const {
     theme,
+    language,
     autoOrderTabs,
     showClock,
     showRightSidebar,
     setTheme: setSettingsTheme,
+    setLanguage,
     toggleAutoOrderTabs,
     toggleShowClock,
     toggleShowRightSidebar,
@@ -46,6 +49,14 @@ const SettingsMenu = () => {
     setSettingsTheme(themeValue);
     setTheme(themeValue);
   };
+
+  const handleLanguageChange = (newLanguage: string) => {
+    const languageValue = newLanguage as Language;
+    setLanguage(languageValue);
+  };
+
+  // Translation function
+  const t = useTranslation(language);
 
   return (
     <div className="fixed bottom-4 right-4 z-50">
@@ -60,27 +71,44 @@ const SettingsMenu = () => {
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="w-56">
-          <DropdownMenuLabel>Settings</DropdownMenuLabel>
+          <DropdownMenuLabel>{t("settings")}</DropdownMenuLabel>
           <DropdownMenuSeparator />
           
           <DropdownMenuSub>
             <DropdownMenuSubTrigger>
               <Monitor className="mr-2 h-4 w-4" />
-              Theme
+              {t("theme")}
             </DropdownMenuSubTrigger>
             <DropdownMenuSubContent>
               <DropdownMenuRadioGroup value={theme} onValueChange={handleThemeChange}>
                 <DropdownMenuRadioItem value="light">
                   <Sun className="mr-2 h-4 w-4" />
-                  Light
+                  {t("light")}
                 </DropdownMenuRadioItem>
                 <DropdownMenuRadioItem value="dark">
                   <Moon className="mr-2 h-4 w-4" />
-                  Dark
+                  {t("dark")}
                 </DropdownMenuRadioItem>
                 <DropdownMenuRadioItem value="system">
                   <Monitor className="mr-2 h-4 w-4" />
-                  System
+                  {t("system")}
+                </DropdownMenuRadioItem>
+              </DropdownMenuRadioGroup>
+            </DropdownMenuSubContent>
+          </DropdownMenuSub>
+
+          <DropdownMenuSub>
+            <DropdownMenuSubTrigger>
+              <Languages className="mr-2 h-4 w-4" />
+              {t("language")}
+            </DropdownMenuSubTrigger>
+            <DropdownMenuSubContent>
+              <DropdownMenuRadioGroup value={language} onValueChange={handleLanguageChange}>
+                <DropdownMenuRadioItem value="bn">
+                  {t("bangla")}
+                </DropdownMenuRadioItem>
+                <DropdownMenuRadioItem value="en">
+                  {t("english")}
                 </DropdownMenuRadioItem>
               </DropdownMenuRadioGroup>
             </DropdownMenuSubContent>
@@ -91,41 +119,41 @@ const SettingsMenu = () => {
           <DropdownMenuCheckboxItem
             checked={autoOrderTabs}
             onCheckedChange={toggleAutoOrderTabs}>
-            Auto Order Tabs
+            {t("autoOrderTabs")}
           </DropdownMenuCheckboxItem>
           
           <DropdownMenuCheckboxItem
             checked={showClock}
             onCheckedChange={toggleShowClock}>
-            Show Clock
+            {t("showClock")}
           </DropdownMenuCheckboxItem>
           
           <DropdownMenuCheckboxItem
             checked={showRightSidebar}
             onCheckedChange={toggleShowRightSidebar}>
-            Show Right Sidebar
+            {t("showRightSidebar")}
           </DropdownMenuCheckboxItem>
           
           <DropdownMenuSeparator />
           
           <DropdownMenuItem onClick={() => setResizeDialogOpen(true)}>
             <Maximize2 className="mr-2 h-4 w-4" />
-            Resize Shortcuts
+            {t("resizeShortcuts")}
           </DropdownMenuItem>
           
           <DropdownMenuItem onClick={() => setBackgroundDialogOpen(true)}>
             <ImageIcon className="mr-2 h-4 w-4" />
-            Background Image
+            {t("backgroundImage")}
           </DropdownMenuItem>
           
           <DropdownMenuItem onClick={() => setClockColorDialogOpen(true)}>
             <Clock className="mr-2 h-4 w-4" />
-            Clock Setting
+            {t("clockSetting")}
           </DropdownMenuItem>
           
           <DropdownMenuItem onClick={() => setClockPositionDialogOpen(true)}>
             <Move className="mr-2 h-4 w-4" />
-            Clock Position
+            {t("clockPosition")}
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
