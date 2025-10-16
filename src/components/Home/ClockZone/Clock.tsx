@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Share_Tech_Mono, Orbitron } from "next/font/google";
+import { useSettingsStore } from "@/store/settingsStore";
 import "./Clock.css";
 
 const shareTech = Share_Tech_Mono({
@@ -16,6 +17,7 @@ const orbitron = Orbitron({
 
 export default function DigitalClock() {
   const [time, setTime] = useState<string>("");
+  const { clockColor, showClockGlow } = useSettingsStore();
 
   useEffect(() => {
     const updateTime = () => {
@@ -33,10 +35,16 @@ export default function DigitalClock() {
 
   return (
     <div
-      className={`${shareTech.className} glow text-green-400 text-7xl font-bold tracking-widest p-8  rounded-2xl  text-center`}
+      className={`${shareTech.className} text-7xl font-bold tracking-widest p-8 rounded-2xl text-center ${
+        showClockGlow ? 'glow' : ''
+      }`}
       style={{
         letterSpacing: "0.1em",
-      }}>
+        color: clockColor,
+        textShadow: showClockGlow ? `0 0 10px ${clockColor}, 0 0 20px ${clockColor}` : 'none',
+        animation: showClockGlow ? `glow 2s ease-in-out infinite alternate` : 'none',
+        '--glow-color': clockColor,
+      } as React.CSSProperties}>
       {time}
     </div>
   );

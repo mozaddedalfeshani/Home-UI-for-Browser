@@ -2,15 +2,15 @@
 
 @keyframes glow {
     0% {
-        text-shadow: 0 0 10px #00ff00, 0 0 20px #00ff00;
+        text-shadow: 0 0 10px var(--glow-color, #22c55e), 0 0 20px var(--glow-color, #22c55e);
     }
 
     50% {
-        text-shadow: 0 0 20px #00ff00, 0 0 40px #00ff00;
+        text-shadow: 0 0 20px var(--glow-color, #22c55e), 0 0 40px var(--glow-color, #22c55e);
     }
 
     100% {
-        text-shadow: 0 0 10px #00ff00, 0 0 20px #00ff00;
+        text-shadow: 0 0 10px var(--glow-color, #22c55e), 0 0 20px var(--glow-color, #22c55e);
     }
 }
 

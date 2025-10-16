@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Settings, Monitor, Sun, Moon, Maximize2, Image as ImageIcon } from "lucide-react";
+import { Settings, Monitor, Sun, Moon, Maximize2, Image as ImageIcon, Palette } from "lucide-react";
 import { useTheme } from "next-themes";
 import { Button } from "@/components/ui/button";
 import {
@@ -21,20 +21,24 @@ import {
 import { useSettingsStore, Theme } from "@/store/settingsStore";
 import { ResizeShortcutsDialog } from "./ResizeShortcutsDialog";
 import { BackgroundImageDialog } from "./BackgroundImageDialog";
+import { ClockColorDialog } from "./ClockColorDialog";
 
 const SettingsMenu = () => {
   const { setTheme } = useTheme();
   const [resizeDialogOpen, setResizeDialogOpen] = useState(false);
   const [backgroundDialogOpen, setBackgroundDialogOpen] = useState(false);
+  const [clockColorDialogOpen, setClockColorDialogOpen] = useState(false);
   const {
     theme,
     autoOrderTabs,
     showClock,
     showRightSidebar,
+    clockColor,
     setTheme: setSettingsTheme,
     toggleAutoOrderTabs,
     toggleShowClock,
     toggleShowRightSidebar,
+    setClockColor,
   } = useSettingsStore();
 
   const handleThemeChange = (newTheme: Theme) => {
@@ -112,6 +116,11 @@ const SettingsMenu = () => {
             <ImageIcon className="mr-2 h-4 w-4" />
             Background Image
           </DropdownMenuItem>
+          
+          <DropdownMenuItem onClick={() => setClockColorDialogOpen(true)}>
+            <Palette className="mr-2 h-4 w-4" />
+            Clock Color
+          </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
       
@@ -123,6 +132,11 @@ const SettingsMenu = () => {
       <BackgroundImageDialog 
         open={backgroundDialogOpen} 
         onOpenChange={setBackgroundDialogOpen} 
+      />
+      
+      <ClockColorDialog 
+        open={clockColorDialogOpen} 
+        onOpenChange={setClockColorDialogOpen} 
       />
     </div>
   );
