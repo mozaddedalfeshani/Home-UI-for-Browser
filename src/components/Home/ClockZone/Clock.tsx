@@ -17,7 +17,7 @@ const orbitron = Orbitron({
 
 export default function DigitalClock() {
   const [time, setTime] = useState<string>("");
-  const { clockColor, showClockGlow, clockFormat } = useSettingsStore();
+  const { clockColor, showClockGlow, clockFormat, showSeconds } = useSettingsStore();
 
   useEffect(() => {
     const updateTime = () => {
@@ -27,21 +27,31 @@ export default function DigitalClock() {
         const hours12 = now.getHours() % 12 || 12;
         const hours = String(hours12).padStart(2, "0");
         const minutes = String(now.getMinutes()).padStart(2, "0");
-        const seconds = String(now.getSeconds()).padStart(2, "0");
         const ampm = now.getHours() >= 12 ? "PM" : "AM";
-        setTime(`${hours}:${minutes}:${seconds} ${ampm}`);
+        
+        if (showSeconds) {
+          const seconds = String(now.getSeconds()).padStart(2, "0");
+          setTime(`${hours}:${minutes}:${seconds} ${ampm}`);
+        } else {
+          setTime(`${hours}:${minutes} ${ampm}`);
+        }
       } else {
         const hours = String(now.getHours()).padStart(2, "0");
         const minutes = String(now.getMinutes()).padStart(2, "0");
-        const seconds = String(now.getSeconds()).padStart(2, "0");
-        setTime(`${hours}:${minutes}:${seconds}`);
+        
+        if (showSeconds) {
+          const seconds = String(now.getSeconds()).padStart(2, "0");
+          setTime(`${hours}:${minutes}:${seconds}`);
+        } else {
+          setTime(`${hours}:${minutes}`);
+        }
       }
     };
 
     updateTime();
     const interval = setInterval(updateTime, 1000);
     return () => clearInterval(interval);
-  }, [clockFormat]);
+  }, [clockFormat, showSeconds]);
 
   return (
     <div
