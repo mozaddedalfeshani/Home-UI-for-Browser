@@ -16,6 +16,7 @@ interface SettingsState {
   clockColor: string;
   showClockGlow: boolean;
   clockFormat: '12h' | '24h';
+  isHydrated: boolean;
   setTheme: (theme: Theme) => void;
   toggleAutoOrderTabs: () => void;
   toggleShowClock: () => void;
@@ -28,6 +29,7 @@ interface SettingsState {
   setClockColor: (color: string) => void;
   setShowClockGlow: (show: boolean) => void;
   setClockFormat: (format: '12h' | '24h') => void;
+  setHydrated: (hydrated: boolean) => void;
 }
 
 export const useSettingsStore = create<SettingsState>()(
@@ -45,6 +47,7 @@ export const useSettingsStore = create<SettingsState>()(
       clockColor: "#22c55e",
       showClockGlow: true,
       clockFormat: "24h",
+      isHydrated: false,
       setTheme: (theme) => set({ theme }),
       toggleAutoOrderTabs: () => set((state) => ({ autoOrderTabs: !state.autoOrderTabs })),
       toggleShowClock: () => set((state) => ({ showClock: !state.showClock })),
@@ -57,10 +60,14 @@ export const useSettingsStore = create<SettingsState>()(
       setClockColor: (color) => set({ clockColor: color }),
       setShowClockGlow: (show) => set({ showClockGlow: show }),
       setClockFormat: (format) => set({ clockFormat: format }),
+      setHydrated: (hydrated) => set({ isHydrated: hydrated }),
     }),
     {
       name: "settings-store",
       version: 1,
+      onRehydrateStorage: () => (state) => {
+        state?.setHydrated(true);
+      },
     }
   )
 );
