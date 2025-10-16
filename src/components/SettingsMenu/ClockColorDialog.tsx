@@ -34,19 +34,22 @@ const predefinedColors = [
 ];
 
 export function ClockColorDialog({ open, onOpenChange }: ClockColorDialogProps) {
-  const { clockColor, showClockGlow, setClockColor, setShowClockGlow } = useSettingsStore();
+  const { clockColor, showClockGlow, clockFormat, setClockColor, setShowClockGlow, setClockFormat } = useSettingsStore();
   const [tempColor, setTempColor] = useState(clockColor);
   const [tempGlow, setTempGlow] = useState(showClockGlow);
+  const [tempFormat, setTempFormat] = useState(clockFormat);
 
   const handleSave = () => {
     setClockColor(tempColor);
     setShowClockGlow(tempGlow);
+    setClockFormat(tempFormat);
     onOpenChange(false);
   };
 
   const handleCancel = () => {
     setTempColor(clockColor);
     setTempGlow(showClockGlow);
+    setTempFormat(clockFormat);
     onOpenChange(false);
   };
 
@@ -95,6 +98,32 @@ export function ClockColorDialog({ open, onOpenChange }: ClockColorDialogProps) 
                 />
               </button>
             </div>
+            
+            <div className="flex items-center justify-between">
+              <span className="text-sm font-medium">Time Format</span>
+              <div className="flex rounded-lg border border-border overflow-hidden">
+                <button
+                  onClick={() => setTempFormat('12h')}
+                  className={`px-3 py-1 text-xs font-medium transition-colors ${
+                    tempFormat === '12h' 
+                      ? 'bg-primary text-primary-foreground' 
+                      : 'bg-background text-foreground hover:bg-muted'
+                  }`}
+                >
+                  12H
+                </button>
+                <button
+                  onClick={() => setTempFormat('24h')}
+                  className={`px-3 py-1 text-xs font-medium transition-colors ${
+                    tempFormat === '24h' 
+                      ? 'bg-primary text-primary-foreground' 
+                      : 'bg-background text-foreground hover:bg-muted'
+                  }`}
+                >
+                  24H
+                </button>
+              </div>
+            </div>
           </div>
 
           <div className="space-y-3">
@@ -129,7 +158,7 @@ export function ClockColorDialog({ open, onOpenChange }: ClockColorDialogProps) 
                 '--glow-color': tempColor,
               } as React.CSSProperties}
             >
-              12:34:56
+              {tempFormat === '12h' ? '12:34:56 PM' : '12:34:56'}
             </div>
           </div>
         </div>

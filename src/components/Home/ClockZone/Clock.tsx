@@ -17,21 +17,31 @@ const orbitron = Orbitron({
 
 export default function DigitalClock() {
   const [time, setTime] = useState<string>("");
-  const { clockColor, showClockGlow } = useSettingsStore();
+  const { clockColor, showClockGlow, clockFormat } = useSettingsStore();
 
   useEffect(() => {
     const updateTime = () => {
       const now = new Date();
-      const hours = String(now.getHours()).padStart(2, "0");
-      const minutes = String(now.getMinutes()).padStart(2, "0");
-      const seconds = String(now.getSeconds()).padStart(2, "0");
-      setTime(`${hours}:${minutes}:${seconds}`);
+      
+      if (clockFormat === "12h") {
+        const hours12 = now.getHours() % 12 || 12;
+        const hours = String(hours12).padStart(2, "0");
+        const minutes = String(now.getMinutes()).padStart(2, "0");
+        const seconds = String(now.getSeconds()).padStart(2, "0");
+        const ampm = now.getHours() >= 12 ? "PM" : "AM";
+        setTime(`${hours}:${minutes}:${seconds} ${ampm}`);
+      } else {
+        const hours = String(now.getHours()).padStart(2, "0");
+        const minutes = String(now.getMinutes()).padStart(2, "0");
+        const seconds = String(now.getSeconds()).padStart(2, "0");
+        setTime(`${hours}:${minutes}:${seconds}`);
+      }
     };
 
     updateTime();
     const interval = setInterval(updateTime, 1000);
     return () => clearInterval(interval);
-  }, []);
+  }, [clockFormat]);
 
   return (
     <div

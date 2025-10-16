@@ -15,6 +15,7 @@ interface SettingsState {
   userProfile: 'developer' | 'gamer' | 'normal' | null;
   clockColor: string;
   showClockGlow: boolean;
+  clockFormat: '12h' | '24h';
   setTheme: (theme: Theme) => void;
   toggleAutoOrderTabs: () => void;
   toggleShowClock: () => void;
@@ -26,6 +27,7 @@ interface SettingsState {
   setUserProfile: (profile: 'developer' | 'gamer' | 'normal' | null) => void;
   setClockColor: (color: string) => void;
   setShowClockGlow: (show: boolean) => void;
+  setClockFormat: (format: '12h' | '24h') => void;
 }
 
 export const useSettingsStore = create<SettingsState>()(
@@ -42,6 +44,7 @@ export const useSettingsStore = create<SettingsState>()(
       userProfile: null,
       clockColor: "#22c55e",
       showClockGlow: true,
+      clockFormat: "24h",
       setTheme: (theme) => set({ theme }),
       toggleAutoOrderTabs: () => set((state) => ({ autoOrderTabs: !state.autoOrderTabs })),
       toggleShowClock: () => set((state) => ({ showClock: !state.showClock })),
@@ -53,6 +56,7 @@ export const useSettingsStore = create<SettingsState>()(
       setUserProfile: (profile) => set({ userProfile: profile }),
       setClockColor: (color) => set({ clockColor: color }),
       setShowClockGlow: (show) => set({ showClockGlow: show }),
+      setClockFormat: (format) => set({ clockFormat: format }),
     }),
     {
       name: "settings-store",
