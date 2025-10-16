@@ -4,10 +4,11 @@ import DigitalClock from "@/components/Home/ClockZone/Clock";
 import TabsZone from "@/components/Home/TabsZone";
 import SettingsMenu from "@/components/SettingsMenu";
 import Notepad from "@/components/Notepad";
+import { WelcomeDialog } from "@/components/WelcomeDialog";
 import { useSettingsStore } from "@/store/settingsStore";
 
 export function PageClient() {
-  const { showClock, showRightSidebar, backgroundImage } = useSettingsStore();
+  const { showClock, showRightSidebar, backgroundImage, hasSeenWelcome } = useSettingsStore();
 
   return (
     <div 
@@ -34,6 +35,7 @@ export function PageClient() {
         )}
       </div>
       <SettingsMenu />
+      <WelcomeDialog open={!hasSeenWelcome} />
     </div>
   );
 }

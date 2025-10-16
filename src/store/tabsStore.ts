@@ -12,6 +12,7 @@ export interface Tab {
 interface TabsState {
   tabs: Tab[];
   addTab: (title: string, url: string) => void;
+  addMultipleTabs: (tabs: Array<{title: string, url: string}>) => void;
   removeTab: (id: string) => void;
   moveTab: (fromIndex: number, toIndex: number) => void;
   incrementVisitCount: (id: string) => void;
@@ -32,6 +33,18 @@ export const useTabsStore = create<TabsState>()(
         };
         set((state) => ({
           tabs: [...state.tabs, newTab],
+        }));
+      },
+      addMultipleTabs: (tabs) => {
+        const newTabs: Tab[] = tabs.map((tab) => ({
+          id: crypto.randomUUID(),
+          title: tab.title,
+          url: tab.url,
+          createdAt: Date.now(),
+          visitCount: 0,
+        }));
+        set((state) => ({
+          tabs: [...state.tabs, ...newTabs],
         }));
       },
       removeTab: (id: string) => {

@@ -11,6 +11,8 @@ interface SettingsState {
   cardSize: number;
   cardRadius: number;
   backgroundImage: string | null;
+  hasSeenWelcome: boolean;
+  userProfile: 'developer' | 'gamer' | 'normal' | null;
   setTheme: (theme: Theme) => void;
   toggleAutoOrderTabs: () => void;
   toggleShowClock: () => void;
@@ -18,6 +20,8 @@ interface SettingsState {
   setCardSize: (size: number) => void;
   setCardRadius: (radius: number) => void;
   setBackgroundImage: (image: string | null) => void;
+  setHasSeenWelcome: (seen: boolean) => void;
+  setUserProfile: (profile: 'developer' | 'gamer' | 'normal' | null) => void;
 }
 
 export const useSettingsStore = create<SettingsState>()(
@@ -30,6 +34,8 @@ export const useSettingsStore = create<SettingsState>()(
       cardSize: 7,
       cardRadius: 1.5,
       backgroundImage: null,
+      hasSeenWelcome: false,
+      userProfile: null,
       setTheme: (theme) => set({ theme }),
       toggleAutoOrderTabs: () => set((state) => ({ autoOrderTabs: !state.autoOrderTabs })),
       toggleShowClock: () => set((state) => ({ showClock: !state.showClock })),
@@ -37,6 +43,8 @@ export const useSettingsStore = create<SettingsState>()(
       setCardSize: (size) => set({ cardSize: size }),
       setCardRadius: (radius) => set({ cardRadius: radius }),
       setBackgroundImage: (image) => set({ backgroundImage: image }),
+      setHasSeenWelcome: (seen) => set({ hasSeenWelcome: seen }),
+      setUserProfile: (profile) => set({ userProfile: profile }),
     }),
     {
       name: "settings-store",
