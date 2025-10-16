@@ -6,6 +6,7 @@ export interface Tab {
   title: string;
   url: string;
   createdAt: number;
+  visitCount: number;
 }
 
 interface TabsState {
@@ -13,6 +14,7 @@ interface TabsState {
   addTab: (title: string, url: string) => void;
   removeTab: (id: string) => void;
   moveTab: (fromIndex: number, toIndex: number) => void;
+  incrementVisitCount: (id: string) => void;
   getTabs: () => Tab[];
 }
 
@@ -26,6 +28,7 @@ export const useTabsStore = create<TabsState>()(
           title,
           url,
           createdAt: Date.now(),
+          visitCount: 0,
         };
         set((state) => ({
           tabs: [...state.tabs, newTab],
@@ -54,6 +57,13 @@ export const useTabsStore = create<TabsState>()(
             tabs: nextTabs,
           };
         });
+      },
+      incrementVisitCount: (id: string) => {
+        set((state) => ({
+          tabs: state.tabs.map((tab) =>
+            tab.id === id ? { ...tab, visitCount: tab.visitCount + 1 } : tab
+          ),
+        }));
       },
       getTabs: () => get().tabs,
     }),

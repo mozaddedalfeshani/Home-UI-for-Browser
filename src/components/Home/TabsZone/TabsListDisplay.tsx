@@ -5,6 +5,7 @@ import { ExternalLink, MoreVertical, Trash2 } from "lucide-react";
 import { DndProvider, useDrag, useDrop } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import { useTabsStore, Tab } from "@/store/tabsStore";
+import { useSettingsStore } from "@/store/settingsStore";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -70,6 +71,8 @@ interface SortableShortcutCardProps {
   index: number;
   moveTab: (fromIndex: number, toIndex: number) => void;
   removeTab: (id: string) => void;
+  incrementVisitCount: (id: string) => void;
+  autoOrderTabs: boolean;
 }
 
 const SortableShortcutCard = ({
@@ -77,13 +80,15 @@ const SortableShortcutCard = ({
   index,
   moveTab,
   removeTab,
+  incrementVisitCount,
+  autoOrderTabs,
 }: SortableShortcutCardProps) => {
   const ref = useRef<HTMLDivElement | null>(null);
 
   const [, drop] = useDrop<DragItem>({
     accept: DRAG_TYPE,
     hover: (item) => {
-      if (!ref.current) {
+      if (!ref.current || autoOrderTabs) {
         return;
       }
 
@@ -108,9 +113,14 @@ const SortableShortcutCard = ({
     collect: (monitor) => ({
       isDragging: monitor.isDragging(),
     }),
+    canDrag: !autoOrderTabs,
   });
 
-  drag(drop(ref));
+  if (!autoOrderTabs) {
+    drag(drop(ref));
+  } else {
+    drop(ref);
+  }
 
   const hostname = getHostname(tab.url);
   const accent = getAccent(tab.title || hostname);
@@ -122,7 +132,7 @@ const SortableShortcutCard = ({
       className="h-full"
       style={{
         opacity: isDragging ? 0.6 : 1,
-        cursor: isDragging ? "grabbing" : "grab",
+        cursor: autoOrderTabs ? "default" : isDragging ? "grabbing" : "grab",
       }}>
       <Card className="group relative flex w-28 flex-col items-center gap-3 rounded-3xl border border-border/60 bg-card/70 p-4 text-center shadow-sm transition hover:border-primary/70 hover:shadow-lg">
         <Tooltip>
@@ -137,7 +147,8 @@ const SortableShortcutCard = ({
                 href={tab.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                aria-label={`Open ${tab.title || hostname}`}>
+                aria-label={`Open ${tab.title || hostname}`}
+                onClick={() => incrementVisitCount(tab.id)}>
                 <Avatar className="size-full border border-transparent bg-transparent">
                   {favicon ? (
                     <AvatarImage src={favicon} alt={hostname} />
@@ -203,6 +214,8 @@ export const TabsList = () => {
   const tabs = useTabsStore((state) => state.tabs);
   const removeTab = useTabsStore((state) => state.removeTab);
   const moveTab = useTabsStore((state) => state.moveTab);
+  const incrementVisitCount = useTabsStore((state) => state.incrementVisitCount);
+  const autoOrderTabs = useSettingsStore((state) => state.autoOrderTabs);
 
   useEffect(() => {
     setMounted(true);
@@ -222,17 +235,24 @@ export const TabsList = () => {
     );
   }
 
+  // Sort tabs by visit count if auto ordering is enabled
+  const sortedTabs = autoOrderTabs 
+    ? [...tabs].sort((a, b) => b.visitCount - a.visitCount)
+    : tabs;
+
   return (
     <TooltipProvider delayDuration={150}>
       <DndProvider backend={HTML5Backend}>
         <div className="grid grid-cols-[repeat(auto-fill,_minmax(7rem,_1fr))] gap-4">
-          {tabs.map((tab: Tab, index) => (
+          {sortedTabs.map((tab: Tab, index) => (
             <SortableShortcutCard
               key={tab.id}
               tab={tab}
               index={index}
               moveTab={moveTab}
               removeTab={removeTab}
+              incrementVisitCount={incrementVisitCount}
+              autoOrderTabs={autoOrderTabs}
             />
           ))}
         </div>
