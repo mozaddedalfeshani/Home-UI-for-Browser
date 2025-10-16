@@ -4,6 +4,8 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useProjectStore } from "@/store/projectStore";
+import { useSettingsStore } from "@/store/settingsStore";
+import { useTranslation } from "@/constants/languages";
 import { Todo } from "@/store/projectStore";
 import { Trash2, ChevronUp, ChevronDown } from "lucide-react";
 import { AddTodoInput } from "./AddTodoInput";
@@ -17,6 +19,8 @@ export function TodoList({ projectId, todos }: TodoListProps) {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editText, setEditText] = useState("");
   const { updateTodo, deleteTodo, toggleTodoComplete, reorderTodos } = useProjectStore();
+  const { language } = useSettingsStore();
+  const t = useTranslation(language);
 
   const sortedTodos = [...todos].sort((a, b) => a.order - b.order);
 
@@ -74,7 +78,7 @@ export function TodoList({ projectId, todos }: TodoListProps) {
       
       {sortedTodos.length === 0 ? (
         <p className="text-sm text-muted-foreground text-center py-4">
-          No todos yet. Add one above!
+          {t("noTodosYet")}
         </p>
       ) : (
         <div className="space-y-1">

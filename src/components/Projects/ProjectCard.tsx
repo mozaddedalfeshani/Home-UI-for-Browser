@@ -5,6 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { useProjectStore } from "@/store/projectStore";
+import { useSettingsStore } from "@/store/settingsStore";
+import { useTranslation } from "@/constants/languages";
 import { Project } from "@/store/projectStore";
 import { EditProjectDialog } from "./EditProjectDialog";
 import { TodoList } from "./TodoList";
@@ -17,13 +19,15 @@ interface ProjectCardProps {
 export function ProjectCard({ project }: ProjectCardProps) {
   const [isExpanded, setIsExpanded] = useState(false);
   const { deleteProject } = useProjectStore();
+  const { language } = useSettingsStore();
+  const t = useTranslation(language);
 
   const completedTodos = project.todos.filter(todo => todo.completed).length;
   const totalTodos = project.todos.length;
   const progressPercentage = totalTodos > 0 ? (completedTodos / totalTodos) * 100 : 0;
 
   const handleDelete = () => {
-    if (confirm(`Are you sure you want to delete "${project.title}"? This action cannot be undone.`)) {
+    if (confirm(`${t("areYouSureDeleteProject")} "${project.title}"? ${t("thisActionCannotBeUndone")}`)) {
       deleteProject(project.id);
     }
   };
@@ -67,8 +71,8 @@ export function ProjectCard({ project }: ProjectCardProps) {
         
         <div className="space-y-2">
           <div className="flex items-center justify-between text-xs text-muted-foreground">
-            <span>Progress</span>
-            <span>{completedTodos}/{totalTodos} completed</span>
+            <span>{t("progress")}</span>
+            <span>{completedTodos}/{totalTodos} {t("completed")}</span>
           </div>
           <Progress value={progressPercentage} className="h-2" />
         </div>

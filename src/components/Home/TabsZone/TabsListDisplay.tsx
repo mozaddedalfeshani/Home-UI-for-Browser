@@ -7,6 +7,7 @@ import { DndProvider, useDrag, useDrop } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import { useTabsStore, Tab } from "@/store/tabsStore";
 import { useSettingsStore } from "@/store/settingsStore";
+import { useTranslation } from "@/constants/languages";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { AddTabDialog } from "./AddTabDialog";
@@ -243,9 +244,8 @@ export const TabsList = () => {
   const removeTab = useTabsStore((state) => state.removeTab);
   const moveTab = useTabsStore((state) => state.moveTab);
   const incrementVisitCount = useTabsStore((state) => state.incrementVisitCount);
-  const autoOrderTabs = useSettingsStore((state) => state.autoOrderTabs);
-  const cardSize = useSettingsStore((state) => state.cardSize);
-  const cardRadius = useSettingsStore((state) => state.cardRadius);
+  const { autoOrderTabs, cardSize, cardRadius, language } = useSettingsStore();
+  const t = useTranslation(language);
 
   useEffect(() => {
     setMounted(true);
@@ -264,7 +264,7 @@ export const TabsList = () => {
         <div className="flex-1 flex items-center justify-center">
           <Card className="flex h-36 items-center justify-center border-dashed border-border/60 bg-muted/30">
             <p className="text-sm text-muted-foreground">
-              Start by adding your first shortcut.
+              {t("startByAddingFirstShortcut")}
             </p>
           </Card>
         </div>

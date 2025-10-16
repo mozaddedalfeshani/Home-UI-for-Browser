@@ -13,6 +13,8 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { useProjectStore } from "@/store/projectStore";
+import { useSettingsStore } from "@/store/settingsStore";
+import { useTranslation } from "@/constants/languages";
 import { Edit2 } from "lucide-react";
 import { Project } from "@/store/projectStore";
 
@@ -25,6 +27,8 @@ export function EditProjectDialog({ project }: EditProjectDialogProps) {
   const [title, setTitle] = useState(project.title);
   const [description, setDescription] = useState(project.description);
   const { updateProject } = useProjectStore();
+  const { language } = useSettingsStore();
+  const t = useTranslation(language);
 
   useEffect(() => {
     setTitle(project.title);
@@ -52,35 +56,35 @@ export function EditProjectDialog({ project }: EditProjectDialogProps) {
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Edit Project</DialogTitle>
+          <DialogTitle>{t("editProject")}</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="title">Project Title</Label>
+            <Label htmlFor="title">{t("projectTitle")}</Label>
             <Input
               id="title"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              placeholder="Enter project title..."
+              placeholder={t("enterProjectTitle")}
               required
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="description">Description (Optional)</Label>
+            <Label htmlFor="description">{t("description")}</Label>
             <Textarea
               id="description"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              placeholder="Enter project description..."
+              placeholder={t("enterProjectDescription")}
               rows={3}
             />
           </div>
           <div className="flex justify-end space-x-2">
             <Button type="button" variant="outline" onClick={() => setOpen(false)}>
-              Cancel
+              {t("cancel")}
             </Button>
             <Button type="submit" disabled={!title.trim()}>
-              Save Changes
+              {t("saveChanges")}
             </Button>
           </div>
         </form>
