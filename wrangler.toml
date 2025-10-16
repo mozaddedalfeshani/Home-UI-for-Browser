@@ -1,11 +1,9 @@
 name = "mclx-home-ui-for-browser"
-compatibility_date = "2024-01-01"
+compatibility_date = "2024-12-01"
+pages_build_output_dir = ".next"
 
 [env.production]
 compatibility_flags = ["nodejs_compat"]
 
 [env.preview]
-compatibility_flags = ["nodejs_compat"]
-
-[[pages_builds]]
 compatibility_flags = ["nodejs_compat"]

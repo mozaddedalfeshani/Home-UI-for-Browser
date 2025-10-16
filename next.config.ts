@@ -6,10 +6,6 @@ const nextConfig: NextConfig = {
   trailingSlash: true,
   images: {
     unoptimized: true
-  },
-  // Cloudflare Pages compatibility
-  experimental: {
-    esmExternals: 'loose'
   }
 };
 
