@@ -1,52 +1,26 @@
-import { Button } from "@/components/ui/button";
+"use client";
+
 import { Card } from "@/components/ui/card";
-import React from "react";
+import { AddTabDialog } from "./AddTabDialog";
+import TabsList from "./TabsList";
 
 const TabsZone = () => {
   return (
-    <div>
-      <Card>
-        <div className="w-full bg-white h-10 flex flex-row justify-end items-center px-2">
-          <Button>
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="24"
-              height="24"
-              viewBox="0 0 24 24"
-              fill="none">
-              <g clipPath="url(#clip0_4418_9827)">
-                <path
-                  d="M8 12H16"
-                  stroke="#000"
-                  strokeWidth="1.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-                <path
-                  d="M12 16V8"
-                  stroke="#000"
-                  strokeWidth="1.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-                <path
-                  d="M9 22H15C20 22 22 20 22 15V9C22 4 20 2 15 2H9C4 2 2 4 2 9V15C2 20 4 22 9 22Z"
-                  stroke="#000"
-                  strokeWidth="1.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </g>
-              <defs>
-                <clipPath id="clip0_4418_9827">
-                  <rect width="24" height="24" fill="white" />
-                </clipPath>
-              </defs>
-            </svg>
-          </Button>
+    <section className="space-y-6">
+      <Card className="rounded-3xl border border-dashed border-border/60 bg-background/60 p-6 shadow-none">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="space-y-1 text-left">
+            <h2 className="text-lg font-semibold text-foreground">Shortcuts</h2>
+            <p className="text-sm text-muted-foreground">
+              Collect your most visited destinations. Shortcuts are stored
+              locally with Zustand so they stay on this device.
+            </p>
+          </div>
+          <AddTabDialog />
         </div>
       </Card>
-    </div>
+      <TabsList />
+    </section>
   );
 };
 
