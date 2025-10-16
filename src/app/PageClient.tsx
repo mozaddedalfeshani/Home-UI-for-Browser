@@ -3,6 +3,7 @@
 import DigitalClock from "@/components/Home/ClockZone/Clock";
 import TabsZone from "@/components/Home/TabsZone";
 import SettingsMenu from "@/components/SettingsMenu";
+import Notepad from "@/components/Notepad";
 import { useSettingsStore } from "@/store/settingsStore";
 
 export function PageClient() {
@@ -27,7 +28,9 @@ export function PageClient() {
         </div>
         {/* Right side */}
         {showRightSidebar && (
-          <div className="w-1/4 bg-blue-950">This is right side</div>
+          <div className="w-1/4">
+            <Notepad />
+          </div>
         )}
       </div>
       <SettingsMenu />
