@@ -12,6 +12,7 @@ interface TabsState {
   tabs: Tab[];
   addTab: (title: string, url: string) => void;
   removeTab: (id: string) => void;
+  moveTab: (fromIndex: number, toIndex: number) => void;
   getTabs: () => Tab[];
 }
 
@@ -34,6 +35,25 @@ export const useTabsStore = create<TabsState>()(
         set((state) => ({
           tabs: state.tabs.filter((tab) => tab.id !== id),
         }));
+      },
+      moveTab: (fromIndex: number, toIndex: number) => {
+        if (fromIndex === toIndex) {
+          return;
+        }
+
+        set((state) => {
+          const nextTabs = [...state.tabs];
+          const [moved] = nextTabs.splice(fromIndex, 1);
+
+          if (!moved) {
+            return state;
+          }
+
+          nextTabs.splice(toIndex, 0, moved);
+          return {
+            tabs: nextTabs,
+          };
+        });
       },
       getTabs: () => get().tabs,
     }),
