@@ -13,6 +13,7 @@ interface TabsState {
   tabs: Tab[];
   addTab: (title: string, url: string) => void;
   addMultipleTabs: (tabs: Array<{title: string, url: string}>) => void;
+  updateTab: (id: string, title: string, url: string) => void;
   removeTab: (id: string) => void;
   moveTab: (fromIndex: number, toIndex: number) => void;
   incrementVisitCount: (id: string) => void;
@@ -45,6 +46,13 @@ export const useTabsStore = create<TabsState>()(
         }));
         set((state) => ({
           tabs: [...state.tabs, ...newTabs],
+        }));
+      },
+      updateTab: (id: string, title: string, url: string) => {
+        set((state) => ({
+          tabs: state.tabs.map((tab) =>
+            tab.id === id ? { ...tab, title, url } : tab
+          ),
         }));
       },
       removeTab: (id: string) => {

@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { ExternalLink, MoreVertical, Trash2 } from "lucide-react";
+import { ExternalLink, MoreVertical, Trash2, Pencil } from "lucide-react";
+import Link from "next/link";
 import { DndProvider, useDrag, useDrop } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import { useTabsStore, Tab } from "@/store/tabsStore";
@@ -9,6 +10,7 @@ import { useSettingsStore } from "@/store/settingsStore";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { AddTabDialog } from "./AddTabDialog";
+import { EditTabDialog } from "./EditTabDialog";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   Tooltip,
@@ -139,32 +141,30 @@ const SortableShortcutCard = ({
         opacity: isDragging ? 0.6 : 1,
         cursor: autoOrderTabs ? "default" : isDragging ? "grabbing" : "grab",
       }}>
-      <Card 
-        className="group relative flex flex-col items-center justify-center gap-2 border border-border/60 bg-card/70 backdrop-blur-sm p-3 text-center shadow-sm transition hover:border-primary/70 hover:shadow-lg"
-        style={{ 
-          width: `${cardSize}rem`,
-          height: `${cardSize}rem`,
-          borderRadius: `${cardRadius}rem`
-        }}
-      >
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Button
-              asChild
-              variant="ghost"
-              className={cn(
-                "group relative flex items-center justify-center rounded-full bg-muted/70 p-0 text-foreground transition hover:bg-muted"
-              )}
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Link
+            href={tab.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label={`Open ${tab.title || hostname}`}
+            onClick={() => incrementVisitCount(tab.id)}
+            className="block [&:hover]:cursor-pointer"
+            style={{ textDecoration: 'none' }}>
+            <Card 
+              className="group relative flex flex-col items-center justify-center gap-2 border border-border/60 bg-card/70 backdrop-blur-sm p-3 text-center shadow-sm transition hover:border-primary/70 hover:shadow-lg cursor-pointer"
               style={{ 
-                height: `${Math.min(cardSize * 0.5, cardSize - 2)}rem`, 
-                width: `${Math.min(cardSize * 0.5, cardSize - 2)}rem` 
-              }}>
-              <a
-                href={tab.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label={`Open ${tab.title || hostname}`}
-                onClick={() => incrementVisitCount(tab.id)}>
+                width: `${cardSize}rem`,
+                height: `${cardSize}rem`,
+                borderRadius: `${cardRadius}rem`
+              }}
+            >
+              <div
+                className="group relative flex items-center justify-center rounded-full bg-muted/70 p-0 text-foreground transition hover:bg-muted"
+                style={{ 
+                  height: `${Math.min(cardSize * 0.5, cardSize - 2)}rem`, 
+                  width: `${Math.min(cardSize * 0.5, cardSize - 2)}rem` 
+                }}>
                 <Avatar 
                   className="border border-transparent bg-transparent"
                   style={{ 
@@ -184,52 +184,56 @@ const SortableShortcutCard = ({
                     {getFallbackChar(tab.title || hostname)}
                   </AvatarFallback>
                 </Avatar>
-                <span className="pointer-events-none absolute bottom-2 right-2 rounded-full bg-background/80 p-1 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100">
-                  <ExternalLink className="h-3.5 w-3.5" />
-                </span>
-              </a>
-            </Button>
-          </TooltipTrigger>
-          <TooltipContent className="max-w-xs space-y-1 text-left">
-            <p className="text-sm font-medium text-foreground">{tab.title}</p>
-            <p className="text-xs text-muted-foreground">{tab.url}</p>
-          </TooltipContent>
-        </Tooltip>
+              </div>
 
-        <div className="flex w-full flex-col items-center gap-1 px-1">
-          <p 
-            className="w-full truncate font-medium text-foreground leading-tight"
-            style={{ fontSize: `${Math.max(0.5, cardSize * 0.1)}rem` }}
-          >
-            {tab.title}
-          </p>
-        </div>
+              <div className="flex w-full flex-col items-center gap-1 px-1">
+                <p 
+                  className="w-full truncate font-medium text-foreground leading-tight"
+                  style={{ fontSize: `${Math.max(0.5, cardSize * 0.1)}rem` }}
+                >
+                  {tab.title}
+                </p>
+              </div>
 
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button
-              variant="ghost"
-              size="icon-sm"
-              aria-label={`Shortcut options for ${tab.title || hostname}`}
-              className="absolute right-2 top-2 rounded-full bg-background/80 text-muted-foreground opacity-0 shadow-sm transition hover:bg-muted focus-visible:opacity-100 group-hover:opacity-100">
-              <MoreVertical className="h-4 w-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-44">
-            <DropdownMenuLabel>Shortcut options</DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem
-              onSelect={(event) => {
-                event.preventDefault();
-                removeTab(tab.id);
-              }}
-              className="flex items-center gap-2 text-destructive focus:text-destructive">
-              <Trash2 className="h-4 w-4" />
-              Delete
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </Card>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="icon-sm"
+                    aria-label={`Shortcut options for ${tab.title || hostname}`}
+                    className="absolute right-2 top-2 rounded-full bg-background/80 text-muted-foreground opacity-0 shadow-sm transition hover:bg-muted focus-visible:opacity-100 group-hover:opacity-100"
+                    onClick={(e) => e.stopPropagation()}>
+                    <MoreVertical className="h-4 w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-44">
+                  <DropdownMenuLabel>Shortcut options</DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <EditTabDialog tab={tab}>
+                    <DropdownMenuItem onSelect={(event) => event.preventDefault()}>
+                      <Pencil className="h-4 w-4 mr-2" />
+                      Edit
+                    </DropdownMenuItem>
+                  </EditTabDialog>
+                  <DropdownMenuItem
+                    onSelect={(event) => {
+                      event.preventDefault();
+                      removeTab(tab.id);
+                    }}
+                    className="flex items-center gap-2 text-destructive focus:text-destructive">
+                    <Trash2 className="h-4 w-4" />
+                    Delete
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </Card>
+          </Link>
+        </TooltipTrigger>
+        <TooltipContent className="max-w-xs space-y-1 text-left">
+          <p className="text-sm font-medium text-foreground">{tab.title}</p>
+          <p className="text-xs text-muted-foreground">{tab.url}</p>
+        </TooltipContent>
+      </Tooltip>
     </div>
   );
 };
