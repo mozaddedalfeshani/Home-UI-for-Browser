@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { Code, Gamepad2, User, Sparkles } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useSettingsStore } from "@/store/settingsStore";
 import { useTabsStore } from "@/store/tabsStore";
@@ -40,7 +39,7 @@ export function WelcomeDialog({ open }: WelcomeDialogProps) {
             <h1 className="text-4xl font-bold text-foreground">Welcome to MCLX</h1>
           </div>
           <p className="text-xl text-muted-foreground mb-2">
-            Let's personalize your experience
+            Let&apos;s personalize your experience
           </p>
           <p className="text-muted-foreground">
             Choose your profile to get started with relevant shortcuts
@@ -144,7 +143,7 @@ export function WelcomeDialog({ open }: WelcomeDialogProps) {
 
         <div className="text-center mt-8">
           <p className="text-sm text-muted-foreground">
-            Don't worry, you can always customize your shortcuts later in settings
+            Don&apos;t worry, you can always customize your shortcuts later in settings
           </p>
         </div>
       </div>

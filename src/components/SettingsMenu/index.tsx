@@ -33,17 +33,16 @@ const SettingsMenu = () => {
     autoOrderTabs,
     showClock,
     showRightSidebar,
-    clockColor,
     setTheme: setSettingsTheme,
     toggleAutoOrderTabs,
     toggleShowClock,
     toggleShowRightSidebar,
-    setClockColor,
   } = useSettingsStore();
 
-  const handleThemeChange = (newTheme: Theme) => {
-    setSettingsTheme(newTheme);
-    setTheme(newTheme);
+  const handleThemeChange = (newTheme: string) => {
+    const themeValue = newTheme as Theme;
+    setSettingsTheme(themeValue);
+    setTheme(themeValue);
   };
 
   return (

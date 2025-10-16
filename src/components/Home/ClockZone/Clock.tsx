@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Share_Tech_Mono, Orbitron } from "next/font/google";
+import { Share_Tech_Mono } from "next/font/google";
 import { useSettingsStore } from "@/store/settingsStore";
 import "./Clock.css";
 
@@ -10,10 +10,6 @@ const shareTech = Share_Tech_Mono({
   weight: "400",
 });
 
-const orbitron = Orbitron({
-  subsets: ["latin"],
-  weight: ["400", "700", "900"],
-});
 
 export default function DigitalClock() {
   const [time, setTime] = useState<string>("");
