@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Settings, Monitor, Sun, Moon, Maximize2 } from "lucide-react";
+import { Settings, Monitor, Sun, Moon, Maximize2, Image as ImageIcon } from "lucide-react";
 import { useTheme } from "next-themes";
 import { Button } from "@/components/ui/button";
 import {
@@ -20,10 +20,12 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useSettingsStore, Theme } from "@/store/settingsStore";
 import { ResizeShortcutsDialog } from "./ResizeShortcutsDialog";
+import { BackgroundImageDialog } from "./BackgroundImageDialog";
 
 const SettingsMenu = () => {
   const { setTheme } = useTheme();
   const [resizeDialogOpen, setResizeDialogOpen] = useState(false);
+  const [backgroundDialogOpen, setBackgroundDialogOpen] = useState(false);
   const {
     theme,
     autoOrderTabs,
@@ -105,12 +107,22 @@ const SettingsMenu = () => {
             <Maximize2 className="mr-2 h-4 w-4" />
             Resize Shortcuts
           </DropdownMenuItem>
+          
+          <DropdownMenuItem onClick={() => setBackgroundDialogOpen(true)}>
+            <ImageIcon className="mr-2 h-4 w-4" />
+            Background Image
+          </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
       
       <ResizeShortcutsDialog 
         open={resizeDialogOpen} 
         onOpenChange={setResizeDialogOpen} 
+      />
+      
+      <BackgroundImageDialog 
+        open={backgroundDialogOpen} 
+        onOpenChange={setBackgroundDialogOpen} 
       />
     </div>
   );
