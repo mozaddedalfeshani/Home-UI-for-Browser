@@ -59,7 +59,7 @@ export function ClockColorDialog({ open, onOpenChange }: ClockColorDialogProps) 
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Palette className="h-5 w-5" />
-            Clock Color
+            Clock Setting
           </DialogTitle>
           <DialogDescription>
             Choose a color for your digital clock display.

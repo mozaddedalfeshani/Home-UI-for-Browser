@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Settings, Monitor, Sun, Moon, Maximize2, Image as ImageIcon, Palette } from "lucide-react";
+import { Settings, Monitor, Sun, Moon, Maximize2, Image as ImageIcon, Clock } from "lucide-react";
 import { useTheme } from "next-themes";
 import { Button } from "@/components/ui/button";
 import {
@@ -118,8 +118,8 @@ const SettingsMenu = () => {
           </DropdownMenuItem>
           
           <DropdownMenuItem onClick={() => setClockColorDialogOpen(true)}>
-            <Palette className="mr-2 h-4 w-4" />
-            Clock Color
+            <Clock className="mr-2 h-4 w-4" />
+            Clock Setting
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
