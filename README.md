@@ -202,7 +202,7 @@ export const customTabs = [
 ## 📞 যোগাযোগ
 
 - **GitHub**: [@mozaddedalfeshani](https://github.com/mozaddedalfeshani)
-- **Email**: mozaddedalfeshani@example.com
+- **Email**: developer.mozadded@gmail.com
 - **Website**: [mclx.pages.dev](https://mclx.pages.dev)
 
 ---
