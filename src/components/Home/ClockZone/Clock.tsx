@@ -33,7 +33,7 @@ export default function DigitalClock() {
 
   return (
     <div
-      className={`${shareTech.className} glow text-green-400 text-7xl font-bold tracking-widest p-8 bg-black rounded-2xl shadow-inner text-center`}
+      className={`${shareTech.className} glow text-green-400 text-7xl font-bold tracking-widest p-8  rounded-2xl  text-center`}
       style={{
         letterSpacing: "0.1em",
       }}>
