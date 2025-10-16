@@ -148,7 +148,7 @@ const SortableShortcutCard = ({
             href={tab.url}
             target="_blank"
             rel="noopener noreferrer"
-            aria-label={`Open ${tab.title || hostname}`}
+            aria-label={`Open ${tab.title || hostname || 'shortcut'}`}
             onClick={() => incrementVisitCount(tab.id)}
             className="block [&:hover]:cursor-pointer"
             style={{ textDecoration: 'none' }}>
