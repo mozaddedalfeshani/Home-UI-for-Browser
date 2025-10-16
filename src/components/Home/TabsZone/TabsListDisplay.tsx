@@ -272,13 +272,13 @@ export const TabsList = () => {
     : tabs;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 ">
       <div className="flex justify-end">
         <AddTabDialog />
       </div>
       <TooltipProvider delayDuration={150}>
         <DndProvider backend={HTML5Backend}>
-          <div className="max-h-[calc(100vh-12rem)] overflow-y-auto scrollbar-thin scrollbar-thumb-muted-foreground/30 scrollbar-track-transparent">
+          <div className="max-h-[calc(100vh-12rem)] py-10 overflow-y-auto scrollbar-thin scrollbar-thumb-muted-foreground/30 scrollbar-track-transparent">
             <div 
               className="grid gap-4"
               style={{ 
