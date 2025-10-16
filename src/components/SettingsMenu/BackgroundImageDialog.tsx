@@ -61,84 +61,57 @@ export function BackgroundImageDialog({ open, onOpenChange }: BackgroundImageDia
             Background Image
           </DialogTitle>
           <DialogDescription>
-            Upload a custom background image for your homepage or remove it to use the default.
+            Choose a background image for your homepage.
           </DialogDescription>
         </DialogHeader>
         
-        <div className="space-y-6 py-4">
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <span className="text-sm font-medium">Background Image</span>
-              {tempBackgroundImage && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={handleRemoveImage}
-                  className="h-8 w-8 p-0 text-muted-foreground hover:text-destructive"
-                >
-                  <X className="h-4 w-4" />
-                </Button>
-              )}
-            </div>
+        <div className="space-y-4 py-4">
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            onChange={handleImageUpload}
+            className="hidden"
+          />
+          
+          <div className="space-y-3">
+            <Button
+              variant="outline"
+              onClick={() => fileInputRef.current?.click()}
+              className="w-full h-12"
+            >
+              <Upload className="mr-2 h-4 w-4" />
+              {tempBackgroundImage ? "Change Image" : "Upload Image"}
+            </Button>
             
-            <div className="space-y-3">
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept="image/*"
-                onChange={handleImageUpload}
-                className="hidden"
-              />
-              
+            {tempBackgroundImage && (
               <Button
                 variant="outline"
-                onClick={() => fileInputRef.current?.click()}
+                onClick={handleRemoveImage}
                 className="w-full"
               >
-                <Upload className="mr-2 h-4 w-4" />
-                {tempBackgroundImage ? "Change Image" : "Upload Background"}
+                <X className="mr-2 h-4 w-4" />
+                Remove Image
               </Button>
-              
-              {tempBackgroundImage && (
-                <div className="relative rounded-lg border bg-muted/50 p-2">
-                  <img
-                    src={tempBackgroundImage}
-                    alt="Background preview"
-                    className="h-32 w-full rounded object-cover"
-                  />
-                  <div className="absolute inset-0 flex items-center justify-center rounded bg-black/50 opacity-0 hover:opacity-100 transition-opacity">
-                    <ImageIcon className="h-6 w-6 text-white" />
-                  </div>
-                </div>
-              )}
-            </div>
+            )}
           </div>
 
-          <div className="rounded-lg border bg-muted/50 p-4">
-            <div className="text-xs text-muted-foreground mb-2">Preview:</div>
-            <div 
-              className="h-20 w-full rounded border"
-              style={{
-                backgroundImage: tempBackgroundImage ? `url(${tempBackgroundImage})` : 'none',
-                backgroundSize: 'cover',
-                backgroundPosition: 'center',
-                backgroundRepeat: 'no-repeat'
-              }}
-            >
-              {!tempBackgroundImage && (
-                <div className="flex h-full items-center justify-center text-xs text-muted-foreground">
-                  Default background
-                </div>
-              )}
+          {tempBackgroundImage && (
+            <div className="rounded-lg border overflow-hidden">
+              <img
+                src={tempBackgroundImage}
+                alt="Background preview"
+                className="w-full h-32 object-cover"
+              />
             </div>
-          </div>
+          )}
         </div>
 
         <DialogFooter>
           <Button variant="outline" onClick={handleCancel}>
             Cancel
           </Button>
-          <Button onClick={handleSave}>
+          <Button variant="outline" onClick={handleSave}>
             Apply Changes
           </Button>
         </DialogFooter>

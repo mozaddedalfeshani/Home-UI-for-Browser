@@ -133,7 +133,7 @@ export function ResizeShortcutsDialog({ open, onOpenChange }: ResizeShortcutsDia
           <Button variant="outline" onClick={handleCancel}>
             Cancel
           </Button>
-          <Button onClick={handleSave}>
+          <Button variant="outline" onClick={handleSave}>
             Apply Changes
           </Button>
         </DialogFooter>
