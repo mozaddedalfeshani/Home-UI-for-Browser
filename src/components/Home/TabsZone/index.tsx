@@ -12,8 +12,7 @@ const TabsZone = () => {
           <div className="space-y-1 text-left">
             <h2 className="text-lg font-semibold text-foreground">Shortcuts</h2>
             <p className="text-sm text-muted-foreground">
-              Collect your most visited destinations. Shortcuts are stored
-              locally with Zustand so they stay on this device.
+              Quick access to your favorite sites
             </p>
           </div>
           <AddTabDialog />
