@@ -175,9 +175,9 @@ const SortableShortcutCard = ({
           <p className="w-full truncate text-sm font-medium text-foreground">
             {tab.title}
           </p>
-          <p className="w-full truncate text-xs text-muted-foreground">
+          {/* <p className="w-full truncate text-xs text-muted-foreground">
             {hostname}
-          </p>
+          </p> */}
         </div>
 
         <DropdownMenu>
