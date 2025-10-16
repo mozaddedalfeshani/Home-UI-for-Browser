@@ -8,6 +8,7 @@ import { useTabsStore, Tab } from "@/store/tabsStore";
 import { useSettingsStore } from "@/store/settingsStore";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { AddTabDialog } from "./AddTabDialog";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   Tooltip,
@@ -241,24 +242,29 @@ export const TabsList = () => {
     : tabs;
 
   return (
-    <TooltipProvider delayDuration={150}>
-      <DndProvider backend={HTML5Backend}>
-        <div className="max-h-[calc(100vh-12rem)] overflow-y-auto scrollbar-thin scrollbar-thumb-muted-foreground/30 scrollbar-track-transparent">
-          <div className="grid grid-cols-[repeat(auto-fill,_minmax(7rem,_1fr))] gap-4">
-            {sortedTabs.map((tab: Tab, index) => (
-              <SortableShortcutCard
-                key={tab.id}
-                tab={tab}
-                index={index}
-                moveTab={moveTab}
-                removeTab={removeTab}
-                incrementVisitCount={incrementVisitCount}
-                autoOrderTabs={autoOrderTabs}
-              />
-            ))}
+    <div className="space-y-6">
+      <div className="flex justify-end">
+        <AddTabDialog />
+      </div>
+      <TooltipProvider delayDuration={150}>
+        <DndProvider backend={HTML5Backend}>
+          <div className="max-h-[calc(100vh-12rem)] overflow-y-auto scrollbar-thin scrollbar-thumb-muted-foreground/30 scrollbar-track-transparent">
+            <div className="grid grid-cols-[repeat(auto-fill,_minmax(7rem,_1fr))] gap-4">
+              {sortedTabs.map((tab: Tab, index) => (
+                <SortableShortcutCard
+                  key={tab.id}
+                  tab={tab}
+                  index={index}
+                  moveTab={moveTab}
+                  removeTab={removeTab}
+                  incrementVisitCount={incrementVisitCount}
+                  autoOrderTabs={autoOrderTabs}
+                />
+              ))}
+            </div>
           </div>
-        </div>
-      </DndProvider>
-    </TooltipProvider>
+        </DndProvider>
+      </TooltipProvider>
+    </div>
   );
 };
