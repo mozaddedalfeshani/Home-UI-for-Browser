@@ -207,8 +207,7 @@ const SortableShortcutCard = ({
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-44">
-                  <DropdownMenuLabel>Shortcut options</DropdownMenuLabel>
-                  <DropdownMenuSeparator />
+                 
                   <EditTabDialog tab={tab}>
                     <DropdownMenuItem onSelect={(event) => event.preventDefault()}>
                       <Pencil className="h-4 w-4 mr-2" />
@@ -258,11 +257,18 @@ export const TabsList = () => {
 
   if (tabs.length === 0) {
     return (
-      <Card className="flex h-36 items-center justify-center border-dashed border-border/60 bg-muted/30">
-        <p className="text-sm text-muted-foreground">
-          Start by adding your first shortcut.
-        </p>
-      </Card>
+      <div className="h-full flex flex-col p-6">
+        <div className="flex justify-end mb-6">
+          <AddTabDialog />
+        </div>
+        <div className="flex-1 flex items-center justify-center">
+          <Card className="flex h-36 items-center justify-center border-dashed border-border/60 bg-muted/30">
+            <p className="text-sm text-muted-foreground">
+              Start by adding your first shortcut.
+            </p>
+          </Card>
+        </div>
+      </div>
     );
   }
 
@@ -272,13 +278,13 @@ export const TabsList = () => {
     : tabs;
 
   return (
-    <div className="space-y-6 ">
-      <div className="flex justify-end">
+    <div className="h-full flex flex-col p-6">
+      <div className="flex justify-end mb-6">
         <AddTabDialog />
       </div>
       <TooltipProvider delayDuration={150}>
         <DndProvider backend={HTML5Backend}>
-          <div className="max-h-[calc(100vh-12rem)] py-10 overflow-y-auto scrollbar-thin scrollbar-thumb-muted-foreground/30 scrollbar-track-transparent">
+          <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-muted-foreground/30 scrollbar-track-transparent">
             <div 
               className="grid gap-4"
               style={{ 

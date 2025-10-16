@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Settings, Monitor, Sun, Moon, Maximize2, Image as ImageIcon, Clock } from "lucide-react";
+import { Settings, Monitor, Sun, Moon, Maximize2, Image as ImageIcon, Clock, Move } from "lucide-react";
 import { useTheme } from "next-themes";
 import { Button } from "@/components/ui/button";
 import {
@@ -22,12 +22,14 @@ import { useSettingsStore, Theme } from "@/store/settingsStore";
 import { ResizeShortcutsDialog } from "./ResizeShortcutsDialog";
 import { BackgroundImageDialog } from "./BackgroundImageDialog";
 import { ClockColorDialog } from "./ClockColorDialog";
+import { ClockPositionDialog } from "./ClockPositionDialog";
 
 const SettingsMenu = () => {
   const { setTheme } = useTheme();
   const [resizeDialogOpen, setResizeDialogOpen] = useState(false);
   const [backgroundDialogOpen, setBackgroundDialogOpen] = useState(false);
   const [clockColorDialogOpen, setClockColorDialogOpen] = useState(false);
+  const [clockPositionDialogOpen, setClockPositionDialogOpen] = useState(false);
   const {
     theme,
     autoOrderTabs,
@@ -120,6 +122,11 @@ const SettingsMenu = () => {
             <Clock className="mr-2 h-4 w-4" />
             Clock Setting
           </DropdownMenuItem>
+          
+          <DropdownMenuItem onClick={() => setClockPositionDialogOpen(true)}>
+            <Move className="mr-2 h-4 w-4" />
+            Clock Position
+          </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
       
@@ -136,6 +143,11 @@ const SettingsMenu = () => {
       <ClockColorDialog 
         open={clockColorDialogOpen} 
         onOpenChange={setClockColorDialogOpen} 
+      />
+      
+      <ClockPositionDialog 
+        open={clockPositionDialogOpen} 
+        onOpenChange={setClockPositionDialogOpen} 
       />
     </div>
   );

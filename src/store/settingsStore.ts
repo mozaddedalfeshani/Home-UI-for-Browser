@@ -2,6 +2,7 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
 export type Theme = "light" | "dark" | "system";
+export type ClockPosition = "top-left" | "top-center" | "top-right";
 
 interface SettingsState {
   theme: Theme;
@@ -17,6 +18,7 @@ interface SettingsState {
   showClockGlow: boolean;
   clockFormat: '12h' | '24h';
   showSeconds: boolean;
+  clockPosition: ClockPosition;
   isHydrated: boolean;
   setTheme: (theme: Theme) => void;
   toggleAutoOrderTabs: () => void;
@@ -31,6 +33,7 @@ interface SettingsState {
   setShowClockGlow: (show: boolean) => void;
   setClockFormat: (format: '12h' | '24h') => void;
   setShowSeconds: (show: boolean) => void;
+  setClockPosition: (position: ClockPosition) => void;
   setHydrated: (hydrated: boolean) => void;
 }
 
@@ -50,6 +53,7 @@ export const useSettingsStore = create<SettingsState>()(
       showClockGlow: true,
       clockFormat: "24h",
       showSeconds: true,
+      clockPosition: "top-left",
       isHydrated: false,
       setTheme: (theme) => set({ theme }),
       toggleAutoOrderTabs: () => set((state) => ({ autoOrderTabs: !state.autoOrderTabs })),
@@ -64,6 +68,7 @@ export const useSettingsStore = create<SettingsState>()(
       setShowClockGlow: (show) => set({ showClockGlow: show }),
       setClockFormat: (format) => set({ clockFormat: format }),
       setShowSeconds: (show) => set({ showSeconds: show }),
+      setClockPosition: (position) => set({ clockPosition: position }),
       setHydrated: (hydrated) => set({ isHydrated: hydrated }),
     }),
     {
