@@ -75,6 +75,7 @@ interface SortableShortcutCardProps {
   incrementVisitCount: (id: string) => void;
   autoOrderTabs: boolean;
   cardSize: number;
+  cardRadius: number;
 }
 
 const SortableShortcutCard = ({
@@ -85,6 +86,7 @@ const SortableShortcutCard = ({
   incrementVisitCount,
   autoOrderTabs,
   cardSize,
+  cardRadius,
 }: SortableShortcutCardProps) => {
   const ref = useRef<HTMLDivElement | null>(null);
 
@@ -138,8 +140,12 @@ const SortableShortcutCard = ({
         cursor: autoOrderTabs ? "default" : isDragging ? "grabbing" : "grab",
       }}>
       <Card 
-        className="group relative flex flex-col items-center gap-3 rounded-3xl border border-border/60 bg-card/70 p-4 text-center shadow-sm transition hover:border-primary/70 hover:shadow-lg"
-        style={{ width: `${cardSize}rem` }}
+        className="group relative flex flex-col items-center justify-center gap-2 border border-border/60 bg-card/70 backdrop-blur-sm p-3 text-center shadow-sm transition hover:border-primary/70 hover:shadow-lg"
+        style={{ 
+          width: `${cardSize}rem`,
+          height: `${cardSize}rem`,
+          borderRadius: `${cardRadius}rem`
+        }}
       >
         <Tooltip>
           <TooltipTrigger asChild>
@@ -150,8 +156,8 @@ const SortableShortcutCard = ({
                 "group relative flex items-center justify-center rounded-full bg-muted/70 p-0 text-foreground transition hover:bg-muted"
               )}
               style={{ 
-                height: `${cardSize * 0.7}rem`, 
-                width: `${cardSize * 0.7}rem` 
+                height: `${Math.min(cardSize * 0.5, cardSize - 2)}rem`, 
+                width: `${Math.min(cardSize * 0.5, cardSize - 2)}rem` 
               }}>
               <a
                 href={tab.url}
@@ -162,8 +168,8 @@ const SortableShortcutCard = ({
                 <Avatar 
                   className="border border-transparent bg-transparent"
                   style={{ 
-                    height: `${cardSize * 0.7}rem`, 
-                    width: `${cardSize * 0.7}rem` 
+                    height: `${Math.min(cardSize * 0.5, cardSize - 2)}rem`, 
+                    width: `${Math.min(cardSize * 0.5, cardSize - 2)}rem` 
                   }}
                 >
                   {favicon ? (
@@ -172,7 +178,7 @@ const SortableShortcutCard = ({
                   <AvatarFallback
                     style={{ 
                       backgroundColor: accent,
-                      fontSize: `${Math.max(0.6, cardSize * 0.08)}rem`
+                      fontSize: `${Math.max(0.5, cardSize * 0.12)}rem`
                     }}
                     className="text-white">
                     {getFallbackChar(tab.title || hostname)}
@@ -190,10 +196,10 @@ const SortableShortcutCard = ({
           </TooltipContent>
         </Tooltip>
 
-        <div className="flex w-full flex-col items-center gap-1">
+        <div className="flex w-full flex-col items-center gap-1 px-1">
           <p 
-            className="w-full truncate font-medium text-foreground"
-            style={{ fontSize: `${Math.max(0.6, cardSize * 0.08)}rem` }}
+            className="w-full truncate font-medium text-foreground leading-tight"
+            style={{ fontSize: `${Math.max(0.5, cardSize * 0.1)}rem` }}
           >
             {tab.title}
           </p>
@@ -236,6 +242,7 @@ export const TabsList = () => {
   const incrementVisitCount = useTabsStore((state) => state.incrementVisitCount);
   const autoOrderTabs = useSettingsStore((state) => state.autoOrderTabs);
   const cardSize = useSettingsStore((state) => state.cardSize);
+  const cardRadius = useSettingsStore((state) => state.cardRadius);
 
   useEffect(() => {
     setMounted(true);
@@ -285,6 +292,7 @@ export const TabsList = () => {
                   incrementVisitCount={incrementVisitCount}
                   autoOrderTabs={autoOrderTabs}
                   cardSize={cardSize}
+                  cardRadius={cardRadius}
                 />
               ))}
             </div>

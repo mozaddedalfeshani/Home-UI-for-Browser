@@ -20,20 +20,27 @@ interface ResizeShortcutsDialogProps {
 }
 
 export function ResizeShortcutsDialog({ open, onOpenChange }: ResizeShortcutsDialogProps) {
-  const { cardSize, setCardSize } = useSettingsStore();
+  const { cardSize, cardRadius, setCardSize, setCardRadius } = useSettingsStore();
   const [tempSize, setTempSize] = useState(cardSize);
+  const [tempRadius, setTempRadius] = useState(cardRadius);
 
-  const handleSliderChange = (value: number[]) => {
+  const handleSizeChange = (value: number[]) => {
     setTempSize(value[0]);
+  };
+
+  const handleRadiusChange = (value: number[]) => {
+    setTempRadius(value[0]);
   };
 
   const handleSave = () => {
     setCardSize(tempSize);
+    setCardRadius(tempRadius);
     onOpenChange(false);
   };
 
   const handleCancel = () => {
     setTempSize(cardSize);
+    setTempRadius(cardRadius);
     onOpenChange(false);
   };
 
@@ -46,7 +53,7 @@ export function ResizeShortcutsDialog({ open, onOpenChange }: ResizeShortcutsDia
             Resize Shortcuts
           </DialogTitle>
           <DialogDescription>
-            Adjust the size of your shortcut cards. Changes will be applied in real-time.
+            Adjust the size and border radius of your shortcut cards. Changes will be applied in real-time.
           </DialogDescription>
         </DialogHeader>
         
@@ -62,7 +69,7 @@ export function ResizeShortcutsDialog({ open, onOpenChange }: ResizeShortcutsDia
             <div className="space-y-2">
               <Slider
                 value={[tempSize]}
-                onValueChange={handleSliderChange}
+                onValueChange={handleSizeChange}
                 min={5}
                 max={10}
                 step={0.5}
@@ -75,15 +82,40 @@ export function ResizeShortcutsDialog({ open, onOpenChange }: ResizeShortcutsDia
             </div>
           </div>
 
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <span className="text-sm font-medium">Card Radius</span>
+              <span className="text-sm text-muted-foreground">
+                {tempRadius.toFixed(1)} rem
+              </span>
+            </div>
+            
+            <div className="space-y-2">
+              <Slider
+                value={[tempRadius]}
+                onValueChange={handleRadiusChange}
+                min={0.5}
+                max={3}
+                step={0.25}
+                className="w-full"
+              />
+              <div className="flex justify-between text-xs text-muted-foreground">
+                <span>Sharp (0.5rem)</span>
+                <span>Round (3rem)</span>
+              </div>
+            </div>
+          </div>
+
           <div className="rounded-lg border bg-muted/50 p-4">
             <div className="text-xs text-muted-foreground mb-2">Preview:</div>
             <div className="flex items-center gap-2">
               <div 
-                className="rounded-lg border bg-card p-2 flex items-center justify-center"
+                className="border bg-card p-2 flex items-center justify-center"
                 style={{ 
                   width: `${tempSize * 0.8}rem`, 
                   height: `${tempSize * 0.6}rem`,
-                  fontSize: `${Math.max(0.6, tempSize * 0.08)}rem`
+                  fontSize: `${Math.max(0.6, tempSize * 0.08)}rem`,
+                  borderRadius: `${tempRadius}rem`
                 }}
               >
                 <div className="w-6 h-6 rounded-full bg-primary/20 flex items-center justify-center text-xs">
@@ -91,7 +123,7 @@ export function ResizeShortcutsDialog({ open, onOpenChange }: ResizeShortcutsDia
                 </div>
               </div>
               <div className="text-xs text-muted-foreground">
-                {tempSize < 6 ? "Compact" : tempSize < 8 ? "Medium" : "Spacious"}
+                {tempSize < 6 ? "Compact" : tempSize < 8 ? "Medium" : "Spacious"} • {tempRadius < 1 ? "Sharp" : tempRadius < 2 ? "Rounded" : "Round"}
               </div>
             </div>
           </div>
