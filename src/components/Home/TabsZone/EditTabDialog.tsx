@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Pencil } from "lucide-react";
 import {
   Dialog,
   DialogClose,
@@ -93,7 +92,7 @@ export const EditTabDialog = ({ tab, children }: EditTabDialogProps) => {
         <DialogHeader>
           <DialogTitle>Edit shortcut</DialogTitle>
           <DialogDescription>
-            Update your shortcut's title and destination URL.
+            Update your shortcut&apos;s title and destination URL.
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="grid gap-6">
