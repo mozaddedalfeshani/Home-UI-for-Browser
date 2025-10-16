@@ -1,6 +1,7 @@
 "use client";
 
-import { Settings, Monitor, Sun, Moon } from "lucide-react";
+import { useState } from "react";
+import { Settings, Monitor, Sun, Moon, Maximize2 } from "lucide-react";
 import { useTheme } from "next-themes";
 import { Button } from "@/components/ui/button";
 import {
@@ -18,9 +19,11 @@ import {
   DropdownMenuCheckboxItem,
 } from "@/components/ui/dropdown-menu";
 import { useSettingsStore, Theme } from "@/store/settingsStore";
+import { ResizeShortcutsDialog } from "./ResizeShortcutsDialog";
 
 const SettingsMenu = () => {
   const { setTheme } = useTheme();
+  const [resizeDialogOpen, setResizeDialogOpen] = useState(false);
   const {
     theme,
     autoOrderTabs,
@@ -95,8 +98,20 @@ const SettingsMenu = () => {
             onCheckedChange={toggleShowRightSidebar}>
             Show Right Sidebar
           </DropdownMenuCheckboxItem>
+          
+          <DropdownMenuSeparator />
+          
+          <DropdownMenuItem onClick={() => setResizeDialogOpen(true)}>
+            <Maximize2 className="mr-2 h-4 w-4" />
+            Resize Shortcuts
+          </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
+      
+      <ResizeShortcutsDialog 
+        open={resizeDialogOpen} 
+        onOpenChange={setResizeDialogOpen} 
+      />
     </div>
   );
 };

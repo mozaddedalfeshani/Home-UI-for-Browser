@@ -8,10 +8,12 @@ interface SettingsState {
   autoOrderTabs: boolean;
   showClock: boolean;
   showRightSidebar: boolean;
+  cardSize: number;
   setTheme: (theme: Theme) => void;
   toggleAutoOrderTabs: () => void;
   toggleShowClock: () => void;
   toggleShowRightSidebar: () => void;
+  setCardSize: (size: number) => void;
 }
 
 export const useSettingsStore = create<SettingsState>()(
@@ -21,10 +23,12 @@ export const useSettingsStore = create<SettingsState>()(
       autoOrderTabs: false,
       showClock: true,
       showRightSidebar: true,
+      cardSize: 7,
       setTheme: (theme) => set({ theme }),
       toggleAutoOrderTabs: () => set((state) => ({ autoOrderTabs: !state.autoOrderTabs })),
       toggleShowClock: () => set((state) => ({ showClock: !state.showClock })),
       toggleShowRightSidebar: () => set((state) => ({ showRightSidebar: !state.showRightSidebar })),
+      setCardSize: (size) => set({ cardSize: size }),
     }),
     {
       name: "settings-store",

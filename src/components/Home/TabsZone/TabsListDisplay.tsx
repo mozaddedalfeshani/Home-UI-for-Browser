@@ -74,6 +74,7 @@ interface SortableShortcutCardProps {
   removeTab: (id: string) => void;
   incrementVisitCount: (id: string) => void;
   autoOrderTabs: boolean;
+  cardSize: number;
 }
 
 const SortableShortcutCard = ({
@@ -83,6 +84,7 @@ const SortableShortcutCard = ({
   removeTab,
   incrementVisitCount,
   autoOrderTabs,
+  cardSize,
 }: SortableShortcutCardProps) => {
   const ref = useRef<HTMLDivElement | null>(null);
 
@@ -135,28 +137,44 @@ const SortableShortcutCard = ({
         opacity: isDragging ? 0.6 : 1,
         cursor: autoOrderTabs ? "default" : isDragging ? "grabbing" : "grab",
       }}>
-      <Card className="group relative flex w-28 flex-col items-center gap-3 rounded-3xl border border-border/60 bg-card/70 p-4 text-center shadow-sm transition hover:border-primary/70 hover:shadow-lg">
+      <Card 
+        className="group relative flex flex-col items-center gap-3 rounded-3xl border border-border/60 bg-card/70 p-4 text-center shadow-sm transition hover:border-primary/70 hover:shadow-lg"
+        style={{ width: `${cardSize}rem` }}
+      >
         <Tooltip>
           <TooltipTrigger asChild>
             <Button
               asChild
               variant="ghost"
               className={cn(
-                "group relative flex h-20 w-20 items-center justify-center rounded-full bg-muted/70 p-0 text-foreground transition hover:bg-muted"
-              )}>
+                "group relative flex items-center justify-center rounded-full bg-muted/70 p-0 text-foreground transition hover:bg-muted"
+              )}
+              style={{ 
+                height: `${cardSize * 0.7}rem`, 
+                width: `${cardSize * 0.7}rem` 
+              }}>
               <a
                 href={tab.url}
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label={`Open ${tab.title || hostname}`}
                 onClick={() => incrementVisitCount(tab.id)}>
-                <Avatar className="size-full border border-transparent bg-transparent">
+                <Avatar 
+                  className="border border-transparent bg-transparent"
+                  style={{ 
+                    height: `${cardSize * 0.7}rem`, 
+                    width: `${cardSize * 0.7}rem` 
+                  }}
+                >
                   {favicon ? (
                     <AvatarImage src={favicon} alt={hostname} />
                   ) : null}
                   <AvatarFallback
-                    style={{ backgroundColor: accent }}
-                    className="text-base text-white">
+                    style={{ 
+                      backgroundColor: accent,
+                      fontSize: `${Math.max(0.6, cardSize * 0.08)}rem`
+                    }}
+                    className="text-white">
                     {getFallbackChar(tab.title || hostname)}
                   </AvatarFallback>
                 </Avatar>
@@ -173,12 +191,12 @@ const SortableShortcutCard = ({
         </Tooltip>
 
         <div className="flex w-full flex-col items-center gap-1">
-          <p className="w-full truncate text-sm font-medium text-foreground">
+          <p 
+            className="w-full truncate font-medium text-foreground"
+            style={{ fontSize: `${Math.max(0.6, cardSize * 0.08)}rem` }}
+          >
             {tab.title}
           </p>
-          {/* <p className="w-full truncate text-xs text-muted-foreground">
-            {hostname}
-          </p> */}
         </div>
 
         <DropdownMenu>
@@ -217,6 +235,7 @@ export const TabsList = () => {
   const moveTab = useTabsStore((state) => state.moveTab);
   const incrementVisitCount = useTabsStore((state) => state.incrementVisitCount);
   const autoOrderTabs = useSettingsStore((state) => state.autoOrderTabs);
+  const cardSize = useSettingsStore((state) => state.cardSize);
 
   useEffect(() => {
     setMounted(true);
@@ -249,7 +268,13 @@ export const TabsList = () => {
       <TooltipProvider delayDuration={150}>
         <DndProvider backend={HTML5Backend}>
           <div className="max-h-[calc(100vh-12rem)] overflow-y-auto scrollbar-thin scrollbar-thumb-muted-foreground/30 scrollbar-track-transparent">
-            <div className="grid grid-cols-[repeat(auto-fill,_minmax(7rem,_1fr))] gap-4">
+            <div 
+              className="grid gap-4"
+              style={{ 
+                gridTemplateColumns: `repeat(auto-fill, minmax(${cardSize}rem, 1fr))`,
+                '--card-size': `${cardSize}rem`
+              } as React.CSSProperties}
+            >
               {sortedTabs.map((tab: Tab, index) => (
                 <SortableShortcutCard
                   key={tab.id}
@@ -259,6 +284,7 @@ export const TabsList = () => {
                   removeTab={removeTab}
                   incrementVisitCount={incrementVisitCount}
                   autoOrderTabs={autoOrderTabs}
+                  cardSize={cardSize}
                 />
               ))}
             </div>
