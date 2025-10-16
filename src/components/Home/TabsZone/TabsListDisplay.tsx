@@ -243,18 +243,20 @@ export const TabsList = () => {
   return (
     <TooltipProvider delayDuration={150}>
       <DndProvider backend={HTML5Backend}>
-        <div className="grid grid-cols-[repeat(auto-fill,_minmax(7rem,_1fr))] gap-4">
-          {sortedTabs.map((tab: Tab, index) => (
-            <SortableShortcutCard
-              key={tab.id}
-              tab={tab}
-              index={index}
-              moveTab={moveTab}
-              removeTab={removeTab}
-              incrementVisitCount={incrementVisitCount}
-              autoOrderTabs={autoOrderTabs}
-            />
-          ))}
+        <div className="max-h-[calc(100vh-12rem)] overflow-y-auto scrollbar-thin scrollbar-thumb-muted-foreground/30 scrollbar-track-transparent">
+          <div className="grid grid-cols-[repeat(auto-fill,_minmax(7rem,_1fr))] gap-4">
+            {sortedTabs.map((tab: Tab, index) => (
+              <SortableShortcutCard
+                key={tab.id}
+                tab={tab}
+                index={index}
+                moveTab={moveTab}
+                removeTab={removeTab}
+                incrementVisitCount={incrementVisitCount}
+                autoOrderTabs={autoOrderTabs}
+              />
+            ))}
+          </div>
         </div>
       </DndProvider>
     </TooltipProvider>

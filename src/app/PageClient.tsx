@@ -12,7 +12,7 @@ export function PageClient() {
     <div className="bg-black min-h-screen w-full">
       <div className="flex flex-row min-h-screen p-6">
         {/* Left side */}
-        <div className="w-3/4">
+        <div className={showRightSidebar ? "w-3/4" : "w-full"}>
           {showClock && <DigitalClock />}
           <TabsZone />
         </div>
