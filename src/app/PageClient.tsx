@@ -7,12 +7,16 @@ import Notepad from "@/components/Notepad";
 import { WelcomeDialog } from "@/components/WelcomeDialog";
 import { useSettingsStore } from "@/store/settingsStore";
 import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
+import { useMediaUrl } from "@/hooks/useMediaUrl";
 
 export function PageClient() {
   const { showClock, showRightSidebar, backgroundImage, hasSeenWelcome, isHydrated, clockPosition } = useSettingsStore();
   
   // Initialize keyboard shortcuts
   useKeyboardShortcuts();
+  
+  // Get the actual media URL
+  const { url: backgroundImageUrl } = useMediaUrl(backgroundImage);
 
   // Show skeleton screen while store is hydrating
   if (!isHydrated) {
@@ -20,11 +24,11 @@ export function PageClient() {
       <div 
         className="min-h-screen w-full"
         style={{
-          backgroundImage: backgroundImage ? `url(${backgroundImage})` : undefined,
+          backgroundImage: backgroundImageUrl ? `url(${backgroundImageUrl})` : undefined,
           backgroundSize: 'cover',
           backgroundPosition: 'center',
           backgroundRepeat: 'no-repeat',
-          backgroundColor: backgroundImage ? undefined : undefined
+          backgroundColor: backgroundImageUrl ? undefined : undefined
         }}
       >
         <div className="h-screen w-full overflow-hidden">
@@ -85,11 +89,11 @@ export function PageClient() {
     <div 
       className="min-h-screen w-full"
       style={{
-        backgroundImage: backgroundImage ? `url(${backgroundImage})` : undefined,
+        backgroundImage: backgroundImageUrl ? `url(${backgroundImageUrl})` : undefined,
         backgroundSize: 'cover',
         backgroundPosition: 'center',
         backgroundRepeat: 'no-repeat',
-        backgroundColor: backgroundImage ? undefined : undefined
+        backgroundColor: backgroundImageUrl ? undefined : undefined
       }}
     >
       <div className="flex flex-row h-screen overflow-hidden">

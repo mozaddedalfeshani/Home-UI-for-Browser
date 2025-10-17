@@ -20,18 +20,21 @@ interface BackgroundImageDialogProps {
 
 export function BackgroundImageDialog({ open, onOpenChange }: BackgroundImageDialogProps) {
   const { backgroundImage, setBackgroundImage } = useSettingsStore();
-  const [tempBackgroundImage, setTempBackgroundImage] = useState(backgroundImage);
+  const [tempBackgroundImage, setTempBackgroundImage] = useState<string | File | null>(backgroundImage);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        const result = e.target?.result as string;
-        setTempBackgroundImage(result);
-      };
-      reader.readAsDataURL(file);
+      // Check file size (50MB limit)
+      const maxSize = 50 * 1024 * 1024; // 50MB in bytes
+      if (file.size > maxSize) {
+        alert(`File size too large. Please select a file smaller than 50MB. Current size: ${(file.size / (1024 * 1024)).toFixed(2)}MB`);
+        return;
+      }
+      
+      // Store the file object directly instead of converting to data URL
+      setTempBackgroundImage(file);
     }
   };
 
@@ -42,8 +45,9 @@ export function BackgroundImageDialog({ open, onOpenChange }: BackgroundImageDia
     }
   };
 
-  const handleSave = () => {
-    setBackgroundImage(tempBackgroundImage);
+  const handleSave = async () => {
+    console.log("Saving background image:", tempBackgroundImage);
+    await setBackgroundImage(tempBackgroundImage);
     onOpenChange(false);
   };
 
@@ -99,7 +103,7 @@ export function BackgroundImageDialog({ open, onOpenChange }: BackgroundImageDia
           {tempBackgroundImage && (
             <div className="rounded-lg border overflow-hidden">
               <img
-                src={tempBackgroundImage}
+                src={tempBackgroundImage instanceof File ? URL.createObjectURL(tempBackgroundImage) : tempBackgroundImage}
                 alt="Background preview"
                 className="w-full h-32 object-cover"
               />
