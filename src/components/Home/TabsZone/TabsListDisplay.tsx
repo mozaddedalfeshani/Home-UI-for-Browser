@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { MoreVertical, Trash2, Pencil } from "lucide-react";
+import { MoreVertical, Trash2, Pencil, Keyboard } from "lucide-react";
 import Link from "next/link";
 import { DndProvider, useDrag, useDrop } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
@@ -12,6 +12,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { AddTabDialog } from "./AddTabDialog";
 import { EditTabDialog } from "./EditTabDialog";
+import { ShortcutDialog } from "./ShortcutDialog";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   Tooltip,
@@ -89,6 +90,8 @@ const SortableShortcutCard = ({
   cardRadius,
 }: SortableShortcutCardProps) => {
   const ref = useRef<HTMLDivElement | null>(null);
+  const language = useSettingsStore((state) => state.language);
+  const t = useTranslation(language);
 
   const [, drop] = useDrop<DragItem>({
     accept: DRAG_TYPE,
@@ -221,6 +224,12 @@ const SortableShortcutCard = ({
                     <Trash2 className="h-4 w-4" />
                     Delete
                   </DropdownMenuItem>
+                  <ShortcutDialog tab={tab}>
+                    <DropdownMenuItem onSelect={(event) => event.preventDefault()}>
+                      <Keyboard className="h-4 w-4 mr-2" />
+                      {t("keyboardShortcut")}
+                    </DropdownMenuItem>
+                  </ShortcutDialog>
                 </DropdownMenuContent>
               </DropdownMenu>
             </Card>
@@ -229,6 +238,11 @@ const SortableShortcutCard = ({
         <TooltipContent className="max-w-xs space-y-1 text-left">
           <p className="text-sm font-medium text-foreground">{tab.title}</p>
           <p className="text-xs text-muted-foreground">{tab.url}</p>
+          {tab.shortcut && (
+            <p className="text-xs text-primary font-medium">
+              {t("shortcut")}: {tab.shortcut}
+            </p>
+          )}
         </TooltipContent>
       </Tooltip>
     </div>

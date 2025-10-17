@@ -71,6 +71,14 @@ export const TRANSLATIONS = {
     startByAddingFirstShortcut: "Start by adding your first shortcut.",
     addShortcut: "Add Shortcut",
     shortcutOptions: "Shortcut options",
+    keyboardShortcut: "Keyboard Shortcut",
+    recordShortcut: "Record Shortcut",
+    pressKeys: "Press any key combination...",
+    shortcutInUse: "This shortcut is already in use",
+    clearShortcut: "Clear Shortcut",
+    openInNewWindow: "Open in new window",
+    setShortcutDescription: "Set a keyboard shortcut for quick access to this tab.",
+    shortcut: "Shortcut",
     
     // Common
     loading: "Loading...",
@@ -157,6 +165,14 @@ export const TRANSLATIONS = {
     startByAddingFirstShortcut: "আপনার প্রথম শর্টকাট যোগ করে শুরু করুন।",
     addShortcut: "শর্টকাট যোগ করুন",
     shortcutOptions: "শর্টকাট অপশন",
+    keyboardShortcut: "কীবোর্ড শর্টকাট",
+    recordShortcut: "শর্টকাট রেকর্ড করুন",
+    pressKeys: "যেকোনো কী কম্বিনেশন চাপুন...",
+    shortcutInUse: "এই শর্টকাটটি ইতিমধ্যে ব্যবহৃত হচ্ছে",
+    clearShortcut: "শর্টকাট মুছুন",
+    openInNewWindow: "নতুন উইন্ডোতে খুলুন",
+    setShortcutDescription: "এই ট্যাবে দ্রুত অ্যাক্সেসের জন্য একটি কীবোর্ড শর্টকাট সেট করুন।",
+    shortcut: "শর্টকাট",
     
     // Common
     loading: "লোড হচ্ছে...",
