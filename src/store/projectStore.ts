@@ -29,6 +29,7 @@ interface ProjectState {
   deleteTodo: (projectId: string, todoId: string) => void;
   toggleTodoComplete: (projectId: string, todoId: string) => void;
   reorderTodos: (projectId: string, todoIds: string[]) => void;
+  resetProjects: () => void;
 }
 
 export const useProjectStore = create<ProjectState>()(
@@ -139,6 +140,9 @@ export const useProjectStore = create<ProjectState>()(
               : project
           ),
         }));
+      },
+      resetProjects: () => {
+        set({ projects: [] });
       },
     }),
     {

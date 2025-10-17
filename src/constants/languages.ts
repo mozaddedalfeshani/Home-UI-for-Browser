@@ -79,6 +79,10 @@ export const TRANSLATIONS = {
     openInNewWindow: "Open in new window",
     setShortcutDescription: "Set a keyboard shortcut for quick access to this tab.",
     shortcut: "Shortcut",
+    resetEverything: "Reset Everything",
+    resetEverythingDescription: "This will clear all tabs, projects, notes, and settings. This action cannot be undone.",
+    confirmReset: "Are you sure you want to reset everything?",
+    resetWarning: "This will permanently delete all your data including tabs, projects, notes, and settings.",
     
     // Common
     loading: "Loading...",
@@ -173,6 +177,10 @@ export const TRANSLATIONS = {
     openInNewWindow: "নতুন উইন্ডোতে খুলুন",
     setShortcutDescription: "এই ট্যাবে দ্রুত অ্যাক্সেসের জন্য একটি কীবোর্ড শর্টকাট সেট করুন।",
     shortcut: "শর্টকাট",
+    resetEverything: "সবকিছু রিসেট করুন",
+    resetEverythingDescription: "এটি সব ট্যাব, প্রজেক্ট, নোট এবং সেটিংস মুছে ফেলবে। এই কাজটি পূর্বাবস্থায় ফেরানো যাবে না।",
+    confirmReset: "আপনি কি নিশ্চিত যে আপনি সবকিছু রিসেট করতে চান?",
+    resetWarning: "এটি আপনার সব ডেটা স্থায়ীভাবে মুছে ফেলবে যার মধ্যে রয়েছে ট্যাব, প্রজেক্ট, নোট এবং সেটিংস।",
     
     // Common
     loading: "লোড হচ্ছে...",

@@ -22,6 +22,7 @@ interface TabsState {
   getTabs: () => Tab[];
   updateTabShortcut: (id: string, shortcut: string | undefined) => void;
   getTabByShortcut: (shortcut: string) => Tab | undefined;
+  resetTabs: () => void;
 }
 
 export const useTabsStore = create<TabsState>()(
@@ -100,6 +101,9 @@ export const useTabsStore = create<TabsState>()(
       },
       getTabByShortcut: (shortcut: string) => {
         return get().tabs.find((tab) => tab.shortcut === shortcut);
+      },
+      resetTabs: () => {
+        set({ tabs: [] });
       },
     }),
     {
