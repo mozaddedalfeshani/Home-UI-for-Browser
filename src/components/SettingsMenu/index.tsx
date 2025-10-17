@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Settings, Monitor, Sun, Moon, Maximize2, Image as ImageIcon, Clock, Move, Languages } from "lucide-react";
+import { Settings, Monitor, Sun, Moon, Maximize2, Image as ImageIcon, Clock, Move, Languages, RotateCcw } from "lucide-react";
 import { useTheme } from "next-themes";
 import { Button } from "@/components/ui/button";
 import {
@@ -24,6 +24,7 @@ import { ResizeShortcutsDialog } from "./ResizeShortcutsDialog";
 import { BackgroundImageDialog } from "./BackgroundImageDialog";
 import { ClockColorDialog } from "./ClockColorDialog";
 import { ClockPositionDialog } from "./ClockPositionDialog";
+import { ResetDialog } from "./ResetDialog";
 
 const SettingsMenu = () => {
   const { setTheme } = useTheme();
@@ -155,6 +156,15 @@ const SettingsMenu = () => {
             <Move className="mr-2 h-4 w-4" />
             {t("clockPosition")}
           </DropdownMenuItem>
+          
+          <DropdownMenuSeparator />
+          
+          <ResetDialog>
+            <DropdownMenuItem onSelect={(event) => event.preventDefault()}>
+              <RotateCcw className="mr-2 h-4 w-4 text-destructive" />
+              <span className="text-destructive">{t("resetEverything")}</span>
+            </DropdownMenuItem>
+          </ResetDialog>
         </DropdownMenuContent>
       </DropdownMenu>
       

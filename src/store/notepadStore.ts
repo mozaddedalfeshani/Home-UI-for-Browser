@@ -5,6 +5,7 @@ interface NotepadState {
   content: string;
   setContent: (content: string) => void;
   clearContent: () => void;
+  resetNotepad: () => void;
 }
 
 export const useNotepadStore = create<NotepadState>()(
@@ -13,6 +14,7 @@ export const useNotepadStore = create<NotepadState>()(
       content: "",
       setContent: (content) => set({ content }),
       clearContent: () => set({ content: "" }),
+      resetNotepad: () => set({ content: "" }),
     }),
     {
       name: "notepad-store",

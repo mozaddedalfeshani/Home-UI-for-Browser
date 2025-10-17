@@ -7,17 +7,22 @@ export interface Tab {
   url: string;
   createdAt: number;
   visitCount: number;
+  shortcut?: string;
+  openInNewWindow?: boolean;
 }
 
 interface TabsState {
   tabs: Tab[];
   addTab: (title: string, url: string) => void;
   addMultipleTabs: (tabs: Array<{title: string, url: string}>) => void;
-  updateTab: (id: string, title: string, url: string) => void;
+  updateTab: (id: string, title: string, url: string, shortcut?: string, openInNewWindow?: boolean) => void;
   removeTab: (id: string) => void;
   moveTab: (fromIndex: number, toIndex: number) => void;
   incrementVisitCount: (id: string) => void;
   getTabs: () => Tab[];
+  updateTabShortcut: (id: string, shortcut: string | undefined) => void;
+  getTabByShortcut: (shortcut: string) => Tab | undefined;
+  resetTabs: () => void;
 }
 
 export const useTabsStore = create<TabsState>()(
@@ -48,10 +53,10 @@ export const useTabsStore = create<TabsState>()(
           tabs: [...state.tabs, ...newTabs],
         }));
       },
-      updateTab: (id: string, title: string, url: string) => {
+      updateTab: (id: string, title: string, url: string, shortcut?: string, openInNewWindow?: boolean) => {
         set((state) => ({
           tabs: state.tabs.map((tab) =>
-            tab.id === id ? { ...tab, title, url } : tab
+            tab.id === id ? { ...tab, title, url, shortcut, openInNewWindow } : tab
           ),
         }));
       },
@@ -87,6 +92,19 @@ export const useTabsStore = create<TabsState>()(
         }));
       },
       getTabs: () => get().tabs,
+      updateTabShortcut: (id: string, shortcut: string | undefined) => {
+        set((state) => ({
+          tabs: state.tabs.map((tab) =>
+            tab.id === id ? { ...tab, shortcut } : tab
+          ),
+        }));
+      },
+      getTabByShortcut: (shortcut: string) => {
+        return get().tabs.find((tab) => tab.shortcut === shortcut);
+      },
+      resetTabs: () => {
+        set({ tabs: [] });
+      },
     }),
     {
       name: "tabs-store",

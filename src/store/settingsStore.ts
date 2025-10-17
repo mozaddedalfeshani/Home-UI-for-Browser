@@ -39,6 +39,7 @@ interface SettingsState {
   setClockPosition: (position: ClockPosition) => void;
   setLanguage: (language: Language) => void;
   setHydrated: (hydrated: boolean) => void;
+  resetSettings: () => void;
 }
 
 export const useSettingsStore = create<SettingsState>()(
@@ -76,6 +77,24 @@ export const useSettingsStore = create<SettingsState>()(
       setClockPosition: (position) => set({ clockPosition: position }),
       setLanguage: (language) => set({ language }),
       setHydrated: (hydrated) => set({ isHydrated: hydrated }),
+      resetSettings: () => set({
+        theme: "system",
+        language: "bn",
+        autoOrderTabs: false,
+        cardSize: 4,
+        cardRadius: 0.5,
+        backgroundImage: null,
+        hasSeenWelcome: false,
+        userProfile: null,
+        showClock: true,
+        showRightSidebar: true,
+        clockColor: "#ffffff",
+        showClockGlow: true,
+        clockFormat: "12h",
+        showSeconds: true,
+        clockPosition: "top-left",
+        isHydrated: true,
+      }),
     }),
     {
       name: "settings-store",

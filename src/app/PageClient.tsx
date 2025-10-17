@@ -6,9 +6,13 @@ import SettingsMenu from "@/components/SettingsMenu";
 import Notepad from "@/components/Notepad";
 import { WelcomeDialog } from "@/components/WelcomeDialog";
 import { useSettingsStore } from "@/store/settingsStore";
+import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
 
 export function PageClient() {
   const { showClock, showRightSidebar, backgroundImage, hasSeenWelcome, isHydrated, clockPosition } = useSettingsStore();
+  
+  // Initialize keyboard shortcuts
+  useKeyboardShortcuts();
 
   // Show skeleton screen while store is hydrating
   if (!isHydrated) {
