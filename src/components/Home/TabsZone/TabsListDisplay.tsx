@@ -320,7 +320,7 @@ export const TabsList = () => {
           </div>
         </DndProvider>
       </TooltipProvider>
-     <p className="text-sm text-muted-foreground text-center"> Made by <Link href="https://mclx.pages.dev/" target="_blank" rel="noopener noreferrer">MCLX</Link></p>
+     <p className="text-sm text-muted-foreground text-center"> Made by <Link href="https://imurad.pages.dev/" target="_blank" rel="noopener noreferrer">Murad</Link></p>
     </div>
   );
 };
