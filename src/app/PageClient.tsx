@@ -13,16 +13,16 @@ import { useMediaUrl } from "@/hooks/useMediaUrl";
 import { useDefaultAssets } from "@/hooks/useDefaultAssets";
 
 export function PageClient() {
-  const { showClock, showRightSidebar, backgroundImage, hasSeenWelcome, isHydrated, clockPosition, enableAISearch } = useSettingsStore();
+  const { showClock, showRightSidebar, backgroundImage, hasSeenWelcome, isHydrated, clockPosition } = useSettingsStore();
   const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
   
   // Initialize keyboard shortcuts
   useKeyboardShortcuts({
     onSearchModalOpen: () => setIsSearchModalOpen(true)
   });
-  
-  // Load default assets (background image)
+  // Ensure default background image on first visit
   useDefaultAssets();
+  
   
   // Get the actual media URL
   const { url: backgroundImageUrl } = useMediaUrl(backgroundImage);
@@ -125,11 +125,10 @@ export function PageClient() {
       </div>
       <SettingsMenu />
       {isHydrated && <WelcomeDialog open={!hasSeenWelcome} />}
-      <SearchModal 
-        open={isSearchModalOpen} 
-        onOpenChange={setIsSearchModalOpen}
-        enableAISearch={enableAISearch}
-      />
+        <SearchModal
+          open={isSearchModalOpen}
+          onOpenChange={setIsSearchModalOpen}
+        />
     </div>
   );
 }
