@@ -17,7 +17,6 @@ interface SettingsState {
   cardRadius: number;
   backgroundImage: string | null;
   hasSeenWelcome: boolean;
-  userProfile: 'developer' | 'gamer' | 'normal' | null;
   clockColor: string;
   showClockGlow: boolean;
   clockFormat: '12h' | '24h';
@@ -33,7 +32,6 @@ interface SettingsState {
   setCardRadius: (radius: number) => void;
   setBackgroundImage: (image: string | File | null) => Promise<void>;
   setHasSeenWelcome: (seen: boolean) => void;
-  setUserProfile: (profile: 'developer' | 'gamer' | 'normal' | null) => void;
   setClockColor: (color: string) => void;
   setShowClockGlow: (show: boolean) => void;
   setClockFormat: (format: '12h' | '24h') => void;
@@ -57,7 +55,6 @@ export const useSettingsStore = create<SettingsState>()(
       cardRadius: 1.5,
       backgroundImage: null,
       hasSeenWelcome: false,
-      userProfile: null,
       clockColor: "#22c55e",
       showClockGlow: true,
       clockFormat: "24h",
@@ -113,7 +110,6 @@ export const useSettingsStore = create<SettingsState>()(
         }
       },
       setHasSeenWelcome: (seen) => set({ hasSeenWelcome: seen }),
-      setUserProfile: (profile) => set({ userProfile: profile }),
       setClockColor: (color) => set({ clockColor: color }),
       setShowClockGlow: (show) => set({ showClockGlow: show }),
       setClockFormat: (format) => set({ clockFormat: format }),
@@ -138,7 +134,6 @@ export const useSettingsStore = create<SettingsState>()(
           cardRadius: 0.5,
           backgroundImage: null,
           hasSeenWelcome: false,
-          userProfile: null,
           showClock: true,
           showRightSidebar: true,
           clockColor: "#ffffff",
