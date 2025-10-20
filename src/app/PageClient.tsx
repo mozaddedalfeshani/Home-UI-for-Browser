@@ -1,19 +1,24 @@
 "use client";
 
+import { useState } from "react";
 import DigitalClock from "@/components/Home/ClockZone/Clock";
 import TabsZone from "@/components/Home/TabsZone";
 import SettingsMenu from "@/components/SettingsMenu";
 import Notepad from "@/components/Notepad";
 import { WelcomeDialog } from "@/components/WelcomeDialog";
+import SearchModal from "@/components/SearchModal";
 import { useSettingsStore } from "@/store/settingsStore";
 import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
 import { useMediaUrl } from "@/hooks/useMediaUrl";
 
 export function PageClient() {
   const { showClock, showRightSidebar, backgroundImage, hasSeenWelcome, isHydrated, clockPosition } = useSettingsStore();
+  const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
   
   // Initialize keyboard shortcuts
-  useKeyboardShortcuts();
+  useKeyboardShortcuts({
+    onSearchModalOpen: () => setIsSearchModalOpen(true)
+  });
   
   // Get the actual media URL
   const { url: backgroundImageUrl } = useMediaUrl(backgroundImage);
@@ -116,6 +121,10 @@ export function PageClient() {
       </div>
       <SettingsMenu />
       {isHydrated && <WelcomeDialog open={!hasSeenWelcome} />}
+      <SearchModal 
+        open={isSearchModalOpen} 
+        onOpenChange={setIsSearchModalOpen} 
+      />
     </div>
   );
 }

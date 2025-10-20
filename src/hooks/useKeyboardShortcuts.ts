@@ -3,13 +3,31 @@
 import { useEffect } from "react";
 import { useTabsStore } from "@/store/tabsStore";
 
-export const useKeyboardShortcuts = () => {
+interface UseKeyboardShortcutsProps {
+  onSearchModalOpen?: () => void;
+}
+
+export const useKeyboardShortcuts = ({ onSearchModalOpen }: UseKeyboardShortcutsProps = {}) => {
   const getTabByShortcut = useTabsStore((state) => state.getTabByShortcut);
 
   useEffect(() => {
     console.log("Keyboard shortcuts hook initialized");
     
     const handleKeyDown = (event: KeyboardEvent) => {
+      // Check if user is typing in an input field
+      const target = event.target as HTMLElement;
+      const isInputField = target.tagName.toLowerCase() === 'input' || 
+                          target.tagName.toLowerCase() === 'textarea' ||
+                          target.contentEditable === 'true';
+
+      // Handle "/" key for search modal (only when not in input fields)
+      if (event.key === "/" && !isInputField && !event.ctrlKey && !event.altKey && !event.shiftKey && !event.metaKey) {
+        event.preventDefault();
+        event.stopPropagation();
+        onSearchModalOpen?.();
+        return;
+      }
+
       // Build the shortcut string from the current key combination
       const modifiers = [];
       if (event.ctrlKey) modifiers.push("Ctrl");
@@ -52,5 +70,5 @@ export const useKeyboardShortcuts = () => {
     return () => {
       document.removeEventListener("keydown", handleKeyDown);
     };
-  }, [getTabByShortcut]);
+  }, [getTabByShortcut, onSearchModalOpen]);
 };
