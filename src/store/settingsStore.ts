@@ -23,6 +23,7 @@ interface SettingsState {
   clockFormat: '12h' | '24h';
   showSeconds: boolean;
   clockPosition: ClockPosition;
+  enableAISearch: boolean;
   isHydrated: boolean;
   setTheme: (theme: Theme) => void;
   toggleAutoOrderTabs: () => void;
@@ -39,6 +40,7 @@ interface SettingsState {
   setShowSeconds: (show: boolean) => void;
   setClockPosition: (position: ClockPosition) => void;
   setLanguage: (language: Language) => void;
+  toggleEnableAISearch: () => void;
   setHydrated: (hydrated: boolean) => void;
   resetSettings: () => Promise<void>;
 }
@@ -61,6 +63,7 @@ export const useSettingsStore = create<SettingsState>()(
       clockFormat: "24h",
       showSeconds: true,
       clockPosition: "top-left",
+      enableAISearch: false,
       isHydrated: false,
       setTheme: (theme) => set({ theme }),
       toggleAutoOrderTabs: () => set((state) => ({ autoOrderTabs: !state.autoOrderTabs })),
@@ -117,6 +120,7 @@ export const useSettingsStore = create<SettingsState>()(
       setShowSeconds: (show) => set({ showSeconds: show }),
       setClockPosition: (position) => set({ clockPosition: position }),
       setLanguage: (language) => set({ language }),
+      toggleEnableAISearch: () => set((state) => ({ enableAISearch: !state.enableAISearch })),
       setHydrated: (hydrated) => set({ isHydrated: hydrated }),
       resetSettings: async () => {
         // Clear IndexedDB media storage
@@ -142,6 +146,7 @@ export const useSettingsStore = create<SettingsState>()(
           clockFormat: "12h",
           showSeconds: true,
           clockPosition: "top-left",
+          enableAISearch: false,
           isHydrated: true,
         });
       },

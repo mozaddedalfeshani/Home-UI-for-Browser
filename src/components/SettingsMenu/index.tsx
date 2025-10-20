@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Settings, Monitor, Sun, Moon, Maximize2, Image as ImageIcon, Clock, Move, Languages, RotateCcw } from "lucide-react";
+import { Settings, Monitor, Sun, Moon, Maximize2, Image as ImageIcon, Clock, Move, Languages, RotateCcw, Brain } from "lucide-react";
 import { useTheme } from "next-themes";
 import { Button } from "@/components/ui/button";
 import {
@@ -38,11 +38,13 @@ const SettingsMenu = () => {
     autoOrderTabs,
     showClock,
     showRightSidebar,
+    enableAISearch,
     setTheme: setSettingsTheme,
     setLanguage,
     toggleAutoOrderTabs,
     toggleShowClock,
     toggleShowRightSidebar,
+    toggleEnableAISearch,
   } = useSettingsStore();
 
   const handleThemeChange = (newTheme: string) => {
@@ -133,6 +135,13 @@ const SettingsMenu = () => {
             checked={showRightSidebar}
             onCheckedChange={toggleShowRightSidebar}>
             {t("showRightSidebar")}
+          </DropdownMenuCheckboxItem>
+          
+          <DropdownMenuCheckboxItem
+            checked={enableAISearch}
+            onCheckedChange={toggleEnableAISearch}>
+            <Brain className="mr-2 h-4 w-4" />
+            AI Search Suggestions
           </DropdownMenuCheckboxItem>
           
           <DropdownMenuSeparator />

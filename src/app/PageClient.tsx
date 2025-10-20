@@ -12,7 +12,7 @@ import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
 import { useMediaUrl } from "@/hooks/useMediaUrl";
 
 export function PageClient() {
-  const { showClock, showRightSidebar, backgroundImage, hasSeenWelcome, isHydrated, clockPosition } = useSettingsStore();
+  const { showClock, showRightSidebar, backgroundImage, hasSeenWelcome, isHydrated, clockPosition, enableAISearch } = useSettingsStore();
   const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
   
   // Initialize keyboard shortcuts
@@ -123,7 +123,8 @@ export function PageClient() {
       {isHydrated && <WelcomeDialog open={!hasSeenWelcome} />}
       <SearchModal 
         open={isSearchModalOpen} 
-        onOpenChange={setIsSearchModalOpen} 
+        onOpenChange={setIsSearchModalOpen}
+        enableAISearch={enableAISearch}
       />
     </div>
   );
