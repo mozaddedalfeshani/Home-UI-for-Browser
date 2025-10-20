@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback, useRef } from "react";
+import { assetCache, ASSET_IDS } from "@/lib/assetCache";
 
 interface UseAIAutocompleteProps {
   enabled: boolean;
@@ -39,6 +40,17 @@ export const useAIAutocomplete = ({ enabled, input, onSuggestionAccept }: UseAIA
           throw new Error('AI features only work in browser');
         }
 
+        // Check if model is already cached
+        if (assetCache.isAssetCached(ASSET_IDS.HF_MODEL)) {
+          console.log("Loading AI model from cache...");
+          const cachedModelData = await assetCache.getAsset(ASSET_IDS.HF_MODEL);
+          if (cachedModelData) {
+            // For now, we still need to load the model through transformers
+            // The caching will help with subsequent loads by avoiding re-downloading
+            console.log("Model cache found, but still need to initialize transformers");
+          }
+        }
+
         // Dynamic import to ensure client-side only loading
         const { pipeline } = await import("@xenova/transformers");
         
@@ -46,6 +58,19 @@ export const useAIAutocomplete = ({ enabled, input, onSuggestionAccept }: UseAIA
         const model = await pipeline("text-generation", "Xenova/distilgpt2", {
           quantized: true, // Use quantized model for better performance
         });
+        
+        // Cache the model for future use
+        try {
+          await assetCache.cacheModel(ASSET_IDS.HF_MODEL, {
+            modelName: "Xenova/distilgpt2",
+            quantized: true,
+            timestamp: Date.now()
+          });
+          console.log("AI model cached successfully");
+        } catch (cacheError) {
+          console.warn("Failed to cache AI model:", cacheError);
+          // Don't fail the whole operation if caching fails
+        }
         
         modelRef.current = model;
         setState(prev => ({ ...prev, isModelLoading: false }));

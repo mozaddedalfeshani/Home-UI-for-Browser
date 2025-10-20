@@ -10,6 +10,7 @@ import SearchModal from "@/components/SearchModal";
 import { useSettingsStore } from "@/store/settingsStore";
 import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
 import { useMediaUrl } from "@/hooks/useMediaUrl";
+import { useDefaultAssets } from "@/hooks/useDefaultAssets";
 
 export function PageClient() {
   const { showClock, showRightSidebar, backgroundImage, hasSeenWelcome, isHydrated, clockPosition, enableAISearch } = useSettingsStore();
@@ -19,6 +20,9 @@ export function PageClient() {
   useKeyboardShortcuts({
     onSearchModalOpen: () => setIsSearchModalOpen(true)
   });
+  
+  // Load default assets (background image)
+  useDefaultAssets();
   
   // Get the actual media URL
   const { url: backgroundImageUrl } = useMediaUrl(backgroundImage);
