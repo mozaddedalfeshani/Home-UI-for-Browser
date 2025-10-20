@@ -17,12 +17,12 @@ interface SettingsState {
   cardRadius: number;
   backgroundImage: string | null;
   hasSeenWelcome: boolean;
-  userProfile: 'developer' | 'gamer' | 'normal' | null;
   clockColor: string;
   showClockGlow: boolean;
   clockFormat: '12h' | '24h';
   showSeconds: boolean;
   clockPosition: ClockPosition;
+  enableAISearch: boolean;
   isHydrated: boolean;
   setTheme: (theme: Theme) => void;
   toggleAutoOrderTabs: () => void;
@@ -32,13 +32,13 @@ interface SettingsState {
   setCardRadius: (radius: number) => void;
   setBackgroundImage: (image: string | File | null) => Promise<void>;
   setHasSeenWelcome: (seen: boolean) => void;
-  setUserProfile: (profile: 'developer' | 'gamer' | 'normal' | null) => void;
   setClockColor: (color: string) => void;
   setShowClockGlow: (show: boolean) => void;
   setClockFormat: (format: '12h' | '24h') => void;
   setShowSeconds: (show: boolean) => void;
   setClockPosition: (position: ClockPosition) => void;
   setLanguage: (language: Language) => void;
+  toggleEnableAISearch: () => void;
   setHydrated: (hydrated: boolean) => void;
   resetSettings: () => Promise<void>;
 }
@@ -55,12 +55,12 @@ export const useSettingsStore = create<SettingsState>()(
       cardRadius: 1.5,
       backgroundImage: null,
       hasSeenWelcome: false,
-      userProfile: null,
       clockColor: "#22c55e",
       showClockGlow: true,
       clockFormat: "24h",
       showSeconds: true,
       clockPosition: "top-left",
+      enableAISearch: false,
       isHydrated: false,
       setTheme: (theme) => set({ theme }),
       toggleAutoOrderTabs: () => set((state) => ({ autoOrderTabs: !state.autoOrderTabs })),
@@ -110,13 +110,13 @@ export const useSettingsStore = create<SettingsState>()(
         }
       },
       setHasSeenWelcome: (seen) => set({ hasSeenWelcome: seen }),
-      setUserProfile: (profile) => set({ userProfile: profile }),
       setClockColor: (color) => set({ clockColor: color }),
       setShowClockGlow: (show) => set({ showClockGlow: show }),
       setClockFormat: (format) => set({ clockFormat: format }),
       setShowSeconds: (show) => set({ showSeconds: show }),
       setClockPosition: (position) => set({ clockPosition: position }),
       setLanguage: (language) => set({ language }),
+      toggleEnableAISearch: () => set((state) => ({ enableAISearch: !state.enableAISearch })),
       setHydrated: (hydrated) => set({ isHydrated: hydrated }),
       resetSettings: async () => {
         // Clear IndexedDB media storage
@@ -134,7 +134,6 @@ export const useSettingsStore = create<SettingsState>()(
           cardRadius: 0.5,
           backgroundImage: null,
           hasSeenWelcome: false,
-          userProfile: null,
           showClock: true,
           showRightSidebar: true,
           clockColor: "#ffffff",
@@ -142,6 +141,7 @@ export const useSettingsStore = create<SettingsState>()(
           clockFormat: "12h",
           showSeconds: true,
           clockPosition: "top-left",
+          enableAISearch: false,
           isHydrated: true,
         });
       },

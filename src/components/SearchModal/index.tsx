@@ -1,0 +1,201 @@
+"use client";
+
+import { useState, useEffect, useRef } from "react";
+import { Search, SearchCheck, Brain, Loader2 } from "lucide-react";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { useAIAutocomplete } from "@/hooks/useAIAutocomplete";
+
+interface SearchModalProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  enableAISearch?: boolean;
+}
+
+const SearchModal = ({ open, onOpenChange, enableAISearch = false }: SearchModalProps) => {
+  const [query, setQuery] = useState("");
+  const inputRef = useRef<HTMLInputElement>(null);
+  const [displayQuery, setDisplayQuery] = useState("");
+  const [suggestion, setSuggestion] = useState("");
+
+  // Focus input when modal opens
+  useEffect(() => {
+    if (open && inputRef.current) {
+      inputRef.current.focus();
+    }
+  }, [open]);
+
+  // Reset query when modal closes
+  useEffect(() => {
+    if (!open) {
+      setQuery("");
+      setDisplayQuery("");
+      setSuggestion("");
+    }
+  }, [open]);
+
+  // AI Autocomplete hook
+  const { 
+    isLoading: aiLoading, 
+    isModelLoading, 
+    suggestion: aiSuggestion, 
+    acceptSuggestion,
+    clearSuggestion 
+  } = useAIAutocomplete({
+    enabled: enableAISearch,
+    input: query,
+    onSuggestionAccept: (suggestion) => {
+      const newQuery = query + suggestion;
+      setQuery(newQuery);
+      setDisplayQuery(newQuery);
+      setSuggestion("");
+    }
+  });
+
+  // Update display query and suggestion
+  useEffect(() => {
+    setDisplayQuery(query);
+    if (enableAISearch && aiSuggestion) {
+      setSuggestion(aiSuggestion);
+    } else {
+      setSuggestion("");
+    }
+  }, [query, aiSuggestion, enableAISearch]);
+
+  const isUrl = (input: string): boolean => {
+    // Check if it starts with http:// or https://
+    if (input.startsWith("http://") || input.startsWith("https://")) {
+      return true;
+    }
+    
+    // Check if it contains common domain extensions
+    const urlPattern = /\.(com|org|net|io|dev|app|co|edu|gov|mil|int|biz|info|name|pro|aero|coop|museum|travel|jobs|mobi|asia|cat|tel|post|xxx|arpa|root|local|onion|bit|example|invalid|test|localhost)(\.[a-z]{2,})?(\/.*)?$/i;
+    return urlPattern.test(input);
+  };
+
+  const handleSearch = () => {
+    if (!query.trim()) return;
+
+    let url: string;
+    
+    if (isUrl(query)) {
+      // It's a URL - add https:// if missing
+      if (query.startsWith("http://") || query.startsWith("https://")) {
+        url = query;
+      } else {
+        url = `https://${query}`;
+      }
+    } else {
+      // It's a search query - search on Google
+      const encodedQuery = encodeURIComponent(query);
+      url = `https://www.google.com/search?q=${encodedQuery}`;
+    }
+
+    // Open in new tab
+    window.open(url, "_blank", "noopener,noreferrer");
+    
+    // Close modal
+    onOpenChange(false);
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      handleSearch();
+    } else if (e.key === "Escape") {
+      e.preventDefault();
+      onOpenChange(false);
+    } else if (e.key === "Tab" || e.key === "ArrowRight") {
+      // Accept AI suggestion
+      if (suggestion && enableAISearch) {
+        e.preventDefault();
+        acceptSuggestion();
+      }
+    } else if (e.key === "ArrowLeft" || e.key === "Backspace") {
+      // Clear suggestion when user navigates back or deletes
+      if (suggestion) {
+        clearSuggestion();
+      }
+    }
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setQuery(value);
+    
+    // Clear suggestion if user continues typing
+    if (suggestion) {
+      clearSuggestion();
+    }
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-2xl w-full top-20 p-0">
+        <DialogTitle className="sr-only">Search</DialogTitle>
+        <div className="relative">
+          <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+          
+          {/* AI Loading indicator */}
+          {enableAISearch && isModelLoading && (
+            <div className="absolute left-10 top-3 flex items-center text-xs text-muted-foreground">
+              <Loader2 className="h-3 w-3 animate-spin mr-1" />
+              Loading AI model...
+            </div>
+          )}
+          
+          {/* Input with inline suggestion */}
+          <div className="relative">
+            <Input
+              ref={inputRef}
+              placeholder="Search Google or enter a URL..."
+              value={displayQuery}
+              onChange={handleInputChange}
+              onKeyDown={handleKeyDown}
+              className="pl-10 pr-12 h-12 text-base"
+            />
+            
+            {/* Inline suggestion display */}
+            {enableAISearch && suggestion && !aiLoading && (
+              <div className="absolute left-10 top-3 pointer-events-none">
+                <span className="text-transparent">
+                  {displayQuery}
+                </span>
+                <span className="text-muted-foreground/60">
+                  {suggestion}
+                </span>
+              </div>
+            )}
+            
+            {/* AI loading indicator for suggestions */}
+            {enableAISearch && aiLoading && !isModelLoading && (
+              <div className="absolute left-10 top-3 pointer-events-none">
+                <Loader2 className="h-3 w-3 animate-spin text-muted-foreground/60" />
+              </div>
+            )}
+          </div>
+          
+          <Button
+            type="button"
+            size="sm"
+            onClick={handleSearch}
+            className="absolute right-2 top-2 h-8 w-8 p-0"
+            disabled={!query.trim()}
+          >
+            <SearchCheck />
+          </Button>
+          
+          {/* AI enabled indicator */}
+          {enableAISearch && (
+            <div className="absolute right-12 top-3">
+              <Brain className="h-4 w-4 text-blue-500" />
+            </div>
+          )}
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+};
+
+export default SearchModal;
