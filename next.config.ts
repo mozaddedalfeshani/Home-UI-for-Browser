@@ -19,7 +19,7 @@ const nextConfig: NextConfig = {
   },
   experimental: {
     // Disable Turbopack for now due to compatibility issues with transformers
-    turbo: false,
+    // turbo: false, // Commented out due to type error
   },
 };
 

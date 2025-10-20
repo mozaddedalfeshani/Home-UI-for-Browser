@@ -73,7 +73,7 @@ class AssetCache {
   }
 
   // Cache Hugging Face model files
-  async cacheModel(assetId: string, modelData: any): Promise<any> {
+  async cacheModel(assetId: string, modelData: Record<string, unknown>): Promise<Record<string, unknown>> {
     if (!this.db) await this.init();
     
     try {

@@ -24,7 +24,7 @@ export const useAIAutocomplete = ({ enabled, input, onSuggestionAccept }: UseAIA
     error: null,
   });
 
-  const modelRef = useRef<any>(null);
+  const modelRef = useRef<unknown>(null);
   const debounceRef = useRef<NodeJS.Timeout | null>(null);
 
   // Initialize model when enabled
@@ -98,16 +98,16 @@ export const useAIAutocomplete = ({ enabled, input, onSuggestionAccept }: UseAIA
     setState(prev => ({ ...prev, isLoading: true, error: null }));
 
     try {
-      // Only use AI model if available
-      if (modelRef.current) {
-        // Generate continuation of the text
-        const result = await modelRef.current(text, {
-          max_length: text.length + 10, // Generate up to 10 more characters
-          num_return_sequences: 1,
-          temperature: 0.7,
-          do_sample: true,
-          pad_token_id: 50256, // GPT-2 pad token
-        });
+            // Only use AI model if available
+            if (modelRef.current) {
+              // Generate continuation of the text
+              const result = await (modelRef.current as (text: string, options: Record<string, unknown>) => Promise<Array<{ generated_text: string }>>)(text, {
+                max_length: text.length + 10, // Generate up to 10 more characters
+                num_return_sequences: 1,
+                temperature: 0.7,
+                do_sample: true,
+                pad_token_id: 50256, // GPT-2 pad token
+              });
 
         if (result && result.length > 0) {
           const generatedText = result[0].generated_text;

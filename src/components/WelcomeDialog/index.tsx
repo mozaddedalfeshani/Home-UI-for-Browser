@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import { Search, Settings, Plus, ArrowRight, Sparkles } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -12,7 +11,6 @@ interface WelcomeDialogProps {
 
 export function WelcomeDialog({ open }: WelcomeDialogProps) {
   const { setHasSeenWelcome } = useSettingsStore();
-  const [currentStep, setCurrentStep] = useState(0);
 
   const handleGetStarted = () => {
     setHasSeenWelcome(true);
@@ -91,7 +89,7 @@ export function WelcomeDialog({ open }: WelcomeDialogProps) {
             <div className="flex items-start gap-3">
               <div className="w-6 h-6 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-xs font-bold">1</div>
               <div>
-                <p className="font-medium">কীবোর্ডে '/' চাপুন</p>
+                <p className="font-medium">কীবোর্ডে &apos;/&apos; চাপুন</p>
                 <p className="text-muted-foreground">দ্রুত অনুসন্ধান করুন</p>
               </div>
             </div>
