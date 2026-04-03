@@ -7,6 +7,7 @@ import { Language } from "@/constants/languages";
 export type Theme = "light" | "dark" | "system";
 export type ClockPosition = "top-left" | "top-center" | "top-right";
 export type SearchEngine = "google" | "duckduckgo" | "bing" | "brave";
+export type LayoutPreset = "default" | "compact" | "focus";
 
 interface SettingsState {
   theme: Theme;
@@ -23,6 +24,7 @@ interface SettingsState {
   clockFormat: "12h" | "24h";
   showSeconds: boolean;
   searchEngine: SearchEngine;
+  layoutPreset: LayoutPreset;
   clockPosition: ClockPosition;
   isHydrated: boolean;
   setTheme: (theme: Theme) => void;
@@ -38,6 +40,7 @@ interface SettingsState {
   setClockFormat: (format: "12h" | "24h") => void;
   setShowSeconds: (show: boolean) => void;
   setSearchEngine: (engine: SearchEngine) => void;
+  setLayoutPreset: (preset: LayoutPreset) => void;
   setClockPosition: (position: ClockPosition) => void;
   setLanguage: (language: Language) => void;
   setHydrated: (hydrated: boolean) => void;
@@ -61,6 +64,7 @@ export const useSettingsStore = create<SettingsState>()(
       clockFormat: "24h",
       showSeconds: true,
       searchEngine: "google",
+      layoutPreset: "default",
       clockPosition: "top-left",
       enableAISearch: false,
       isHydrated: false,
@@ -127,6 +131,7 @@ export const useSettingsStore = create<SettingsState>()(
       setClockFormat: (format) => set({ clockFormat: format }),
       setShowSeconds: (show) => set({ showSeconds: show }),
       setSearchEngine: (engine) => set({ searchEngine: engine }),
+      setLayoutPreset: (preset) => set({ layoutPreset: preset }),
       setClockPosition: (position) => set({ clockPosition: position }),
       setLanguage: (language) => set({ language }),
       setHydrated: (hydrated) => set({ isHydrated: hydrated }),
@@ -153,6 +158,7 @@ export const useSettingsStore = create<SettingsState>()(
           clockFormat: "12h",
           showSeconds: true,
           searchEngine: "google",
+          layoutPreset: "default",
           clockPosition: "top-left",
           isHydrated: true,
         });

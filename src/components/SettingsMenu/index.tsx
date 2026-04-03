@@ -13,6 +13,7 @@ import {
   Languages,
   RotateCcw,
   Search,
+  PanelsTopLeft,
 } from "lucide-react";
 import { useTheme } from "next-themes";
 import { Button } from "@/components/ui/button";
@@ -30,7 +31,12 @@ import {
   DropdownMenuTrigger,
   DropdownMenuCheckboxItem,
 } from "@/components/ui/dropdown-menu";
-import { SearchEngine, useSettingsStore, Theme } from "@/store/settingsStore";
+import {
+  LayoutPreset,
+  SearchEngine,
+  useSettingsStore,
+  Theme,
+} from "@/store/settingsStore";
 import { Language, useTranslation } from "@/constants/languages";
 import { ResizeShortcutsDialog } from "./ResizeShortcutsDialog";
 import { BackgroundImageDialog } from "./BackgroundImageDialog";
@@ -51,9 +57,11 @@ const SettingsMenu = () => {
     showClock,
     showRightSidebar,
     searchEngine,
+    layoutPreset,
     setTheme: setSettingsTheme,
     setLanguage,
     setSearchEngine,
+    setLayoutPreset,
     toggleAutoOrderTabs,
     toggleShowClock,
     toggleShowRightSidebar,
@@ -72,6 +80,10 @@ const SettingsMenu = () => {
 
   const handleSearchEngineChange = (newEngine: string) => {
     setSearchEngine(newEngine as SearchEngine);
+  };
+
+  const handleLayoutPresetChange = (nextPreset: string) => {
+    setLayoutPreset(nextPreset as LayoutPreset);
   };
 
   // Translation function
@@ -157,6 +169,28 @@ const SettingsMenu = () => {
                 </DropdownMenuRadioItem>
                 <DropdownMenuRadioItem value="brave">
                   {t("brave")}
+                </DropdownMenuRadioItem>
+              </DropdownMenuRadioGroup>
+            </DropdownMenuSubContent>
+          </DropdownMenuSub>
+
+          <DropdownMenuSub>
+            <DropdownMenuSubTrigger>
+              <PanelsTopLeft className="mr-2 h-4 w-4" />
+              {t("layoutMode")}
+            </DropdownMenuSubTrigger>
+            <DropdownMenuSubContent>
+              <DropdownMenuRadioGroup
+                value={layoutPreset}
+                onValueChange={handleLayoutPresetChange}>
+                <DropdownMenuRadioItem value="default">
+                  {t("layoutDefault")}
+                </DropdownMenuRadioItem>
+                <DropdownMenuRadioItem value="compact">
+                  {t("layoutCompact")}
+                </DropdownMenuRadioItem>
+                <DropdownMenuRadioItem value="focus">
+                  {t("layoutFocus")}
                 </DropdownMenuRadioItem>
               </DropdownMenuRadioGroup>
             </DropdownMenuSubContent>

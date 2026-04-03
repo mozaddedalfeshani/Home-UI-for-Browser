@@ -118,13 +118,17 @@ const SearchModal = ({ open, onOpenChange }: SearchModalProps) => {
         <div className="relative">
           <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
 
+          <span className="absolute right-14 top-3 text-[11px] uppercase tracking-wide text-muted-foreground bg-muted/70 px-2 py-0.5 rounded-md border border-border/70">
+            {providerLabel}
+          </span>
+
           <Input
             ref={inputRef}
             placeholder={`${t("search")} ${providerLabel} or enter a URL...`}
             value={query}
             onChange={handleInputChange}
             onKeyDown={handleKeyDown}
-            className="pl-10 pr-12 h-12 text-base"
+            className="pl-10 pr-32 h-12 text-base"
           />
 
           <Button
