@@ -11,6 +11,7 @@ import { useSettingsStore } from "@/store/settingsStore";
 import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
 import { useMediaUrl } from "@/hooks/useMediaUrl";
 import { useDefaultAssets } from "@/hooks/useDefaultAssets";
+import GithubLink from "@/components/Home/GithubLink";
 
 export function PageClient() {
   const { showClock, showRightSidebar, backgroundImage, hasSeenWelcome, isHydrated, clockPosition } = useSettingsStore();
@@ -86,10 +87,11 @@ export function PageClient() {
           </div>
           
           {/* Settings gear skeleton */}
-          <div className="fixed bottom-6 right-6">
+          <div className="fixed bottom-4 right-4">
             <div className="h-12 w-12 bg-muted rounded-full animate-pulse"></div>
           </div>
         </div>
+        <GithubLink />
       </div>
     );
   }
@@ -124,6 +126,7 @@ export function PageClient() {
         )}
       </div>
       <SettingsMenu />
+      <GithubLink />
       {isHydrated && <WelcomeDialog open={!hasSeenWelcome} />}
         <SearchModal
           open={isSearchModalOpen}
