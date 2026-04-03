@@ -1,7 +1,19 @@
 "use client";
 
 import { useState } from "react";
-import { Settings, Monitor, Sun, Moon, Maximize2, Image as ImageIcon, Clock, Move, Languages, RotateCcw } from "lucide-react";
+import {
+  Settings,
+  Monitor,
+  Sun,
+  Moon,
+  Maximize2,
+  Image as ImageIcon,
+  Clock,
+  Move,
+  Languages,
+  RotateCcw,
+  Search,
+} from "lucide-react";
 import { useTheme } from "next-themes";
 import { Button } from "@/components/ui/button";
 import {
@@ -18,7 +30,7 @@ import {
   DropdownMenuTrigger,
   DropdownMenuCheckboxItem,
 } from "@/components/ui/dropdown-menu";
-import { useSettingsStore, Theme } from "@/store/settingsStore";
+import { SearchEngine, useSettingsStore, Theme } from "@/store/settingsStore";
 import { Language, useTranslation } from "@/constants/languages";
 import { ResizeShortcutsDialog } from "./ResizeShortcutsDialog";
 import { BackgroundImageDialog } from "./BackgroundImageDialog";
@@ -38,8 +50,10 @@ const SettingsMenu = () => {
     autoOrderTabs,
     showClock,
     showRightSidebar,
+    searchEngine,
     setTheme: setSettingsTheme,
     setLanguage,
+    setSearchEngine,
     toggleAutoOrderTabs,
     toggleShowClock,
     toggleShowRightSidebar,
@@ -54,6 +68,10 @@ const SettingsMenu = () => {
   const handleLanguageChange = (newLanguage: string) => {
     const languageValue = newLanguage as Language;
     setLanguage(languageValue);
+  };
+
+  const handleSearchEngineChange = (newEngine: string) => {
+    setSearchEngine(newEngine as SearchEngine);
   };
 
   // Translation function
@@ -74,14 +92,16 @@ const SettingsMenu = () => {
         <DropdownMenuContent align="end" className="w-56">
           <DropdownMenuLabel>{t("settings")}</DropdownMenuLabel>
           <DropdownMenuSeparator />
-          
+
           <DropdownMenuSub>
             <DropdownMenuSubTrigger>
               <Monitor className="mr-2 h-4 w-4" />
               {t("theme")}
             </DropdownMenuSubTrigger>
             <DropdownMenuSubContent>
-              <DropdownMenuRadioGroup value={theme} onValueChange={handleThemeChange}>
+              <DropdownMenuRadioGroup
+                value={theme}
+                onValueChange={handleThemeChange}>
                 <DropdownMenuRadioItem value="light">
                   <Sun className="mr-2 h-4 w-4" />
                   {t("light")}
@@ -104,7 +124,9 @@ const SettingsMenu = () => {
               {t("language")}
             </DropdownMenuSubTrigger>
             <DropdownMenuSubContent>
-              <DropdownMenuRadioGroup value={language} onValueChange={handleLanguageChange}>
+              <DropdownMenuRadioGroup
+                value={language}
+                onValueChange={handleLanguageChange}>
                 <DropdownMenuRadioItem value="bn">
                   {t("bangla")}
                 </DropdownMenuRadioItem>
@@ -115,50 +137,75 @@ const SettingsMenu = () => {
             </DropdownMenuSubContent>
           </DropdownMenuSub>
 
+          <DropdownMenuSub>
+            <DropdownMenuSubTrigger>
+              <Search className="mr-2 h-4 w-4" />
+              {t("searchEngine")}
+            </DropdownMenuSubTrigger>
+            <DropdownMenuSubContent>
+              <DropdownMenuRadioGroup
+                value={searchEngine}
+                onValueChange={handleSearchEngineChange}>
+                <DropdownMenuRadioItem value="google">
+                  {t("google")}
+                </DropdownMenuRadioItem>
+                <DropdownMenuRadioItem value="duckduckgo">
+                  {t("duckduckgo")}
+                </DropdownMenuRadioItem>
+                <DropdownMenuRadioItem value="bing">
+                  {t("bing")}
+                </DropdownMenuRadioItem>
+                <DropdownMenuRadioItem value="brave">
+                  {t("brave")}
+                </DropdownMenuRadioItem>
+              </DropdownMenuRadioGroup>
+            </DropdownMenuSubContent>
+          </DropdownMenuSub>
+
           <DropdownMenuSeparator />
-          
+
           <DropdownMenuCheckboxItem
             checked={autoOrderTabs}
             onCheckedChange={toggleAutoOrderTabs}>
             {t("autoOrderTabs")}
           </DropdownMenuCheckboxItem>
-          
+
           <DropdownMenuCheckboxItem
             checked={showClock}
             onCheckedChange={toggleShowClock}>
             {t("showClock")}
           </DropdownMenuCheckboxItem>
-          
+
           <DropdownMenuCheckboxItem
             checked={showRightSidebar}
             onCheckedChange={toggleShowRightSidebar}>
             {t("showRightSidebar")}
           </DropdownMenuCheckboxItem>
-          
+
           <DropdownMenuSeparator />
-          
+
           <DropdownMenuItem onClick={() => setResizeDialogOpen(true)}>
             <Maximize2 className="mr-2 h-4 w-4" />
             {t("resizeShortcuts")}
           </DropdownMenuItem>
-          
+
           <DropdownMenuItem onClick={() => setBackgroundDialogOpen(true)}>
             <ImageIcon className="mr-2 h-4 w-4" />
             {t("backgroundImage")}
           </DropdownMenuItem>
-          
+
           <DropdownMenuItem onClick={() => setClockColorDialogOpen(true)}>
             <Clock className="mr-2 h-4 w-4" />
             {t("clockSetting")}
           </DropdownMenuItem>
-          
+
           <DropdownMenuItem onClick={() => setClockPositionDialogOpen(true)}>
             <Move className="mr-2 h-4 w-4" />
             {t("clockPosition")}
           </DropdownMenuItem>
-          
+
           <DropdownMenuSeparator />
-          
+
           <ResetDialog>
             <DropdownMenuItem onSelect={(event) => event.preventDefault()}>
               <RotateCcw className="mr-2 h-4 w-4 text-destructive" />
@@ -167,25 +214,25 @@ const SettingsMenu = () => {
           </ResetDialog>
         </DropdownMenuContent>
       </DropdownMenu>
-      
-      <ResizeShortcutsDialog 
-        open={resizeDialogOpen} 
-        onOpenChange={setResizeDialogOpen} 
+
+      <ResizeShortcutsDialog
+        open={resizeDialogOpen}
+        onOpenChange={setResizeDialogOpen}
       />
-      
-      <BackgroundImageDialog 
-        open={backgroundDialogOpen} 
-        onOpenChange={setBackgroundDialogOpen} 
+
+      <BackgroundImageDialog
+        open={backgroundDialogOpen}
+        onOpenChange={setBackgroundDialogOpen}
       />
-      
-      <ClockColorDialog 
-        open={clockColorDialogOpen} 
-        onOpenChange={setClockColorDialogOpen} 
+
+      <ClockColorDialog
+        open={clockColorDialogOpen}
+        onOpenChange={setClockColorDialogOpen}
       />
-      
-      <ClockPositionDialog 
-        open={clockPositionDialogOpen} 
-        onOpenChange={setClockPositionDialogOpen} 
+
+      <ClockPositionDialog
+        open={clockPositionDialogOpen}
+        onOpenChange={setClockPositionDialogOpen}
       />
     </div>
   );

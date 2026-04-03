@@ -28,6 +28,11 @@ export const TRANSLATIONS = {
     backgroundImage: "Background Image",
     clockSetting: "Clock Setting",
     clockPosition: "Clock Position",
+    searchEngine: "Search Engine",
+    google: "Google",
+    duckduckgo: "DuckDuckGo",
+    bing: "Bing",
+    brave: "Brave",
 
     // Clock
     clock: "Clock",
@@ -130,6 +135,11 @@ export const TRANSLATIONS = {
     backgroundImage: "ব্যাকগ্রাউন্ড ইমেজ",
     clockSetting: "ঘড়ি সেটিং",
     clockPosition: "ঘড়ির অবস্থান",
+    searchEngine: "সার্চ ইঞ্জিন",
+    google: "Google",
+    duckduckgo: "DuckDuckGo",
+    bing: "Bing",
+    brave: "Brave",
 
     // Clock
     clock: "ঘড়ি",
