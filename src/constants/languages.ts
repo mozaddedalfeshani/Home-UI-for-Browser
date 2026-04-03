@@ -28,20 +28,21 @@ export const TRANSLATIONS = {
     backgroundImage: "Background Image",
     clockSetting: "Clock Setting",
     clockPosition: "Clock Position",
-    
+
     // Clock
     clock: "Clock",
-    
+
     // Notepad
     notepad: "Notepad",
     notes: "Notes",
     projects: "Projects",
     clear: "Clear",
     writeYourNotesHere: "Write your notes here...",
-    
+
     // Projects
     noProjectsYet: "No projects yet",
-    createFirstProject: "Create your first project to start organizing your tasks",
+    createFirstProject:
+      "Create your first project to start organizing your tasks",
     addProject: "Add Project",
     createNewProject: "Create New Project",
     projectTitle: "Project Title",
@@ -55,7 +56,7 @@ export const TRANSLATIONS = {
     deleteProject: "Delete Project",
     areYouSureDeleteProject: "Are you sure you want to delete",
     thisActionCannotBeUndone: "This action cannot be undone.",
-    
+
     // Todos
     addNewTodo: "Add a new todo...",
     noTodosYet: "No todos yet. Add one above!",
@@ -65,7 +66,7 @@ export const TRANSLATIONS = {
     high: "High",
     progress: "Progress",
     completed: "completed",
-    
+
     // Tabs
     shortcuts: "Shortcuts",
     startByAddingFirstShortcut: "Start by adding your first shortcut.",
@@ -77,13 +78,16 @@ export const TRANSLATIONS = {
     shortcutInUse: "This shortcut is already in use",
     clearShortcut: "Clear Shortcut",
     openInNewWindow: "Open in new window",
-    setShortcutDescription: "Set a keyboard shortcut for quick access to this tab.",
+    setShortcutDescription:
+      "Set a keyboard shortcut for quick access to this tab.",
     shortcut: "Shortcut",
     resetEverything: "Reset Everything",
-    resetEverythingDescription: "This will clear all tabs, projects, notes, and settings. This action cannot be undone.",
+    resetEverythingDescription:
+      "This will clear all tabs, projects, notes, and settings. This action cannot be undone.",
     confirmReset: "Are you sure you want to reset everything?",
-    resetWarning: "This will permanently delete all your data including tabs, projects, notes, and settings.",
-    
+    resetWarning:
+      "This will permanently delete all your data including tabs, projects, notes, and settings.",
+
     // Common
     loading: "Loading...",
     error: "Error",
@@ -108,7 +112,7 @@ export const TRANSLATIONS = {
     yes: "Yes",
     no: "No",
   },
-  
+
   [LANGUAGES.BN]: {
     // Settings Menu
     settings: "সেটিংস",
@@ -126,17 +130,17 @@ export const TRANSLATIONS = {
     backgroundImage: "ব্যাকগ্রাউন্ড ইমেজ",
     clockSetting: "ঘড়ি সেটিং",
     clockPosition: "ঘড়ির অবস্থান",
-    
+
     // Clock
     clock: "ঘড়ি",
-    
+
     // Notepad
     notepad: "নোটপ্যাড",
     notes: "নোট",
     projects: "প্রজেক্ট",
     clear: "মুছুন",
     writeYourNotesHere: "এখানে আপনার নোট লিখুন...",
-    
+
     // Projects
     noProjectsYet: "এখনো কোনো প্রজেক্ট নেই",
     createFirstProject: "আপনার কাজগুলো সংগঠিত করতে প্রথম প্রজেক্ট তৈরি করুন",
@@ -153,7 +157,7 @@ export const TRANSLATIONS = {
     deleteProject: "প্রজেক্ট মুছুন",
     areYouSureDeleteProject: "আপনি কি নিশ্চিত যে আপনি মুছতে চান",
     thisActionCannotBeUndone: "এই কাজটি পূর্বাবস্থায় ফেরানো যাবে না।",
-    
+
     // Todos
     addNewTodo: "নতুন টুডু যোগ করুন...",
     noTodosYet: "এখনো কোনো টুডু নেই। উপরে একটি যোগ করুন!",
@@ -163,7 +167,7 @@ export const TRANSLATIONS = {
     high: "উচ্চ",
     progress: "অগ্রগতি",
     completed: "সম্পন্ন",
-    
+
     // Tabs
     shortcuts: "শর্টকাট",
     startByAddingFirstShortcut: "আপনার প্রথম শর্টকাট যোগ করে শুরু করুন।",
@@ -175,13 +179,16 @@ export const TRANSLATIONS = {
     shortcutInUse: "এই শর্টকাটটি ইতিমধ্যে ব্যবহৃত হচ্ছে",
     clearShortcut: "শর্টকাট মুছুন",
     openInNewWindow: "নতুন উইন্ডোতে খুলুন",
-    setShortcutDescription: "এই ট্যাবে দ্রুত অ্যাক্সেসের জন্য একটি কীবোর্ড শর্টকাট সেট করুন।",
+    setShortcutDescription:
+      "এই ট্যাবে দ্রুত অ্যাক্সেসের জন্য একটি কীবোর্ড শর্টকাট সেট করুন।",
     shortcut: "শর্টকাট",
     resetEverything: "সবকিছু রিসেট করুন",
-    resetEverythingDescription: "এটি সব ট্যাব, প্রজেক্ট, নোট এবং সেটিংস মুছে ফেলবে। এই কাজটি পূর্বাবস্থায় ফেরানো যাবে না।",
+    resetEverythingDescription:
+      "এটি সব ট্যাব, প্রজেক্ট, নোট এবং সেটিংস মুছে ফেলবে। এই কাজটি পূর্বাবস্থায় ফেরানো যাবে না।",
     confirmReset: "আপনি কি নিশ্চিত যে আপনি সবকিছু রিসেট করতে চান?",
-    resetWarning: "এটি আপনার সব ডেটা স্থায়ীভাবে মুছে ফেলবে যার মধ্যে রয়েছে ট্যাব, প্রজেক্ট, নোট এবং সেটিংস।",
-    
+    resetWarning:
+      "এটি আপনার সব ডেটা স্থায়ীভাবে মুছে ফেলবে যার মধ্যে রয়েছে ট্যাব, প্রজেক্ট, নোট এবং সেটিংস।",
+
     // Common
     loading: "লোড হচ্ছে...",
     error: "ত্রুটি",
@@ -209,7 +216,11 @@ export const TRANSLATIONS = {
 } as const;
 
 export const getTranslation = (language: Language, key: string): string => {
-  return TRANSLATIONS[language][key as keyof typeof TRANSLATIONS[typeof language]] || key;
+  return (
+    TRANSLATIONS[language][
+      key as keyof (typeof TRANSLATIONS)[typeof language]
+    ] || key
+  );
 };
 
 export const useTranslation = (language: Language) => {

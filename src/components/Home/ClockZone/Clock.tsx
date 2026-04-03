@@ -10,21 +10,21 @@ const shareTech = Share_Tech_Mono({
   weight: "400",
 });
 
-
 export default function DigitalClock() {
   const [time, setTime] = useState<string>("");
-  const { clockColor, showClockGlow, clockFormat, showSeconds } = useSettingsStore();
+  const { clockColor, showClockGlow, clockFormat, showSeconds } =
+    useSettingsStore();
 
   useEffect(() => {
     const updateTime = () => {
       const now = new Date();
-      
+
       if (clockFormat === "12h") {
         const hours12 = now.getHours() % 12 || 12;
         const hours = String(hours12).padStart(2, "0");
         const minutes = String(now.getMinutes()).padStart(2, "0");
         const ampm = now.getHours() >= 12 ? "PM" : "AM";
-        
+
         if (showSeconds) {
           const seconds = String(now.getSeconds()).padStart(2, "0");
           setTime(`${hours}:${minutes}:${seconds} ${ampm}`);
@@ -34,7 +34,7 @@ export default function DigitalClock() {
       } else {
         const hours = String(now.getHours()).padStart(2, "0");
         const minutes = String(now.getMinutes()).padStart(2, "0");
-        
+
         if (showSeconds) {
           const seconds = String(now.getSeconds()).padStart(2, "0");
           setTime(`${hours}:${minutes}:${seconds}`);
@@ -51,16 +51,22 @@ export default function DigitalClock() {
 
   return (
     <div
-      className={`${shareTech.className} text-7xl font-bold tracking-widest p-8 rounded-2xl text-center ${
-        showClockGlow ? 'glow' : ''
-      }`}
-      style={{
-        letterSpacing: "0.1em",
-        color: clockColor,
-        textShadow: showClockGlow ? `0 0 10px ${clockColor}, 0 0 20px ${clockColor}` : 'none',
-        animation: showClockGlow ? `glow 2s ease-in-out infinite alternate` : 'none',
-        '--glow-color': clockColor,
-      } as React.CSSProperties}>
+      className={`${shareTech.className} clock-style clock-style--classic text-7xl tracking-widest p-8 rounded-2xl text-center`}
+      style={
+        {
+          letterSpacing: "0.08em",
+          color: "var(--clock-color)",
+          textShadow: showClockGlow
+            ? "0 0 10px var(--glow-color), 0 0 20px var(--glow-color)"
+            : "none",
+          animation: showClockGlow
+            ? "glow 2s ease-in-out infinite alternate"
+            : "none",
+          "--clock-color": clockColor,
+          "--glow-color": clockColor,
+          "--clock-glow-strength": showClockGlow ? "1" : "0",
+        } as React.CSSProperties
+      }>
       {time}
     </div>
   );

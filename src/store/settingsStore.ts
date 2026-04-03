@@ -19,7 +19,7 @@ interface SettingsState {
   hasSeenWelcome: boolean;
   clockColor: string;
   showClockGlow: boolean;
-  clockFormat: '12h' | '24h';
+  clockFormat: "12h" | "24h";
   showSeconds: boolean;
   clockPosition: ClockPosition;
   isHydrated: boolean;
@@ -33,7 +33,7 @@ interface SettingsState {
   setHasSeenWelcome: (seen: boolean) => void;
   setClockColor: (color: string) => void;
   setShowClockGlow: (show: boolean) => void;
-  setClockFormat: (format: '12h' | '24h') => void;
+  setClockFormat: (format: "12h" | "24h") => void;
   setShowSeconds: (show: boolean) => void;
   setClockPosition: (position: ClockPosition) => void;
   setLanguage: (language: Language) => void;
@@ -61,14 +61,16 @@ export const useSettingsStore = create<SettingsState>()(
       enableAISearch: false,
       isHydrated: false,
       setTheme: (theme) => set({ theme }),
-      toggleAutoOrderTabs: () => set((state) => ({ autoOrderTabs: !state.autoOrderTabs })),
+      toggleAutoOrderTabs: () =>
+        set((state) => ({ autoOrderTabs: !state.autoOrderTabs })),
       toggleShowClock: () => set((state) => ({ showClock: !state.showClock })),
-      toggleShowRightSidebar: () => set((state) => ({ showRightSidebar: !state.showRightSidebar })),
+      toggleShowRightSidebar: () =>
+        set((state) => ({ showRightSidebar: !state.showRightSidebar })),
       setCardSize: (size) => set({ cardSize: size }),
       setCardRadius: (radius) => set({ cardRadius: radius }),
       setBackgroundImage: async (image) => {
         console.log("Setting background image in store:", image);
-        
+
         // If it's a File object, store it in IndexedDB
         if (image instanceof File) {
           try {
@@ -77,17 +79,22 @@ export const useSettingsStore = create<SettingsState>()(
             set({ backgroundImage: mediaRef });
             console.log("Background image stored in IndexedDB:", mediaRef);
           } catch (error) {
-            console.error("Failed to store background image in IndexedDB:", error);
-            
+            console.error(
+              "Failed to store background image in IndexedDB:",
+              error,
+            );
+
             // Check file size for fallback decision
             const maxDataUrlSize = 5 * 1024 * 1024; // 5MB limit for data URL
-            
+
             if (image.size > maxDataUrlSize) {
-              console.warn("File too large for data URL fallback, skipping background image");
+              console.warn(
+                "File too large for data URL fallback, skipping background image",
+              );
               // Don't set the background image if it's too large for data URL
               return;
             }
-            
+
             // Fallback to data URL if IndexedDB fails and file is small enough
             try {
               const dataUrl = await new Promise<string>((resolve, reject) => {
@@ -99,7 +106,10 @@ export const useSettingsStore = create<SettingsState>()(
               set({ backgroundImage: dataUrl });
               console.log("Background image stored as data URL fallback");
             } catch (fallbackError) {
-              console.error("Failed to create data URL fallback:", fallbackError);
+              console.error(
+                "Failed to create data URL fallback:",
+                fallbackError,
+              );
             }
           }
         } else {
@@ -122,7 +132,7 @@ export const useSettingsStore = create<SettingsState>()(
         } catch (error) {
           console.error("Failed to clear media storage:", error);
         }
-        
+
         set({
           theme: "system",
           language: "bn",
@@ -148,6 +158,6 @@ export const useSettingsStore = create<SettingsState>()(
       onRehydrateStorage: () => (state) => {
         state?.setHydrated(true);
       },
-    }
-  )
+    },
+  ),
 );

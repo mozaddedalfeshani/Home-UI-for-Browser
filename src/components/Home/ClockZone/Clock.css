@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400..900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Exo+2:wght@400;600;700&display=swap');
 
 @keyframes glow {
     0% {
@@ -17,3 +17,21 @@
 .glow {
     animation: glow 2s ease-in-out infinite alternate;
 }
+
+@keyframes softFloat {
+    .clock-style {
+        --clock-color: #22c55e;
+        --glow-color: var(--clock-color);
+        --clock-glow-strength: 1;
+        color: var(--clock-color);
+        border: 1px solid color-mix(in srgb, var(--clock-color) 24%, rgba(255, 255, 255, 0.2));
+        background: color-mix(in srgb, var(--clock-color) 12%, rgba(15, 23, 42, 0.64));
+        box-shadow: 0 14px 36px -24px rgba(15, 23, 42, 0.9);
+        font-weight: 700;
+        transition: color 220ms ease, text-shadow 220ms ease, box-shadow 260ms ease;
+    }
+
+    .clock-style--classic {
+        font-family: 'Exo 2', sans-serif;
+        text-transform: uppercase;
+    }
