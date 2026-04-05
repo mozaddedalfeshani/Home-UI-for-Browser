@@ -172,17 +172,17 @@ export function ClockColorDialog({
              </div>
              
              <div className="bg-muted/20 rounded-3xl border border-border/20 p-6 space-y-6">
-                {/* Tone Grid */}
-                <div className="grid grid-cols-6 gap-3">
+                {/* Tone Grid - Smaller sizes */}
+                <div className="flex flex-wrap gap-2.5">
                   {predefinedColors.map((color) => (
                     <button
                       key={color.value}
                       onClick={() => setTempColor(color.value)}
                       className={cn(
-                        "w-full aspect-square rounded-2xl border-2 transition-all hover:scale-105",
+                        "w-8 h-8 rounded-xl border-2 transition-all hover:scale-105 shadow-sm",
                         tempColor === color.value ? "border-primary ring-2 ring-primary/20 scale-110" : "border-transparent"
                       )}
-                      style={{ backgroundColor: color.value, boxShadow: tempColor === color.value ? `0 0 15px ${color.value}33` : 'none' }}
+                      style={{ backgroundColor: color.value, boxShadow: tempColor === color.value ? `0 0 10px ${color.value}44` : 'none' }}
                       title={color.name}
                     />
                   ))}
