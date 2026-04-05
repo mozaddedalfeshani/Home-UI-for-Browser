@@ -1,20 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Share_Tech_Mono, Fredoka } from "next/font/google";
 import { useSettingsStore } from "@/store/settingsStore";
 import { cn } from "@/lib/utils";
 import "./Clock.css";
-
-const shareTech = Share_Tech_Mono({
-  subsets: ["latin"],
-  weight: "400",
-});
-
-const fredoka = Fredoka({
-  subsets: ["latin"],
-  weight: "700",
-});
 
 export default function DigitalClock() {
   const [timeData, setTimeData] = useState<{ digits: string; ampm: string }>({
@@ -65,11 +54,11 @@ export default function DigitalClock() {
     <div
       className={cn(
         "clock-style text-7xl text-center flex items-baseline justify-center",
-        clockStyle === "modern" ? fredoka.className : shareTech.className,
-        clockStyle === "modern" ? "clock-style--modern" : "clock-style--classic"
+        clockStyle === "modern" ? "font-sans clock-style--modern" : "font-mono clock-style--classic"
       )}
       style={
         {
+          fontFamily: clockStyle === "modern" ? "var(--font-fredoka)" : "var(--font-share-tech-mono)",
           letterSpacing: clockStyle === "modern" ? "-0.02em" : "0.02em",
           color: "var(--clock-color)",
           textShadow: showClockGlow
@@ -88,8 +77,11 @@ export default function DigitalClock() {
         <span 
           className={cn(
             "ml-2 opacity-40 font-medium self-end mb-2",
-            clockStyle === "modern" ? "text-2xl" : "text-xl"
+            clockStyle === "modern" ? "text-2xl" : "text-xl font-mono"
           )}
+          style={{
+            fontFamily: clockStyle === "modern" ? "var(--font-fredoka)" : "var(--font-share-tech-mono)",
+          }}
         >
           {timeData.ampm}
         </span>

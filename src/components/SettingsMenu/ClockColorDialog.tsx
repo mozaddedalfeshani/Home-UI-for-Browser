@@ -328,12 +328,13 @@ export function ClockColorDialog({
                   <div className="relative flex items-baseline justify-center py-4 z-10">
                     <span 
                        className={cn(
-                         "text-5xl font-black transition-all duration-700",
+                         "text-5xl font-bold transition-all duration-700",
                          theme === 'classic' ? "font-mono opacity-80" : "font-sans tracking-tight"
                        )}
                        style={{ 
                           fontFamily: theme === 'modern' ? 'var(--font-fredoka)' : 'var(--font-share-tech-mono)',
                           color: tempStyle === theme ? tempColor : 'currentColor',
+                          letterSpacing: theme === 'modern' ? '-0.02em' : '0.02em',
                           textShadow: tempStyle === theme && tempGlow ? `0 0 15px ${tempColor}44` : 'none'
                        }}
                     >
@@ -345,7 +346,7 @@ export function ClockColorDialog({
                          theme === 'modern' ? "text-xl" : "text-sm"
                        )}
                        style={{ 
-                          fontFamily: theme === 'modern' ? 'var(--font-fredoka)' : 'inherit',
+                          fontFamily: theme === 'modern' ? 'var(--font-fredoka)' : 'var(--font-share-tech-mono)',
                        }}
                     >
                       PM
@@ -372,13 +373,13 @@ export function ClockColorDialog({
             <div
               className={cn(
                 "clock-style transition-all duration-1000 select-none",
-                tempStyle === "modern" ? "font-sans italic text-6xl md:text-8xl" : "font-mono text-5xl md:text-7xl",
+                tempStyle === "modern" ? "font-sans text-6xl md:text-8xl" : "font-mono text-5xl md:text-7xl",
                 tempStyle === "modern" ? "clock-style--modern" : "clock-style--classic"
               )}
               style={{
                 fontFamily: tempStyle === "modern" ? "var(--font-fredoka)" : "var(--font-share-tech-mono)",
                 color: tempColor,
-                letterSpacing: tempStyle === "modern" ? "-0.05em" : "0.02em",
+                letterSpacing: tempStyle === "modern" ? "-0.02em" : "0.02em",
                 textShadow: tempGlow
                   ? `0 0 30px ${tempColor}88, 0 0 60px ${tempColor}44`
                   : "none",
@@ -394,9 +395,13 @@ export function ClockColorDialog({
                   ? "00:00:00"
                   : "00:00"}
               <span className={cn(
-                "ml-3 opacity-30 font-black italic",
+                "ml-3 opacity-30 font-bold",
                 tempStyle === "modern" ? "text-3xl" : "text-xl"
-              )}>
+              )}
+              style={{ 
+                fontFamily: tempStyle === "modern" ? "var(--font-fredoka)" : "var(--font-share-tech-mono)",
+              }}
+              >
                 {tempFormat === "12h" ? "PM" : ""}
               </span>
             </div>
