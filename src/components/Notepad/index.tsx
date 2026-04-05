@@ -8,6 +8,7 @@ import { useNotepadStore, Note } from "@/store/notepadStore";
 import { useSettingsStore } from "@/store/settingsStore";
 import { useTranslation } from "@/constants/languages";
 import { cn } from "@/lib/utils";
+import { DeleteConfirmDialog } from "@/components/ui/DeleteConfirmDialog";
 
 const formatRelativeTime = (dateString: string) => {
   const date = new Date(dateString);
@@ -86,18 +87,19 @@ const Notepad = () => {
                   >
                     {copied ? <CheckCircle2 className="h-4 w-4 text-green-500" /> : <Copy className="h-3.5 w-3.5" />}
                   </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => {
-                      if (confirm('Delete this note?')) {
-                        deleteNote(selectedNote.id);
-                      }
-                    }}
-                    className="h-8 w-8 p-0 text-destructive hover:bg-destructive/10 transition-colors"
+                  <DeleteConfirmDialog
+                    title="Delete Note?"
+                    description={`Are you sure you want to delete "${selectedNote.title || 'this note'}"? This cannot be undone.`}
+                    onConfirm={() => deleteNote(selectedNote.id)}
                   >
-                    <Trash2 className="h-3.5 w-3.5" />
-                  </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-8 w-8 p-0 text-destructive hover:bg-destructive/10 transition-colors"
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </Button>
+                  </DeleteConfirmDialog>
                 </div>
               </div>
 
@@ -169,17 +171,20 @@ const Notepad = () => {
                         <h3 className="font-bold text-sm truncate pr-6 group-hover:text-primary transition-colors">
                           {note.title || "Untitled Note"}
                         </h3>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            deleteNote(note.id);
-                          }}
-                          className="absolute right-2 top-2 h-7 w-7 opacity-0 group-hover:opacity-100 hover:text-destructive hover:bg-destructive/10 transition-all rounded-full"
+                        <DeleteConfirmDialog
+                          title="Delete Note?"
+                          description={`Are you sure you want to delete "${note.title || 'this note'}"? This cannot be undone.`}
+                          onConfirm={() => deleteNote(note.id)}
                         >
-                          <Trash2 className="h-3.5 w-3.5" />
-                        </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={(e) => e.stopPropagation()}
+                            className="absolute right-2 top-2 h-7 w-7 opacity-0 group-hover:opacity-100 hover:text-destructive hover:bg-destructive/10 transition-all rounded-full"
+                          >
+                            <Trash2 className="h-3.5 w-3.5" />
+                          </Button>
+                        </DeleteConfirmDialog>
                       </div>
                       <p className="text-xs text-muted-foreground/60 line-clamp-2 leading-relaxed">
                         {note.content || "No content..."}

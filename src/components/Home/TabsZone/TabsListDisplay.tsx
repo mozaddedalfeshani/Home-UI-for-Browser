@@ -14,6 +14,7 @@ import { AddTabDialog } from "./AddTabDialog";
 import { EditTabDialog } from "./EditTabDialog";
 import { ShortcutDialog } from "./ShortcutDialog";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { DeleteConfirmDialog } from "@/components/ui/DeleteConfirmDialog";
 import {
   Tooltip,
   TooltipContent,
@@ -215,15 +216,19 @@ const SortableShortcutCard = ({
                       Edit
                     </DropdownMenuItem>
                   </EditTabDialog>
-                  <DropdownMenuItem
-                    onSelect={(event) => {
-                      event.preventDefault();
-                      removeTab(tab.id);
-                    }}
-                    className="flex items-center gap-2 text-destructive focus:text-destructive">
-                    <Trash2 className="h-4 w-4" />
-                    Delete
-                  </DropdownMenuItem>
+                  <DeleteConfirmDialog
+                    title="Delete Shortcut?"
+                    description={`Are you sure you want to delete "${tab.title || hostname}"? This shortcut will be removed from your dashboard.`}
+                    onConfirm={() => removeTab(tab.id)}
+                  >
+                    <DropdownMenuItem
+                      onSelect={(event) => event.preventDefault()}
+                      className="flex items-center gap-2 text-destructive focus:text-destructive"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                      Delete
+                    </DropdownMenuItem>
+                  </DeleteConfirmDialog>
                   <ShortcutDialog tab={tab}>
                     <DropdownMenuItem onSelect={(event) => event.preventDefault()}>
                       <Keyboard className="h-4 w-4 mr-2" />
