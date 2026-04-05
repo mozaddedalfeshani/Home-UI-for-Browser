@@ -222,17 +222,17 @@ const SortableShortcutCard = ({
       </ContextMenuTrigger>
 
       <ContextMenuContent className="w-64 p-1.5 bg-background/95 backdrop-blur-xl border-border/40 shadow-2xl">
-        <div className="px-2 py-1.5 text-[10px] font-black uppercase tracking-widest text-muted-foreground/50">{t("shortcutActions") || "Shortcut Actions"}</div>
+        <div className="px-2 py-1.5 text-[10px] font-black uppercase tracking-widest text-muted-foreground/50">{t("shortcutActions")}</div>
         <EditTabDialog tab={tab}>
           <ContextMenuItem className="gap-2.5 font-bold text-xs rounded-lg" onSelect={(e) => e.preventDefault()}>
             <Pencil className="h-3.5 w-3.5 text-primary" />
-            {t("edit") || "Edit Shortcut"}
+            {t("edit")}
           </ContextMenuItem>
         </EditTabDialog>
         <ShortcutDialog tab={tab}>
           <ContextMenuItem className="gap-2.5 font-bold text-xs rounded-lg" onSelect={(e) => e.preventDefault()}>
             <Keyboard className="h-3.5 w-3.5 text-primary" />
-            {t("keyboardShortcut") || "Keyboard Shortcut"}
+            {t("keyboardShortcut")}
           </ContextMenuItem>
         </ShortcutDialog>
         <DeleteConfirmDialog
@@ -242,73 +242,25 @@ const SortableShortcutCard = ({
         >
           <ContextMenuItem className="gap-2.5 font-bold text-xs rounded-lg text-destructive focus:text-destructive" onSelect={(e) => e.preventDefault()}>
             <Trash2 className="h-3.5 w-3.5" />
-            {t("delete") || "Delete Shortcut"}
+            {t("deleteShortcut")}
           </ContextMenuItem>
         </DeleteConfirmDialog>
 
         <ContextMenuSeparator className="bg-border/40 my-1.5" />
 
-        <div className="px-2 py-1.5 text-[10px] font-black uppercase tracking-widest text-muted-foreground/50">{t("dashboardConfig") || "Dashboard Config"}</div>
+        <div className="px-2 py-1.5 text-[10px] font-black uppercase tracking-widest text-muted-foreground/50">{t("dashboardConfig")}</div>
         
-        <ContextMenuSub>
-          <ContextMenuSubTrigger className="gap-2.5 font-bold text-xs rounded-lg">
-            <Sun className="h-3.5 w-3.5 text-primary" />
-            {t("theme") || "Appearance"}
-          </ContextMenuSubTrigger>
-          <ContextMenuSubContent className="w-40 bg-background/95 backdrop-blur-xl border-border/40 shadow-2xl">
-            <ContextMenuItem onClick={() => setTheme("light")} className="gap-2.5 font-bold text-xs">
-              <Sun className="h-3.5 w-3.5" /> {t("light")}
-            </ContextMenuItem>
-            <ContextMenuItem onClick={() => setTheme("dark")} className="gap-2.5 font-bold text-xs">
-              <Moon className="h-3.5 w-3.5" /> {t("dark")}
-            </ContextMenuItem>
-            <ContextMenuItem onClick={() => setTheme("system")} className="gap-2.5 font-bold text-xs">
-              <Monitor className="h-3.5 w-3.5" /> {t("system")}
-            </ContextMenuItem>
-          </ContextMenuSubContent>
-        </ContextMenuSub>
-
-        <ContextMenuSub>
-          <ContextMenuSubTrigger className="gap-2.5 font-bold text-xs rounded-lg">
-            <Search className="h-3.5 w-3.5 text-primary" />
-            {t("searchEngine") || "Search Engine"}
-          </ContextMenuSubTrigger>
-          <ContextMenuSubContent className="w-44 bg-background/95 backdrop-blur-xl border-border/40 shadow-2xl">
-            {["google", "duckduckgo", "bing", "brave"].map((engine) => (
-              <ContextMenuItem key={engine} onClick={() => setSearchEngine(engine as any)} className="capitalize font-bold text-xs">
-                {engine === 'duckduckgo' ? 'DuckDuckGo' : engine}
-              </ContextMenuItem>
-            ))}
-          </ContextMenuSubContent>
-        </ContextMenuSub>
-
-        <ContextMenuSub>
-          <ContextMenuSubTrigger className="gap-2.5 font-bold text-xs rounded-lg">
-            <Layout className="h-3.5 w-3.5 text-primary" />
-            {t("layoutMode") || "Layout Mode"}
-          </ContextMenuSubTrigger>
-          <ContextMenuSubContent className="w-40 bg-background/95 backdrop-blur-xl border-border/40 shadow-2xl">
-            {["default", "compact", "focus"].map((preset) => (
-              <ContextMenuItem key={preset} onClick={() => setLayoutPreset(preset as any)} className="capitalize font-bold text-xs">
-                {preset}
-              </ContextMenuItem>
-            ))}
-          </ContextMenuSubContent>
-        </ContextMenuSub>
-
-        <ContextMenuSeparator className="bg-border/40 my-1.5" />
-
-        <ContextMenuItem onClick={() => setClockDialogOpen(true)} className="gap-2.5 font-bold text-xs rounded-lg">
+        <ContextMenuItem onSelect={() => setClockDialogOpen(true)} className="gap-2.5 font-bold text-xs rounded-lg">
           <Clock className="h-3.5 w-3.5 text-primary" />
-          {t("clockSetting") || "Digital Clock Settings"}
+          {t("clockSettings")}
         </ContextMenuItem>
-        <ContextMenuItem onClick={() => setBackgroundDialogOpen(true)} className="gap-2.5 font-bold text-xs rounded-lg">
+        <ContextMenuItem onSelect={() => setBackgroundDialogOpen(true)} className="gap-2.5 font-bold text-xs rounded-lg">
           <ImageIcon className="h-3.5 w-3.5 text-primary" />
-          {t("backgroundImage") || "Change Wallpaper"}
+          {t("backgroundImage")}
         </ContextMenuItem>
-        <ContextMenuItem onClick={() => setResizeDialogOpen(true)} className="gap-2.5 font-bold text-xs rounded-lg">
+        <ContextMenuItem onSelect={() => setResizeDialogOpen(true)} className="gap-2.5 font-bold text-xs rounded-lg">
           <Maximize2 className="h-3.5 w-3.5 text-primary" />
-          {t("resizeShortcuts") || "Resize Shortcut Cards"}
+          {t("resizeShortcuts")}
         </ContextMenuItem>
       </ContextMenuContent>
     </ContextMenu>

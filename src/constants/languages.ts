@@ -37,6 +37,11 @@ export const TRANSLATIONS = {
     duckduckgo: "DuckDuckGo",
     bing: "Bing",
     brave: "Brave",
+    shortcutActions: "SHORTCUT ACTIONS",
+    dashboardConfig: "DASHBOARD CONFIG",
+    deleteShortcut: "delete",
+    clockSettings: "Clock Settings",
+
 
     // Clock
     clock: "Clock",
@@ -148,6 +153,11 @@ export const TRANSLATIONS = {
     duckduckgo: "DuckDuckGo",
     bing: "Bing",
     brave: "Brave",
+    shortcutActions: "SHORTCUT ACTIONS",
+    dashboardConfig: "DASHBOARD CONFIG",
+    deleteShortcut: "delete",
+    clockSettings: "ঘড়ি সেটিং",
+
 
     // Clock
     clock: "ঘড়ি",
