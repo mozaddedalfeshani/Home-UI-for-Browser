@@ -8,6 +8,7 @@ export type Theme = "light" | "dark" | "system";
 export type ClockPosition = "top-left" | "top-center" | "top-right";
 export type SearchEngine = "google" | "duckduckgo" | "bing" | "brave";
 export type LayoutPreset = "default" | "compact" | "focus";
+export type ClockStyle = "classic" | "modern";
 
 interface SettingsState {
   theme: Theme;
@@ -25,6 +26,7 @@ interface SettingsState {
   searchEngine: SearchEngine;
   layoutPreset: LayoutPreset;
   clockPosition: ClockPosition;
+  clockStyle: ClockStyle;
   isHydrated: boolean;
   setTheme: (theme: Theme) => void;
   toggleAutoOrderTabs: () => void;
@@ -40,6 +42,7 @@ interface SettingsState {
   setSearchEngine: (engine: SearchEngine) => void;
   setLayoutPreset: (preset: LayoutPreset) => void;
   setClockPosition: (position: ClockPosition) => void;
+  setClockStyle: (style: ClockStyle) => void;
   setLanguage: (language: Language) => void;
   setHydrated: (hydrated: boolean) => void;
   resetSettings: () => Promise<void>;
@@ -63,6 +66,7 @@ export const useSettingsStore = create<SettingsState>()(
       searchEngine: "google",
       layoutPreset: "default",
       clockPosition: "top-left",
+      clockStyle: "classic",
       enableAISearch: false,
       isHydrated: false,
       setTheme: (theme) => set({ theme }),
@@ -129,6 +133,7 @@ export const useSettingsStore = create<SettingsState>()(
       setSearchEngine: (engine) => set({ searchEngine: engine }),
       setLayoutPreset: (preset) => set({ layoutPreset: preset }),
       setClockPosition: (position) => set({ clockPosition: position }),
+      setClockStyle: (style) => set({ clockStyle: style }),
       setLanguage: (language) => set({ language }),
       setHydrated: (hydrated) => set({ isHydrated: hydrated }),
       resetSettings: async () => {
@@ -158,6 +163,7 @@ export const useSettingsStore = create<SettingsState>()(
           searchEngine: "google",
           layoutPreset: "default",
           clockPosition: "top-left",
+          clockStyle: "classic",
           isHydrated: true,
         });
       },

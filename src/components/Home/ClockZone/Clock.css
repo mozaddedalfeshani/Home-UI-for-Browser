@@ -31,6 +31,12 @@
 }
 
 .clock-style--classic {
-    font-family: 'Exo 2', sans-serif;
+    font-family: inherit;
     text-transform: uppercase;
+}
+
+.clock-style--modern {
+    font-weight: 700;
+    line-height: 1;
+    letter-spacing: -0.1em;
 }

@@ -1,8 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Share_Tech_Mono } from "next/font/google";
+import { Share_Tech_Mono, Fredoka } from "next/font/google";
 import { useSettingsStore } from "@/store/settingsStore";
+import { cn } from "@/lib/utils";
 import "./Clock.css";
 
 const shareTech = Share_Tech_Mono({
@@ -10,12 +11,17 @@ const shareTech = Share_Tech_Mono({
   weight: "400",
 });
 
+const fredoka = Fredoka({
+  subsets: ["latin"],
+  weight: "700",
+});
+
 export default function DigitalClock() {
   const [timeData, setTimeData] = useState<{ digits: string; ampm: string }>({
     digits: "",
     ampm: "",
   });
-  const { clockColor, showClockGlow, clockFormat, showSeconds } =
+  const { clockColor, showClockGlow, clockFormat, showSeconds, clockStyle } =
     useSettingsStore();
 
   useEffect(() => {
@@ -57,10 +63,14 @@ export default function DigitalClock() {
 
   return (
     <div
-      className={`${shareTech.className} clock-style clock-style--classic text-7xl text-center flex items-baseline justify-center`}
+      className={cn(
+        "clock-style text-7xl text-center flex items-baseline justify-center",
+        clockStyle === "modern" ? fredoka.className : shareTech.className,
+        clockStyle === "modern" ? "clock-style--modern" : "clock-style--classic"
+      )}
       style={
         {
-          letterSpacing: "0.02em",
+          letterSpacing: clockStyle === "modern" ? "-0.02em" : "0.02em",
           color: "var(--clock-color)",
           textShadow: showClockGlow
             ? "0 0 10px var(--glow-color), 0 0 20px var(--glow-color)"
@@ -75,7 +85,12 @@ export default function DigitalClock() {
       }>
       <span>{timeData.digits}</span>
       {timeData.ampm && (
-        <span className="text-xl ml-2 opacity-40 font-medium self-end mb-2">
+        <span 
+          className={cn(
+            "ml-2 opacity-40 font-medium self-end mb-2",
+            clockStyle === "modern" ? "text-2xl" : "text-xl"
+          )}
+        >
           {timeData.ampm}
         </span>
       )}
