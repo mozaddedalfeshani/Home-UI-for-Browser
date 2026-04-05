@@ -66,48 +66,55 @@ export function PageClient() {
           <div className="flex flex-row h-full">
             {/* Left side skeleton */}
             <div className={`${leftPaneClass} flex flex-col overflow-hidden`}>
-              {/* Clock skeleton */}
+              {/* Clock skeleton - Transparent to match new clock */}
               <div
                 className={`flex justify-${clockPosition === "top-left" ? "start" : clockPosition === "top-center" ? "center" : "end"} ${clockPaddingClass}`}>
-                <div className="bg-muted/50 rounded-2xl p-8 animate-pulse">
-                  <div className="h-20 bg-muted rounded-lg"></div>
+                <div className="p-0 animate-pulse">
+                  <div className="h-20 w-48 bg-muted rounded-lg opacity-40"></div>
                 </div>
               </div>
 
-              {/* Tabs skeleton */}
-              <div className="flex-1 p-6 space-y-4">
-                <div className="flex justify-between items-center">
-                  <div className="h-6 w-32 bg-muted rounded animate-pulse"></div>
+              {/* Tabs skeleton - Matching centered flex layout */}
+              <div className="flex-1 p-6 flex flex-col items-center">
+                <div className="flex justify-end w-full mb-6">
                   <div className="h-10 w-10 bg-muted rounded-full animate-pulse"></div>
                 </div>
 
-                <div className="grid grid-cols-4 gap-4">
-                  {Array.from({ length: 8 }).map((_, i) => (
+                <div className="flex flex-wrap gap-4 justify-center w-full">
+                  {Array.from({ length: 6 }).map((_, i) => (
                     <div
                       key={i}
-                      className="bg-muted/50 rounded-xl p-4 animate-pulse">
-                      <div className="h-12 w-12 bg-muted rounded-lg mx-auto mb-3"></div>
-                      <div className="h-4 w-full bg-muted rounded mb-2"></div>
-                      <div className="h-3 w-3/4 bg-muted rounded mx-auto"></div>
+                      className="bg-muted/30 animate-pulse"
+                      style={{ 
+                        width: `${5}rem`,
+                        height: `${5}rem`,
+                        borderRadius: `${0.5}rem`
+                      }}
+                    >
+                      <div className="h-full w-full flex items-center justify-center">
+                        <div className="h-8 w-8 bg-muted/50 rounded-lg"></div>
+                      </div>
                     </div>
                   ))}
                 </div>
               </div>
             </div>
 
-            {/* Right sidebar skeleton */}
-            <div className={`${rightPaneClass} overflow-hidden`}>
-              <div className="bg-muted/50 backdrop-blur-sm border-l border-border/60 h-full rounded-l-lg p-4 animate-pulse">
-                <div className="h-6 w-20 bg-muted rounded mb-4"></div>
-                <div className="space-y-3">
-                  <div className="h-4 w-full bg-muted rounded"></div>
-                  <div className="h-4 w-5/6 bg-muted rounded"></div>
-                  <div className="h-4 w-4/5 bg-muted rounded"></div>
-                  <div className="h-4 w-full bg-muted rounded"></div>
-                  <div className="h-4 w-3/4 bg-muted rounded"></div>
+            {/* Right sidebar skeleton - Conditional to match UI */}
+            {shouldShowRightSidebar && (
+              <div className={`${rightPaneClass} overflow-hidden`}>
+                <div className="bg-muted/50 backdrop-blur-sm border-l border-border/60 h-full rounded-l-lg p-4 animate-pulse">
+                  <div className="h-6 w-20 bg-muted rounded mb-4"></div>
+                  <div className="space-y-3">
+                    <div className="h-4 w-full bg-muted rounded"></div>
+                    <div className="h-4 w-5/6 bg-muted rounded"></div>
+                    <div className="h-4 w-4/5 bg-muted rounded"></div>
+                    <div className="h-4 w-full bg-muted rounded"></div>
+                    <div className="h-4 w-3/4 bg-muted rounded"></div>
+                  </div>
                 </div>
               </div>
-            </div>
+            )}
           </div>
 
           {/* Settings gear skeleton */}
