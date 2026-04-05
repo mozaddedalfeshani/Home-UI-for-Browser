@@ -42,7 +42,6 @@ import { Language, useTranslation } from "@/constants/languages";
 import { ResizeShortcutsDialog } from "./ResizeShortcutsDialog";
 import { BackgroundImageDialog } from "./BackgroundImageDialog";
 import { ClockColorDialog } from "./ClockColorDialog";
-import { ClockPositionDialog } from "./ClockPositionDialog";
 import { ResetDialog } from "./ResetDialog";
 
 const SettingsMenu = () => {
@@ -50,7 +49,6 @@ const SettingsMenu = () => {
   const [resizeDialogOpen, setResizeDialogOpen] = useState(false);
   const [backgroundDialogOpen, setBackgroundDialogOpen] = useState(false);
   const [clockColorDialogOpen, setClockColorDialogOpen] = useState(false);
-  const [clockPositionDialogOpen, setClockPositionDialogOpen] = useState(false);
   const {
     theme,
     language,
@@ -64,7 +62,6 @@ const SettingsMenu = () => {
     setSearchEngine,
     setLayoutPreset,
     toggleAutoOrderTabs,
-    toggleShowClock,
     toggleShowRightSidebar,
   } = useSettingsStore();
 
@@ -211,7 +208,6 @@ const SettingsMenu = () => {
           <div className="space-y-1 p-1">
             {[
               { id: "autoOrderTabs", label: t("autoOrderTabs"), checked: autoOrderTabs, onCheckedChange: toggleAutoOrderTabs },
-              { id: "showClock", label: t("showClock"), checked: showClock, onCheckedChange: toggleShowClock },
               { id: "showRightSidebar", label: t("showRightSidebar"), checked: showRightSidebar, onCheckedChange: toggleShowRightSidebar },
             ].map((item) => (
               <div key={item.id} className="flex items-center justify-between rounded-md px-2 py-1 hover:bg-accent/50">
@@ -255,17 +251,9 @@ const SettingsMenu = () => {
               variant="ghost"
               size="sm"
               onClick={() => setClockColorDialogOpen(true)}
-              className="h-9 justify-start gap-2 px-2 text-[11px] font-normal">
+              className="h-9 justify-start gap-2 px-2 text-[11px] font-normal col-span-2">
               <Clock className="h-3.5 w-3.5 text-muted-foreground" />
-              {t("clockSetting")}
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setClockPositionDialogOpen(true)}
-              className="h-9 justify-start gap-2 px-2 text-[11px] font-normal">
-              <Move className="h-3.5 w-3.5 text-muted-foreground" />
-              {t("clockPosition")}
+              Digital Clock Settings
             </Button>
           </div>
         </DropdownMenuContent>
@@ -284,11 +272,6 @@ const SettingsMenu = () => {
       <ClockColorDialog
         open={clockColorDialogOpen}
         onOpenChange={setClockColorDialogOpen}
-      />
-
-      <ClockPositionDialog
-        open={clockPositionDialogOpen}
-        onOpenChange={setClockPositionDialogOpen}
       />
     </div>
   );
