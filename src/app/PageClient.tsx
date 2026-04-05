@@ -12,6 +12,7 @@ import { useMediaUrl } from "@/hooks/useMediaUrl";
 import { useDefaultAssets } from "@/hooks/useDefaultAssets";
 import Image from "next/image";
 import GithubLink from "@/components/Home/GithubLink";
+import { cn } from "@/lib/utils";
 
 export function PageClient() {
   const {
@@ -23,6 +24,7 @@ export function PageClient() {
     layoutPreset,
   } = useSettingsStore();
   const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
+  const [isSidebarVisible, setIsSidebarVisible] = useState(false);
 
   const shouldShowRightSidebar = showRightSidebar && layoutPreset !== "focus";
   const leftPaneClass = shouldShowRightSidebar
@@ -128,7 +130,7 @@ export function PageClient() {
   }
 
   return (
-    <div className="min-h-screen w-full relative">
+    <div className="min-h-screen w-full relative overflow-hidden">
       {backgroundImageUrl && (
         <Image
           src={backgroundImageUrl}
@@ -139,9 +141,10 @@ export function PageClient() {
           unoptimized={backgroundImageUrl.startsWith('blob:')}
         />
       )}
-      <div className="flex flex-row h-screen overflow-hidden">
-        {/* Left side */}
-        <div className={`${leftPaneClass} flex flex-col overflow-hidden`}>
+      
+      {/* Main Content (Always Centered) */}
+      <div className="relative z-10 flex flex-col h-screen overflow-hidden">
+        <div className="flex-1 flex flex-col overflow-hidden">
           {/* Clock positioned within left side only */}
           {showClock && (
             <div
@@ -151,13 +154,29 @@ export function PageClient() {
           )}
           <TabsZone />
         </div>
-        {/* Right side */}
-        {shouldShowRightSidebar && (
-          <div className={`${rightPaneClass} overflow-hidden`}>
-            <Notepad />
-          </div>
-        )}
       </div>
+
+      {/* Sidebar Hover Trigger Zone (Far Right) */}
+      {shouldShowRightSidebar && !isSidebarVisible && (
+        <div 
+          className="fixed right-0 top-0 bottom-0 w-8 z-40 cursor-w-resize" 
+          onMouseEnter={() => setIsSidebarVisible(true)}
+        />
+      )}
+
+      {/* Sidebar Overlay */}
+      {shouldShowRightSidebar && (
+        <div 
+          className={cn(
+            "fixed right-0 top-0 bottom-0 w-80 md:w-96 z-50 transform transition-all duration-500 ease-out",
+            isSidebarVisible ? "translate-x-0" : "translate-x-full"
+          )}
+          onMouseLeave={() => setIsSidebarVisible(false)}
+        >
+          <Notepad />
+        </div>
+      )}
+
       <SettingsMenu />
       <GithubLink />
       <SearchModal
