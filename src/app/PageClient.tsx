@@ -35,10 +35,10 @@ export function PageClient() {
   const rightPaneClass = layoutPreset === "compact" ? "w-1/5" : "w-1/4";
   const clockPaddingClass =
     layoutPreset === "compact"
-      ? "p-2"
+      ? "pt-10 pb-2 px-2"
       : layoutPreset === "focus"
-        ? "p-6"
-        : "p-4";
+        ? "pt-24 pb-6 px-6"
+        : "pt-16 pb-4 px-4";
 
   // Initialize keyboard shortcuts
   useKeyboardShortcuts({
