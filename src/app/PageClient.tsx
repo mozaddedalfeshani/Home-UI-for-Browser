@@ -10,6 +10,7 @@ import { useSettingsStore } from "@/store/settingsStore";
 import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
 import { useMediaUrl } from "@/hooks/useMediaUrl";
 import { useDefaultAssets } from "@/hooks/useDefaultAssets";
+import Image from "next/image";
 import GithubLink from "@/components/Home/GithubLink";
 
 export function PageClient() {
@@ -50,17 +51,17 @@ export function PageClient() {
   // Show skeleton screen while store is hydrating
   if (!isHydrated) {
     return (
-      <div
-        className="min-h-screen w-full"
-        style={{
-          backgroundImage: backgroundImageUrl
-            ? `url(${backgroundImageUrl})`
-            : undefined,
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-          backgroundRepeat: "no-repeat",
-          backgroundColor: backgroundImageUrl ? undefined : undefined,
-        }}>
+      <div className="min-h-screen w-full relative">
+        {backgroundImageUrl && (
+          <Image
+            src={backgroundImageUrl}
+            alt="Dashboard Background"
+            fill
+            priority
+            className="object-cover -z-10"
+            unoptimized={backgroundImageUrl.startsWith('blob:')}
+          />
+        )}
         <div className="h-screen w-full overflow-hidden">
           <div className="flex flex-row h-full">
             {/* Left side skeleton */}
@@ -120,17 +121,17 @@ export function PageClient() {
   }
 
   return (
-    <div
-      className="min-h-screen w-full"
-      style={{
-        backgroundImage: backgroundImageUrl
-          ? `url(${backgroundImageUrl})`
-          : undefined,
-        backgroundSize: "cover",
-        backgroundPosition: "center",
-        backgroundRepeat: "no-repeat",
-        backgroundColor: backgroundImageUrl ? undefined : undefined,
-      }}>
+    <div className="min-h-screen w-full relative">
+      {backgroundImageUrl && (
+        <Image
+          src={backgroundImageUrl}
+          alt="Dashboard Background"
+          fill
+          priority
+          className="object-cover -z-10"
+          unoptimized={backgroundImageUrl.startsWith('blob:')}
+        />
+      )}
       <div className="flex flex-row h-screen overflow-hidden">
         {/* Left side */}
         <div className={`${leftPaneClass} flex flex-col overflow-hidden`}>
