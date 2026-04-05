@@ -19,7 +19,12 @@ interface BackgroundImageDialogProps {
 }
 
 export function BackgroundImageDialog({ open, onOpenChange }: BackgroundImageDialogProps) {
-  const { backgroundImage, setBackgroundImage } = useSettingsStore();
+  const { 
+    backgroundImage, 
+    setBackgroundImage,
+    isDynamicWallpaper,
+    setDynamicWallpaper
+  } = useSettingsStore();
   const [tempBackgroundImage, setTempBackgroundImage] = useState<string | File | null>(backgroundImage);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -100,12 +105,30 @@ export function BackgroundImageDialog({ open, onOpenChange }: BackgroundImageDia
             )}
           </div>
 
-          {tempBackgroundImage && (
-            <div className="rounded-lg border overflow-hidden">
+          <div className="space-y-4 rounded-lg bg-accent/30 p-4 border border-border/40">
+            <div className="flex items-center justify-between">
+              <div className="space-y-0.5">
+                <span className="text-sm font-semibold">Dynamic Wallpaper</span>
+                <p className="text-[11px] text-muted-foreground leading-snug">
+                  Randomize background on every refresh from curated list.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setDynamicWallpaper(!isDynamicWallpaper)}
+                className={`relative h-5 w-10 rounded-full transition-colors ${isDynamicWallpaper ? "bg-primary" : "bg-muted"}`}
+              >
+                <div className={`absolute top-0.5 h-4 w-4 rounded-full bg-background transition-all ${isDynamicWallpaper ? "translate-x-5" : "translate-x-0.5"}`} />
+              </button>
+            </div>
+          </div>
+
+          {tempBackgroundImage && !isDynamicWallpaper && (
+            <div className="rounded-lg border overflow-hidden shadow-xl ring-1 ring-black/5">
               <img
                 src={tempBackgroundImage instanceof File ? URL.createObjectURL(tempBackgroundImage) : tempBackgroundImage}
                 alt="Background preview"
-                className="w-full h-32 object-cover"
+                className="w-full h-40 object-cover"
               />
             </div>
           )}

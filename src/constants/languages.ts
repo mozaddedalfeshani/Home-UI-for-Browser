@@ -45,6 +45,7 @@ export const TRANSLATIONS = {
     top: "Top",
     center: "Center",
     bottom: "Bottom",
+    dynamicWallpaper: "Dynamic Wallpaper",
 
 
 
@@ -166,6 +167,7 @@ export const TRANSLATIONS = {
     top: "উপরে",
     center: "কেন্দ্রে",
     bottom: "নিচে",
+    dynamicWallpaper: "ডাইনামিক মিডিয়া",
 
 
 

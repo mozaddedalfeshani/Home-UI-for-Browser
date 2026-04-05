@@ -34,6 +34,8 @@ interface SettingsState {
   isClockDialogOpen: boolean;
   isBackgroundDialogOpen: boolean;
   isResizeDialogOpen: boolean;
+  isDynamicWallpaper: boolean;
+  dynamicWallpapers: string[];
   setTheme: (theme: Theme) => void;
   toggleAutoOrderTabs: () => void;
   toggleShowClock: () => void;
@@ -55,6 +57,7 @@ interface SettingsState {
   setBackgroundDialogOpen: (open: boolean) => void;
   setResizeDialogOpen: (open: boolean) => void;
   setTabsPosition: (position: TabsPosition) => void;
+  setDynamicWallpaper: (enabled: boolean) => void;
   resetSettings: () => Promise<void>;
 }
 
@@ -83,6 +86,12 @@ export const useSettingsStore = create<SettingsState>()(
       isClockDialogOpen: false,
       isBackgroundDialogOpen: false,
       isResizeDialogOpen: false,
+      isDynamicWallpaper: false,
+      dynamicWallpapers: [
+        "https://homewalpaper.imurad.me/1351306.png",
+        "https://homewalpaper.imurad.me/1362858.jpeg",
+        "https://homewalpaper.imurad.me/573653.jpg",
+      ],
       setTheme: (theme) => set({ theme }),
       toggleAutoOrderTabs: () =>
         set((state) => ({ autoOrderTabs: !state.autoOrderTabs })),
@@ -154,6 +163,7 @@ export const useSettingsStore = create<SettingsState>()(
       setBackgroundDialogOpen: (open) => set({ isBackgroundDialogOpen: open }),
       setResizeDialogOpen: (open) => set({ isResizeDialogOpen: open }),
       setTabsPosition: (position) => set({ tabsPosition: position }),
+      setDynamicWallpaper: (enabled) => set({ isDynamicWallpaper: enabled }),
       resetSettings: async () => {
         set({
           theme: "system",
@@ -165,6 +175,7 @@ export const useSettingsStore = create<SettingsState>()(
           showClock: true,
           showRightSidebar: true,
           tabsPosition: "center",
+          isDynamicWallpaper: false,
           clockColor: "#eab308",
           showClockGlow: false,
           clockFormat: "12h",

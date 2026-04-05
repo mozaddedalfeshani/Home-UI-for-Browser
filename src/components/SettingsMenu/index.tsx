@@ -58,11 +58,13 @@ const SettingsMenu = () => {
     isClockDialogOpen,
     isBackgroundDialogOpen,
     isResizeDialogOpen,
+    isDynamicWallpaper,
     setTheme: setSettingsTheme,
     setLanguage,
     setSearchEngine,
     setLayoutPreset,
     setTabsPosition,
+    setDynamicWallpaper,
     toggleAutoOrderTabs,
     toggleShowRightSidebar,
     setClockDialogOpen,
@@ -232,6 +234,7 @@ const SettingsMenu = () => {
             {[
               { id: "autoOrderTabs", label: t("autoOrderTabs"), checked: autoOrderTabs, onCheckedChange: toggleAutoOrderTabs },
               { id: "showRightSidebar", label: t("showRightSidebar"), checked: showRightSidebar, onCheckedChange: toggleShowRightSidebar },
+              { id: "dynamicWallpaper", label: t("dynamicWallpaper"), checked: isDynamicWallpaper, onCheckedChange: () => setDynamicWallpaper(!isDynamicWallpaper) },
             ].map((item) => (
               <div key={item.id} className="flex items-center justify-between rounded-md px-2 py-1 hover:bg-accent/50">
                 <span className="text-[11px] font-medium">{item.label}</span>

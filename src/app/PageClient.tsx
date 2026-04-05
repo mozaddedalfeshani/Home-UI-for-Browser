@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import DigitalClock from "@/components/Home/ClockZone/Clock";
 import TabsZone from "@/components/Home/TabsZone";
 import SettingsMenu from "@/components/SettingsMenu";
@@ -22,9 +22,55 @@ export function PageClient() {
     isHydrated,
     clockPosition,
     layoutPreset,
+    isDynamicWallpaper,
+    dynamicWallpapers,
+    setBackgroundImage,
   } = useSettingsStore();
   const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
   const [isSidebarVisible, setIsSidebarVisible] = useState(false);
+
+  // Dynamic Wallpaper Logic: Pick a new one on every refresh
+  useEffect(() => {
+    if (isHydrated && isDynamicWallpaper && dynamicWallpapers.length > 0) {
+      const fetchNewWallpaper = async () => {
+        try {
+          // Use sessionStorage to keep track of the last index across refreshes in the same session
+          const lastIndexStr = sessionStorage.getItem("lastWallpaperIndex");
+          const lastIndex = lastIndexStr ? parseInt(lastIndexStr, 10) : -1;
+          
+          let randomIndex;
+          if (dynamicWallpapers.length > 1) {
+            // Ensure we pick a DIFFERENT index than the last one if possible
+            do {
+              randomIndex = Math.floor(Math.random() * dynamicWallpapers.length);
+            } while (randomIndex === lastIndex);
+          } else {
+            randomIndex = 0;
+          }
+          
+          sessionStorage.setItem("lastWallpaperIndex", randomIndex.toString());
+          const selectedUrl = dynamicWallpapers[randomIndex];
+          
+          console.log("Fetching dynamic wallpaper:", selectedUrl);
+          
+          // Add a cache-busting timestamp to bypass aggressive browser/proxy caching
+          const response = await fetch(`/api/proxy-wallpaper?url=${encodeURIComponent(selectedUrl)}&_t=${Date.now()}`);
+          if (!response.ok) throw new Error("Failed to fetch through proxy");
+          
+          const blob = await response.blob();
+          const filename = selectedUrl.split("/").pop() || "wallpaper.png";
+          const file = new File([blob], filename, { type: blob.type });
+          
+          await setBackgroundImage(file);
+          console.log("Dynamic wallpaper updated successfully to index:", randomIndex);
+        } catch (error) {
+          console.error("Error updating dynamic wallpaper:", error);
+        }
+      };
+      
+      fetchNewWallpaper();
+    }
+  }, [isHydrated, isDynamicWallpaper]); // Only run when hydrated or dynamic mode toggled
 
   const shouldShowRightSidebar = showRightSidebar && layoutPreset !== "focus";
   const leftPaneClass = shouldShowRightSidebar
