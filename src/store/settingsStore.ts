@@ -135,6 +135,9 @@ export const useSettingsStore = create<SettingsState>()(
         // Clear IndexedDB media storage
         try {
           await mediaStorage.clearAll();
+          if (typeof window !== "undefined") {
+            localStorage.removeItem("default-wallpaper-cached-v3");
+          }
         } catch (error) {
           console.error("Failed to clear media storage:", error);
         }
