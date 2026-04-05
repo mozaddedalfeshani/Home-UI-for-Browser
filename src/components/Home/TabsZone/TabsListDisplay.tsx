@@ -297,24 +297,30 @@ export const TabsList = () => {
         <DndProvider backend={HTML5Backend}>
           <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-muted-foreground/30 scrollbar-track-transparent">
             <div 
-              className="grid gap-4"
+              className="flex flex-wrap gap-4 justify-center w-full"
               style={{ 
-                gridTemplateColumns: `repeat(auto-fill, minmax(${cardSize}rem, 1fr))`,
                 '--card-size': `${cardSize}rem`
               } as React.CSSProperties}
             >
               {sortedTabs.map((tab: Tab, index) => (
-                <SortableShortcutCard
+                <div 
                   key={tab.id}
-                  tab={tab}
-                  index={index}
-                  moveTab={moveTab}
-                  removeTab={removeTab}
-                  incrementVisitCount={incrementVisitCount}
-                  autoOrderTabs={autoOrderTabs}
-                  cardSize={cardSize}
-                  cardRadius={cardRadius}
-                />
+                  style={{ 
+                    width: `${cardSize}rem`,
+                    height: `${cardSize}rem`
+                  }}
+                >
+                  <SortableShortcutCard
+                    tab={tab}
+                    index={index}
+                    moveTab={moveTab}
+                    removeTab={removeTab}
+                    incrementVisitCount={incrementVisitCount}
+                    autoOrderTabs={autoOrderTabs}
+                    cardSize={cardSize}
+                    cardRadius={cardRadius}
+                  />
+                </div>
               ))}
             </div>
           </div>
