@@ -26,6 +26,19 @@ export function PageClient() {
     dynamicWallpapers,
     setBackgroundImage,
   } = useSettingsStore();
+
+  const { url: backgroundImageUrl } = useMediaUrl(backgroundImage);
+  const [bgOpacity, setBgOpacity] = useState(0);
+
+  // Smooth Wallpaper Transition
+  useEffect(() => {
+    if (backgroundImageUrl) {
+      setBgOpacity(0);
+      const timer = setTimeout(() => setBgOpacity(1), 50);
+      return () => clearTimeout(timer);
+    }
+  }, [backgroundImageUrl]);
+
   const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
   const [isSidebarVisible, setIsSidebarVisible] = useState(false);
 
@@ -93,8 +106,7 @@ export function PageClient() {
   // Ensure default background image on first visit
   useDefaultAssets();
 
-  // Get the actual media URL
-  const { url: backgroundImageUrl } = useMediaUrl(backgroundImage);
+  const { url: backgroundImageUrl_dummy } = useMediaUrl(backgroundImage); // already have backgroundImageUrl
 
   // Show skeleton screen while store is hydrating
   if (!isHydrated) {
@@ -106,7 +118,7 @@ export function PageClient() {
             alt="Dashboard Background"
             fill
             priority
-            className="object-cover -z-10"
+            className="object-cover -z-10 transition-opacity duration-1000 opacity-60"
             unoptimized={backgroundImageUrl.startsWith('blob:')}
           />
         )}
@@ -183,7 +195,10 @@ export function PageClient() {
           alt="Dashboard Background"
           fill
           priority
-          className="object-cover -z-10"
+          className={cn(
+            "object-cover -z-10 transition-opacity duration-1000",
+            bgOpacity === 1 ? "opacity-100" : "opacity-0"
+          )}
           unoptimized={backgroundImageUrl.startsWith('blob:')}
         />
       )}
