@@ -45,6 +45,11 @@ export const useKeyboardShortcuts = ({ onSearchModalOpen }: UseKeyboardShortcuts
       
       console.log("Key pressed:", event.key, "Modifiers:", modifiers, "Shortcut string:", shortcutString);
 
+      // Disable shortcuts if typing in an input field
+      if (isInputField) {
+        return;
+      }
+
       // Check if this shortcut matches any tab
       const tab = getTabByShortcut(shortcutString);
       console.log("Found tab for shortcut:", tab);

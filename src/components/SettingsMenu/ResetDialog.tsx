@@ -14,7 +14,6 @@ import {
 import { Button } from "@/components/ui/button";
 import { useSettingsStore } from "@/store/settingsStore";
 import { useTabsStore } from "@/store/tabsStore";
-import { useProjectStore } from "@/store/projectStore";
 import { useNotepadStore } from "@/store/notepadStore";
 import { useTranslation } from "@/constants/languages";
 import { AlertTriangle } from "lucide-react";
@@ -33,7 +32,6 @@ export const ResetDialog = ({ children }: ResetDialogProps) => {
   // Get store actions
   const resetSettings = useSettingsStore((state) => state.resetSettings);
   const resetTabs = useTabsStore((state) => state.resetTabs);
-  const resetProjects = useProjectStore((state) => state.resetProjects);
   const resetNotepad = useNotepadStore((state) => state.resetNotepad);
 
   const handleReset = async () => {
@@ -43,7 +41,6 @@ export const ResetDialog = ({ children }: ResetDialogProps) => {
       // Reset all stores
       resetSettings();
       resetTabs();
-      resetProjects();
       resetNotepad();
       
       // Close dialog
