@@ -319,9 +319,11 @@ export const TabsList = () => {
             "justify-center"
           )}>
             <div 
-              className="flex flex-wrap gap-4 justify-center w-full"
+              className="flex flex-wrap gap-4 justify-center w-full mx-auto"
               style={{ 
-                '--card-size': `${cardSize}rem`
+                '--card-size': `${cardSize}rem`,
+                maxWidth: `calc(8 * ${cardSize}rem + 7 * 1rem)`, // 8 items + 7 gaps
+                minWidth: `calc(2 * ${cardSize}rem + 1 * 1rem)` // 2 items + 1 gap
               } as React.CSSProperties}
             >
               {sortedTabs.map((tab: Tab, index) => (
