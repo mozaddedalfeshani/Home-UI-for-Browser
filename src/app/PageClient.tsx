@@ -5,7 +5,6 @@ import DigitalClock from "@/components/Home/ClockZone/Clock";
 import TabsZone from "@/components/Home/TabsZone";
 import SettingsMenu from "@/components/SettingsMenu";
 import Notepad from "@/components/Notepad";
-import { WelcomeDialog } from "@/components/WelcomeDialog";
 import SearchModal from "@/components/SearchModal";
 import { useSettingsStore } from "@/store/settingsStore";
 import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
@@ -18,7 +17,6 @@ export function PageClient() {
     showClock,
     showRightSidebar,
     backgroundImage,
-    hasSeenWelcome,
     isHydrated,
     clockPosition,
     layoutPreset,
@@ -154,7 +152,6 @@ export function PageClient() {
       </div>
       <SettingsMenu />
       <GithubLink />
-      {isHydrated && <WelcomeDialog open={!hasSeenWelcome} />}
       <SearchModal
         open={isSearchModalOpen}
         onOpenChange={setIsSearchModalOpen}
