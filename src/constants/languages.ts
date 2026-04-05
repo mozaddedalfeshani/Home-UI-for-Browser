@@ -41,6 +41,11 @@ export const TRANSLATIONS = {
     dashboardConfig: "DASHBOARD CONFIG",
     deleteShortcut: "delete",
     clockSettings: "Clock Settings",
+    shortcutPosition: "Shortcut Position",
+    top: "Top",
+    center: "Center",
+    bottom: "Bottom",
+
 
 
     // Clock
@@ -157,6 +162,11 @@ export const TRANSLATIONS = {
     dashboardConfig: "DASHBOARD CONFIG",
     deleteShortcut: "delete",
     clockSettings: "ঘড়ি সেটিং",
+    shortcutPosition: "শর্টকাট অবস্থান",
+    top: "উপরে",
+    center: "কেন্দ্রে",
+    bottom: "নিচে",
+
 
 
     // Clock

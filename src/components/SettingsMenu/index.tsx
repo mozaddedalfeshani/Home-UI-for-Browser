@@ -54,6 +54,7 @@ const SettingsMenu = () => {
     showRightSidebar,
     searchEngine,
     layoutPreset,
+    tabsPosition,
     isClockDialogOpen,
     isBackgroundDialogOpen,
     isResizeDialogOpen,
@@ -61,6 +62,7 @@ const SettingsMenu = () => {
     setLanguage,
     setSearchEngine,
     setLayoutPreset,
+    setTabsPosition,
     toggleAutoOrderTabs,
     toggleShowRightSidebar,
     setClockDialogOpen,
@@ -200,6 +202,24 @@ const SettingsMenu = () => {
                     layoutPreset === preset ? "bg-primary text-primary-foreground shadow-sm" : "text-muted-foreground hover:bg-accent"
                   )}>
                   {t(`layout${preset.charAt(0).toUpperCase() + preset.slice(1)}`)}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Shortcut Position Selection */}
+          <div className="px-2 py-2">
+            <span className="mb-2 block text-[10px] font-medium uppercase text-muted-foreground/70">{t("shortcutPosition")}</span>
+            <div className="flex rounded-md border border-border/50 bg-background/50 p-0.5">
+              {["top", "center", "bottom"].map((pos) => (
+                <button
+                  key={pos}
+                  onClick={() => setTabsPosition(pos as any)}
+                  className={cn(
+                    "flex-1 rounded-sm py-1 text-[10px] font-semibold capitalize transition-all",
+                    tabsPosition === pos ? "bg-primary text-primary-foreground shadow-sm" : "text-muted-foreground hover:bg-accent"
+                  )}>
+                  {t(pos)}
                 </button>
               ))}
             </div>

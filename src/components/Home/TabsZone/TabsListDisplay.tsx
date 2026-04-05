@@ -8,6 +8,7 @@ import { HTML5Backend } from "react-dnd-html5-backend";
 import { useTabsStore, Tab } from "@/store/tabsStore";
 import { useSettingsStore } from "@/store/settingsStore";
 import { useTranslation } from "@/constants/languages";
+import { cn } from "@/lib/utils";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { AddTabDialog } from "./AddTabDialog";
@@ -273,7 +274,7 @@ export const TabsList = () => {
   const removeTab = useTabsStore((state) => state.removeTab);
   const moveTab = useTabsStore((state) => state.moveTab);
   const incrementVisitCount = useTabsStore((state) => state.incrementVisitCount);
-  const { autoOrderTabs, cardSize, cardRadius, language } = useSettingsStore();
+  const { autoOrderTabs, cardSize, cardRadius, language, tabsPosition } = useSettingsStore();
   const t = useTranslation(language);
 
   useEffect(() => {
@@ -312,7 +313,11 @@ export const TabsList = () => {
       </div>
       <TooltipProvider delayDuration={150}>
         <DndProvider backend={HTML5Backend}>
-          <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-muted-foreground/30 scrollbar-track-transparent">
+          <div className={cn("flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-muted-foreground/30 scrollbar-track-transparent flex flex-col",
+            tabsPosition === "top" ? "justify-start" : 
+            tabsPosition === "bottom" ? "justify-end" : 
+            "justify-center"
+          )}>
             <div 
               className="flex flex-wrap gap-4 justify-center w-full"
               style={{ 
@@ -343,7 +348,7 @@ export const TabsList = () => {
           </div>
         </DndProvider>
       </TooltipProvider>
-     <p className="text-sm text-muted-foreground text-center"> Made by <Link href="https://imurad.pages.dev/" target="_blank" rel="noopener noreferrer">Murad</Link></p>
+      <p className="text-sm text-muted-foreground text-center mt-6"> Made by <Link href="https://imurad.pages.dev/" target="_blank" rel="noopener noreferrer">Murad</Link></p>
     </div>
   );
 };

@@ -9,6 +9,7 @@ export type ClockPosition = "top-left" | "top-center" | "top-right";
 export type SearchEngine = "google" | "duckduckgo" | "bing" | "brave";
 export type LayoutPreset = "default" | "compact" | "focus";
 export type ClockStyle = "classic" | "modern";
+export type TabsPosition = "top" | "center" | "bottom";
 
 interface SettingsState {
   theme: Theme;
@@ -16,6 +17,7 @@ interface SettingsState {
   autoOrderTabs: boolean;
   showClock: boolean;
   showRightSidebar: boolean;
+  tabsPosition: TabsPosition;
   cardSize: number;
   cardRadius: number;
   backgroundImage: string | null;
@@ -52,6 +54,7 @@ interface SettingsState {
   setClockDialogOpen: (open: boolean) => void;
   setBackgroundDialogOpen: (open: boolean) => void;
   setResizeDialogOpen: (open: boolean) => void;
+  setTabsPosition: (position: TabsPosition) => void;
   resetSettings: () => Promise<void>;
 }
 
@@ -63,6 +66,7 @@ export const useSettingsStore = create<SettingsState>()(
       autoOrderTabs: false,
       showClock: true,
       showRightSidebar: true,
+      tabsPosition: "center",
       cardSize: 5,
       cardRadius: 0.5,
       backgroundImage: null,
@@ -149,6 +153,7 @@ export const useSettingsStore = create<SettingsState>()(
       setClockDialogOpen: (open) => set({ isClockDialogOpen: open }),
       setBackgroundDialogOpen: (open) => set({ isBackgroundDialogOpen: open }),
       setResizeDialogOpen: (open) => set({ isResizeDialogOpen: open }),
+      setTabsPosition: (position) => set({ tabsPosition: position }),
       resetSettings: async () => {
         set({
           theme: "system",
@@ -159,6 +164,7 @@ export const useSettingsStore = create<SettingsState>()(
           backgroundImage: null,
           showClock: true,
           showRightSidebar: true,
+          tabsPosition: "center",
           clockColor: "#eab308",
           showClockGlow: false,
           clockFormat: "12h",
