@@ -2,15 +2,15 @@
 
 @keyframes glow {
     0% {
-        text-shadow: 0 0 10px var(--glow-color, #22c55e), 0 0 20px var(--glow-color, #22c55e);
+        text-shadow: 0 0 10px var(--glow-color, #eab308), 0 0 20px var(--glow-color, #eab308);
     }
 
     50% {
-        text-shadow: 0 0 20px var(--glow-color, #22c55e), 0 0 40px var(--glow-color, #22c55e);
+        text-shadow: 0 0 20px var(--glow-color, #eab308), 0 0 40px var(--glow-color, #eab308);
     }
 
     100% {
-        text-shadow: 0 0 10px var(--glow-color, #22c55e), 0 0 20px var(--glow-color, #22c55e);
+        text-shadow: 0 0 10px var(--glow-color, #eab308), 0 0 20px var(--glow-color, #eab308);
     }
 }
 
@@ -19,7 +19,7 @@
 }
 
 .clock-style {
-    --clock-color: #22c55e;
+    --clock-color: #eab308;
     --glow-color: var(--clock-color);
     --clock-glow-strength: 1;
     color: var(--clock-color);
