@@ -28,6 +28,10 @@ interface SettingsState {
   clockPosition: ClockPosition;
   clockStyle: ClockStyle;
   isHydrated: boolean;
+  // UI Dialog States (Non-persistent)
+  isClockDialogOpen: boolean;
+  isBackgroundDialogOpen: boolean;
+  isResizeDialogOpen: boolean;
   setTheme: (theme: Theme) => void;
   toggleAutoOrderTabs: () => void;
   toggleShowClock: () => void;
@@ -45,6 +49,9 @@ interface SettingsState {
   setClockStyle: (style: ClockStyle) => void;
   setLanguage: (language: Language) => void;
   setHydrated: (hydrated: boolean) => void;
+  setClockDialogOpen: (open: boolean) => void;
+  setBackgroundDialogOpen: (open: boolean) => void;
+  setResizeDialogOpen: (open: boolean) => void;
   resetSettings: () => Promise<void>;
 }
 
@@ -69,6 +76,9 @@ export const useSettingsStore = create<SettingsState>()(
       clockStyle: "classic",
       enableAISearch: false,
       isHydrated: false,
+      isClockDialogOpen: false,
+      isBackgroundDialogOpen: false,
+      isResizeDialogOpen: false,
       setTheme: (theme) => set({ theme }),
       toggleAutoOrderTabs: () =>
         set((state) => ({ autoOrderTabs: !state.autoOrderTabs })),
@@ -136,17 +146,10 @@ export const useSettingsStore = create<SettingsState>()(
       setClockStyle: (style) => set({ clockStyle: style }),
       setLanguage: (language) => set({ language }),
       setHydrated: (hydrated) => set({ isHydrated: hydrated }),
+      setClockDialogOpen: (open) => set({ isClockDialogOpen: open }),
+      setBackgroundDialogOpen: (open) => set({ isBackgroundDialogOpen: open }),
+      setResizeDialogOpen: (open) => set({ isResizeDialogOpen: open }),
       resetSettings: async () => {
-        // Clear IndexedDB media storage
-        try {
-          await mediaStorage.clearAll();
-          if (typeof window !== "undefined") {
-            localStorage.removeItem("default-wallpaper-cached-v3");
-          }
-        } catch (error) {
-          console.error("Failed to clear media storage:", error);
-        }
-
         set({
           theme: "system",
           language: "bn",
@@ -165,12 +168,27 @@ export const useSettingsStore = create<SettingsState>()(
           clockPosition: "top-left",
           clockStyle: "classic",
           isHydrated: true,
+          isClockDialogOpen: false,
+          isBackgroundDialogOpen: false,
+          isResizeDialogOpen: false,
         });
       },
     }),
     {
       name: "settings-store",
       version: 1,
+      partialize: (state) => {
+        const {
+          isClockDialogOpen,
+          isBackgroundDialogOpen,
+          isResizeDialogOpen,
+          setClockDialogOpen,
+          setBackgroundDialogOpen,
+          setResizeDialogOpen,
+          ...persistedState
+        } = state;
+        return persistedState;
+      },
       onRehydrateStorage: () => (state) => {
         state?.setHydrated(true);
       },

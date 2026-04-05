@@ -46,9 +46,6 @@ import { ResetDialog } from "./ResetDialog";
 
 const SettingsMenu = () => {
   const { setTheme } = useTheme();
-  const [resizeDialogOpen, setResizeDialogOpen] = useState(false);
-  const [backgroundDialogOpen, setBackgroundDialogOpen] = useState(false);
-  const [clockColorDialogOpen, setClockColorDialogOpen] = useState(false);
   const {
     theme,
     language,
@@ -57,12 +54,18 @@ const SettingsMenu = () => {
     showRightSidebar,
     searchEngine,
     layoutPreset,
+    isClockDialogOpen,
+    isBackgroundDialogOpen,
+    isResizeDialogOpen,
     setTheme: setSettingsTheme,
     setLanguage,
     setSearchEngine,
     setLayoutPreset,
     toggleAutoOrderTabs,
     toggleShowRightSidebar,
+    setClockDialogOpen,
+    setBackgroundDialogOpen,
+    setResizeDialogOpen,
   } = useSettingsStore();
 
   const handleThemeChange = (newTheme: string) => {
@@ -250,7 +253,7 @@ const SettingsMenu = () => {
             <Button
               variant="ghost"
               size="sm"
-              onClick={() => setClockColorDialogOpen(true)}
+              onClick={() => setClockDialogOpen(true)}
               className="h-9 justify-start gap-2 px-2 text-[11px] font-normal col-span-2">
               <Clock className="h-3.5 w-3.5 text-muted-foreground" />
               Digital Clock Settings
@@ -260,18 +263,18 @@ const SettingsMenu = () => {
       </DropdownMenu>
 
       <ResizeShortcutsDialog
-        open={resizeDialogOpen}
+        open={isResizeDialogOpen}
         onOpenChange={setResizeDialogOpen}
       />
 
       <BackgroundImageDialog
-        open={backgroundDialogOpen}
+        open={isBackgroundDialogOpen}
         onOpenChange={setBackgroundDialogOpen}
       />
 
       <ClockColorDialog
-        open={clockColorDialogOpen}
-        onOpenChange={setClockColorDialogOpen}
+        open={isClockDialogOpen}
+        onOpenChange={setClockDialogOpen}
       />
     </div>
   );

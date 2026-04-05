@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { MoreVertical, Trash2, Pencil, Keyboard } from "lucide-react";
+import { Trash2, Pencil, Keyboard, Sun, Moon, Monitor, Search, Layout, Clock, ImageIcon, Maximize2 } from "lucide-react";
 import Link from "next/link";
 import { DndProvider, useDrag, useDrop } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
@@ -22,11 +22,15 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+  ContextMenu,
+  ContextMenuContent,
+  ContextMenuItem,
+  ContextMenuSeparator,
+  ContextMenuSub,
+  ContextMenuSubContent,
+  ContextMenuSubTrigger,
+  ContextMenuTrigger,
+} from "@/components/ui/context-menu";
 
 const getHostname = (rawUrl: string) => {
   try {
@@ -91,7 +95,15 @@ const SortableShortcutCard = ({
   cardRadius,
 }: SortableShortcutCardProps) => {
   const ref = useRef<HTMLDivElement | null>(null);
-  const language = useSettingsStore((state) => state.language);
+  const { 
+    language, 
+    setTheme, 
+    setSearchEngine, 
+    setLayoutPreset,
+    setClockDialogOpen,
+    setBackgroundDialogOpen,
+    setResizeDialogOpen
+  } = useSettingsStore();
   const t = useTranslation(language);
 
   const [, drop] = useDrop<DragItem>({
@@ -136,121 +148,170 @@ const SortableShortcutCard = ({
   const favicon = getFaviconUrl(tab.url);
 
   return (
-    <div
-      ref={ref}
-      className="h-full"
-      style={{
-        opacity: isDragging ? 0.6 : 1,
-        cursor: autoOrderTabs ? "default" : isDragging ? "grabbing" : "grab",
-      }}>
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <Link
-            href={tab.url}
-            target="_blank"
-            rel="noopener noreferrer"
-            aria-label={`Open ${tab.title || hostname || 'shortcut'}`}
-            onClick={() => incrementVisitCount(tab.id)}
-            className="block [&:hover]:cursor-pointer"
-            style={{ textDecoration: 'none' }}>
-            <Card 
-              className="group relative flex flex-col items-center justify-center gap-2 border border-border/60 bg-card/70 backdrop-blur-sm p-3 text-center shadow-sm transition hover:border-primary/70 hover:shadow-lg cursor-pointer"
-              style={{ 
-                width: `${cardSize}rem`,
-                height: `${cardSize}rem`,
-                borderRadius: `${cardRadius}rem`
-              }}
-            >
-              <div
-                className="group relative flex items-center justify-center rounded-full bg-muted/70 p-0 text-foreground transition hover:bg-muted"
-                style={{ 
-                  height: `${Math.min(cardSize * 0.5, cardSize - 2)}rem`, 
-                  width: `${Math.min(cardSize * 0.5, cardSize - 2)}rem` 
-                }}>
-                <Avatar 
-                  className="border border-transparent bg-transparent"
+    <ContextMenu>
+      <ContextMenuTrigger asChild>
+        <div
+          ref={ref}
+          className="h-full"
+          style={{
+            opacity: isDragging ? 0.6 : 1,
+            cursor: autoOrderTabs ? "default" : isDragging ? "grabbing" : "grab",
+          }}>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Link
+                href={tab.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label={`Open ${tab.title || hostname || 'shortcut'}`}
+                onClick={() => incrementVisitCount(tab.id)}
+                className="block [&:hover]:cursor-pointer"
+                style={{ textDecoration: 'none' }}>
+                <Card 
+                  className="group relative flex flex-col items-center justify-center gap-2 border border-border/60 bg-card/70 backdrop-blur-sm p-3 text-center shadow-sm transition hover:border-primary/70 hover:shadow-lg cursor-pointer"
                   style={{ 
-                    height: `${Math.min(cardSize * 0.5, cardSize - 2)}rem`, 
-                    width: `${Math.min(cardSize * 0.5, cardSize - 2)}rem` 
+                    width: `${cardSize}rem`,
+                    height: `${cardSize}rem`,
+                    borderRadius: `${cardRadius}rem`
                   }}
                 >
-                  {favicon ? (
-                    <AvatarImage src={favicon} alt={hostname} />
-                  ) : null}
-                  <AvatarFallback
+                  <div
+                    className="group relative flex items-center justify-center rounded-full bg-muted/70 p-0 text-foreground transition hover:bg-muted"
                     style={{ 
-                      backgroundColor: accent,
-                      fontSize: `${Math.max(0.5, cardSize * 0.12)}rem`
-                    }}
-                    className="text-white">
-                    {getFallbackChar(tab.title || hostname)}
-                  </AvatarFallback>
-                </Avatar>
-              </div>
-
-              <div className="flex w-full flex-col items-center gap-1 px-1">
-                <p 
-                  className="w-full truncate font-medium text-foreground leading-tight"
-                  style={{ fontSize: `${Math.max(0.5, cardSize * 0.1)}rem` }}
-                >
-                  {tab.title}
-                </p>
-              </div>
-
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="icon-sm"
-                    aria-label={`Shortcut options for ${tab.title || hostname}`}
-                    className="absolute right-1 top-0 rounded-full  text-muted-foreground opacity-0  transition hover:bg-muted focus-visible:opacity-100 group-hover:opacity-100"
-                    onClick={(e) => e.stopPropagation()}>
-                    <MoreVertical className="h-2 w-2" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-44">
-                 
-                  <EditTabDialog tab={tab}>
-                    <DropdownMenuItem onSelect={(event) => event.preventDefault()}>
-                      <Pencil className="h-4 w-4 mr-2" />
-                      Edit
-                    </DropdownMenuItem>
-                  </EditTabDialog>
-                  <DeleteConfirmDialog
-                    title="Delete Shortcut?"
-                    description={`Are you sure you want to delete "${tab.title || hostname}"? This shortcut will be removed from your dashboard.`}
-                    onConfirm={() => removeTab(tab.id)}
-                  >
-                    <DropdownMenuItem
-                      onSelect={(event) => event.preventDefault()}
-                      className="flex items-center gap-2 text-destructive focus:text-destructive"
+                      height: `${Math.min(cardSize * 0.5, cardSize - 2)}rem`, 
+                      width: `${Math.min(cardSize * 0.5, cardSize - 2)}rem` 
+                    }}>
+                    <Avatar 
+                      className="border border-transparent bg-transparent"
+                      style={{ 
+                        height: `${Math.min(cardSize * 0.5, cardSize - 2)}rem`, 
+                        width: `${Math.min(cardSize * 0.5, cardSize - 2)}rem` 
+                      }}
                     >
-                      <Trash2 className="h-4 w-4" />
-                      Delete
-                    </DropdownMenuItem>
-                  </DeleteConfirmDialog>
-                  <ShortcutDialog tab={tab}>
-                    <DropdownMenuItem onSelect={(event) => event.preventDefault()}>
-                      <Keyboard className="h-4 w-4 mr-2" />
-                      {t("keyboardShortcut")}
-                    </DropdownMenuItem>
-                  </ShortcutDialog>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </Card>
-          </Link>
-        </TooltipTrigger>
-        <TooltipContent className="max-w-xs space-y-1 text-left">
-          <p className="text-sm font-medium text-foreground">{tab.title}</p>
-          <p className="text-xs text-muted-foreground">{tab.url}</p>
-          {tab.shortcut && (
-            <p className="text-xs text-primary font-medium">
-              {t("shortcut")}: {tab.shortcut}
-            </p>
-          )}
-        </TooltipContent>
-      </Tooltip>
-    </div>
+                      {favicon ? (
+                        <AvatarImage src={favicon} alt={hostname} />
+                      ) : null}
+                      <AvatarFallback
+                        style={{ 
+                          backgroundColor: accent,
+                          fontSize: `${Math.max(0.5, cardSize * 0.12)}rem`
+                        }}
+                        className="text-white">
+                        {getFallbackChar(tab.title || hostname)}
+                      </AvatarFallback>
+                    </Avatar>
+                  </div>
+
+                  <div className="flex w-full flex-col items-center gap-1 px-1">
+                    <p 
+                      className="w-full truncate font-medium text-foreground leading-tight"
+                      style={{ fontSize: `${Math.max(0.5, cardSize * 0.1)}rem` }}
+                    >
+                      {tab.title}
+                    </p>
+                  </div>
+                </Card>
+              </Link>
+            </TooltipTrigger>
+            <TooltipContent className="max-w-xs space-y-1 text-left">
+              <p className="text-sm font-medium text-foreground">{tab.title}</p>
+              <p className="text-xs text-muted-foreground">{tab.url}</p>
+            </TooltipContent>
+          </Tooltip>
+        </div>
+      </ContextMenuTrigger>
+
+      <ContextMenuContent className="w-64 p-1.5 bg-background/95 backdrop-blur-xl border-border/40 shadow-2xl">
+        <div className="px-2 py-1.5 text-[10px] font-black uppercase tracking-widest text-muted-foreground/50">{t("shortcutActions") || "Shortcut Actions"}</div>
+        <EditTabDialog tab={tab}>
+          <ContextMenuItem className="gap-2.5 font-bold text-xs rounded-lg" onSelect={(e) => e.preventDefault()}>
+            <Pencil className="h-3.5 w-3.5 text-primary" />
+            {t("edit") || "Edit Shortcut"}
+          </ContextMenuItem>
+        </EditTabDialog>
+        <ShortcutDialog tab={tab}>
+          <ContextMenuItem className="gap-2.5 font-bold text-xs rounded-lg" onSelect={(e) => e.preventDefault()}>
+            <Keyboard className="h-3.5 w-3.5 text-primary" />
+            {t("keyboardShortcut") || "Keyboard Shortcut"}
+          </ContextMenuItem>
+        </ShortcutDialog>
+        <DeleteConfirmDialog
+          title={t("deleteShortcut") + "?"}
+          description={t("deleteShortcutDesc") || `Permanently remove "${tab.title || hostname}"?`}
+          onConfirm={() => removeTab(tab.id)}
+        >
+          <ContextMenuItem className="gap-2.5 font-bold text-xs rounded-lg text-destructive focus:text-destructive" onSelect={(e) => e.preventDefault()}>
+            <Trash2 className="h-3.5 w-3.5" />
+            {t("delete") || "Delete Shortcut"}
+          </ContextMenuItem>
+        </DeleteConfirmDialog>
+
+        <ContextMenuSeparator className="bg-border/40 my-1.5" />
+
+        <div className="px-2 py-1.5 text-[10px] font-black uppercase tracking-widest text-muted-foreground/50">{t("dashboardConfig") || "Dashboard Config"}</div>
+        
+        <ContextMenuSub>
+          <ContextMenuSubTrigger className="gap-2.5 font-bold text-xs rounded-lg">
+            <Sun className="h-3.5 w-3.5 text-primary" />
+            {t("theme") || "Appearance"}
+          </ContextMenuSubTrigger>
+          <ContextMenuSubContent className="w-40 bg-background/95 backdrop-blur-xl border-border/40 shadow-2xl">
+            <ContextMenuItem onClick={() => setTheme("light")} className="gap-2.5 font-bold text-xs">
+              <Sun className="h-3.5 w-3.5" /> {t("light")}
+            </ContextMenuItem>
+            <ContextMenuItem onClick={() => setTheme("dark")} className="gap-2.5 font-bold text-xs">
+              <Moon className="h-3.5 w-3.5" /> {t("dark")}
+            </ContextMenuItem>
+            <ContextMenuItem onClick={() => setTheme("system")} className="gap-2.5 font-bold text-xs">
+              <Monitor className="h-3.5 w-3.5" /> {t("system")}
+            </ContextMenuItem>
+          </ContextMenuSubContent>
+        </ContextMenuSub>
+
+        <ContextMenuSub>
+          <ContextMenuSubTrigger className="gap-2.5 font-bold text-xs rounded-lg">
+            <Search className="h-3.5 w-3.5 text-primary" />
+            {t("searchEngine") || "Search Engine"}
+          </ContextMenuSubTrigger>
+          <ContextMenuSubContent className="w-44 bg-background/95 backdrop-blur-xl border-border/40 shadow-2xl">
+            {["google", "duckduckgo", "bing", "brave"].map((engine) => (
+              <ContextMenuItem key={engine} onClick={() => setSearchEngine(engine as any)} className="capitalize font-bold text-xs">
+                {engine === 'duckduckgo' ? 'DuckDuckGo' : engine}
+              </ContextMenuItem>
+            ))}
+          </ContextMenuSubContent>
+        </ContextMenuSub>
+
+        <ContextMenuSub>
+          <ContextMenuSubTrigger className="gap-2.5 font-bold text-xs rounded-lg">
+            <Layout className="h-3.5 w-3.5 text-primary" />
+            {t("layoutMode") || "Layout Mode"}
+          </ContextMenuSubTrigger>
+          <ContextMenuSubContent className="w-40 bg-background/95 backdrop-blur-xl border-border/40 shadow-2xl">
+            {["default", "compact", "focus"].map((preset) => (
+              <ContextMenuItem key={preset} onClick={() => setLayoutPreset(preset as any)} className="capitalize font-bold text-xs">
+                {preset}
+              </ContextMenuItem>
+            ))}
+          </ContextMenuSubContent>
+        </ContextMenuSub>
+
+        <ContextMenuSeparator className="bg-border/40 my-1.5" />
+
+        <ContextMenuItem onClick={() => setClockDialogOpen(true)} className="gap-2.5 font-bold text-xs rounded-lg">
+          <Clock className="h-3.5 w-3.5 text-primary" />
+          {t("clockSetting") || "Digital Clock Settings"}
+        </ContextMenuItem>
+        <ContextMenuItem onClick={() => setBackgroundDialogOpen(true)} className="gap-2.5 font-bold text-xs rounded-lg">
+          <ImageIcon className="h-3.5 w-3.5 text-primary" />
+          {t("backgroundImage") || "Change Wallpaper"}
+        </ContextMenuItem>
+        <ContextMenuItem onClick={() => setResizeDialogOpen(true)} className="gap-2.5 font-bold text-xs rounded-lg">
+          <Maximize2 className="h-3.5 w-3.5 text-primary" />
+          {t("resizeShortcuts") || "Resize Shortcut Cards"}
+        </ContextMenuItem>
+      </ContextMenuContent>
+    </ContextMenu>
   );
 };
 
@@ -288,7 +349,6 @@ export const TabsList = () => {
     );
   }
 
-  // Sort tabs by visit count if auto ordering is enabled
   const sortedTabs = autoOrderTabs 
     ? [...tabs].sort((a, b) => b.visitCount - a.visitCount)
     : tabs;
@@ -335,3 +395,4 @@ export const TabsList = () => {
     </div>
   );
 };
+
