@@ -14,10 +14,12 @@ export interface Tab {
 const DEFAULT_TABS: Tab[] = [
   { id: '1', title: "Google", url: "https://www.google.com", createdAt: Date.now(), visitCount: 0, shortcut: "g" },
   { id: '2', title: "YouTube", url: "https://www.youtube.com", createdAt: Date.now(), visitCount: 0, shortcut: "y" },
-  { id: '3', title: "GitHub", url: "https://github.com", createdAt: Date.now(), visitCount: 0, shortcut: "h" },
+  { id: '3', title: "Gmail", url: "https://mail.google.com", createdAt: Date.now(), visitCount: 0, shortcut: "m" },
   { id: '4', title: "Facebook", url: "https://www.facebook.com", createdAt: Date.now(), visitCount: 0, shortcut: "f" },
-  { id: '5', title: "Gemini", url: "https://gemini.google.com", createdAt: Date.now(), visitCount: 0, shortcut: "m" },
-  { id: '6', title: "ChatGPT", url: "https://chatgpt.com", createdAt: Date.now(), visitCount: 0, shortcut: "c" },
+  { id: '5', title: "Daraz", url: "https://www.daraz.com.bd", createdAt: Date.now(), visitCount: 0, shortcut: "d" },
+  { id: '6', title: "GitHub", url: "https://github.com", createdAt: Date.now(), visitCount: 0, shortcut: "h" },
+  { id: '7', title: "ChatGPT", url: "https://chatgpt.com", createdAt: Date.now(), visitCount: 0, shortcut: "c" },
+  { id: '8', title: "Gemini", url: "https://gemini.google.com", createdAt: Date.now(), visitCount: 0, shortcut: "a" },
 ];
 
 interface TabsState {
