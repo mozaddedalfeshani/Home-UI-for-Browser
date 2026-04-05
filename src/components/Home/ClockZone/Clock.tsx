@@ -51,10 +51,10 @@ export default function DigitalClock() {
 
   return (
     <div
-      className={`${shareTech.className} clock-style clock-style--classic text-7xl tracking-widest p-8 rounded-2xl text-center`}
+      className={`${shareTech.className} clock-style clock-style--classic text-7xl text-center`}
       style={
         {
-          letterSpacing: "0.08em",
+          letterSpacing: "0.02em",
           color: "var(--clock-color)",
           textShadow: showClockGlow
             ? "0 0 10px var(--glow-color), 0 0 20px var(--glow-color)"
