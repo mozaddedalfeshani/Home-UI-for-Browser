@@ -62,12 +62,20 @@ export const useNotepadStore = create<NotepadState>()(
     {
       name: "notepad-store",
       version: 2,
-      migrate: (persistedState: any, version: number) => {
+      migrate: (persistedState: unknown, version: number) => {
         if (version === 1) {
           // Migration from single content to list of notes
-          const oldContent = persistedState.content || "";
+          const oldContent =
+            typeof persistedState === "object" &&
+            persistedState !== null &&
+            "content" in persistedState &&
+            typeof (persistedState as { content?: unknown }).content === "string"
+              ? (persistedState as { content: string }).content
+              : "";
           return {
-            ...persistedState,
+            ...(typeof persistedState === "object" && persistedState !== null
+              ? persistedState
+              : {}),
             notes: oldContent ? [{
               id: "legacy",
               title: "My First Note",

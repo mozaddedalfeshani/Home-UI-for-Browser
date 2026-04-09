@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
+import type { ShareProfileTab } from "@/lib/shareProfile";
 
 export interface Tab {
   id: string;
@@ -33,6 +34,8 @@ interface TabsState {
   getTabs: () => Tab[];
   updateTabShortcut: (id: string, shortcut: string | undefined) => void;
   getTabByShortcut: (shortcut: string) => Tab | undefined;
+  getShareableTabs: () => ShareProfileTab[];
+  replaceTabsFromShareProfile: (tabs: ShareProfileTab[]) => void;
   resetTabs: () => void;
 }
 
@@ -112,6 +115,28 @@ export const useTabsStore = create<TabsState>()(
       },
       getTabByShortcut: (shortcut: string) => {
         return get().tabs.find((tab) => tab.shortcut === shortcut);
+      },
+      getShareableTabs: () => {
+        return get().tabs.map((tab) => ({
+          title: tab.title,
+          url: tab.url,
+          shortcut: tab.shortcut,
+          openInNewWindow: tab.openInNewWindow,
+        }));
+      },
+      replaceTabsFromShareProfile: (tabs) => {
+        const now = Date.now();
+        set({
+          tabs: tabs.map((tab, index) => ({
+            id: crypto.randomUUID(),
+            title: tab.title,
+            url: tab.url,
+            createdAt: now + index,
+            visitCount: 0,
+            shortcut: tab.shortcut,
+            openInNewWindow: tab.openInNewWindow,
+          })),
+        });
       },
       resetTabs: () => {
         set({ tabs: DEFAULT_TABS });

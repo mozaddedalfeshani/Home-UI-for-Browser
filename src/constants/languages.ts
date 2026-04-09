@@ -46,6 +46,16 @@ export const TRANSLATIONS = {
     center: "Center",
     bottom: "Bottom",
     dynamicWallpaper: "Dynamic Wallpaper",
+    profileShare: "Profile Share",
+    exportProfile: "Export Profile",
+    importProfile: "Import Profile",
+    importProfileConfirmTitle: "Import Shared Profile?",
+    importProfileConfirmDescription:
+      "This will replace your current tabs and settings. Your background will stay unchanged.",
+    profileImportInvalid: "Invalid profile JSON file.",
+    profileImportSuccess: "Shared profile imported successfully.",
+    profileImportFailed: "Failed to apply shared profile.",
+    profileExportFailed: "Failed to export profile file.",
 
 
 
@@ -168,6 +178,16 @@ export const TRANSLATIONS = {
     center: "কেন্দ্রে",
     bottom: "নিচে",
     dynamicWallpaper: "ডাইনামিক মিডিয়া",
+    profileShare: "প্রোফাইল শেয়ার",
+    exportProfile: "প্রোফাইল এক্সপোর্ট",
+    importProfile: "প্রোফাইল ইমপোর্ট",
+    importProfileConfirmTitle: "শেয়ার করা প্রোফাইল ইমপোর্ট করবেন?",
+    importProfileConfirmDescription:
+      "এটি আপনার বর্তমান শর্টকাট ও সেটিংস প্রতিস্থাপন করবে। ব্যাকগ্রাউন্ড অপরিবর্তিত থাকবে।",
+    profileImportInvalid: "অবৈধ প্রোফাইল JSON ফাইল।",
+    profileImportSuccess: "শেয়ার করা প্রোফাইল সফলভাবে ইমপোর্ট হয়েছে।",
+    profileImportFailed: "শেয়ার করা প্রোফাইল প্রয়োগ করা যায়নি।",
+    profileExportFailed: "প্রোফাইল এক্সপোর্ট করা যায়নি।",
 
 
 
