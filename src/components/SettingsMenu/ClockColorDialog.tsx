@@ -228,7 +228,7 @@ export function ClockColorDialog({
                   {["12h", "24h"].map((f) => (
                     <button
                       key={f}
-                      onClick={() => setTempFormat(f as any)}
+                      onClick={() => setTempFormat(f as "12h" | "24h")}
                       className={cn(
                         "flex-1 py-1.5 rounded-lg text-[9px] font-black tracking-widest transition-all",
                         tempFormat === f ? "bg-primary text-primary-foreground shadow-lg" : "text-muted-foreground/40 hover:text-white"

@@ -1,6 +1,10 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { mediaStorage } from "@/lib/mediaStorage";
+import {
+  SHARE_SETTINGS_DEFAULTS,
+  type ShareProfileSettings,
+} from "@/lib/shareProfile";
 
 import { Language } from "@/constants/languages";
 
@@ -10,6 +14,12 @@ export type SearchEngine = "google" | "duckduckgo" | "bing" | "brave";
 export type LayoutPreset = "default" | "compact" | "focus";
 export type ClockStyle = "classic" | "modern";
 export type TabsPosition = "top" | "center" | "bottom";
+
+export const DEFAULT_DYNAMIC_WALLPAPERS = [
+  "https://homewalpaper.imurad.me/1351306.png",
+  "https://homewalpaper.imurad.me/1362858.jpeg",
+  "https://homewalpaper.imurad.me/573653.jpg",
+];
 
 interface SettingsState {
   theme: Theme;
@@ -58,40 +68,38 @@ interface SettingsState {
   setResizeDialogOpen: (open: boolean) => void;
   setTabsPosition: (position: TabsPosition) => void;
   setDynamicWallpaper: (enabled: boolean) => void;
+  getShareableSettings: () => ShareProfileSettings;
+  applyShareProfileSettings: (settings: ShareProfileSettings) => void;
   resetSettings: () => Promise<void>;
 }
 
 export const useSettingsStore = create<SettingsState>()(
   persist(
-    (set) => ({
-      theme: "system",
-      language: "bn",
-      autoOrderTabs: false,
-      showClock: true,
-      showRightSidebar: true,
-      tabsPosition: "top",
-      cardSize: 5,
-      cardRadius: 0.5,
+    (set, get) => ({
+      theme: SHARE_SETTINGS_DEFAULTS.theme,
+      language: SHARE_SETTINGS_DEFAULTS.language,
+      autoOrderTabs: SHARE_SETTINGS_DEFAULTS.autoOrderTabs,
+      showClock: SHARE_SETTINGS_DEFAULTS.showClock,
+      showRightSidebar: SHARE_SETTINGS_DEFAULTS.showRightSidebar,
+      tabsPosition: SHARE_SETTINGS_DEFAULTS.tabsPosition,
+      cardSize: SHARE_SETTINGS_DEFAULTS.cardSize,
+      cardRadius: SHARE_SETTINGS_DEFAULTS.cardRadius,
       backgroundImage: null,
-      clockColor: "#ffffff",
-      showClockGlow: false,
-      clockFormat: "12h",
-      showSeconds: false,
-      searchEngine: "google",
-      layoutPreset: "default",
-      clockPosition: "top-center",
-      clockStyle: "modern",
+      clockColor: SHARE_SETTINGS_DEFAULTS.clockColor,
+      showClockGlow: SHARE_SETTINGS_DEFAULTS.showClockGlow,
+      clockFormat: SHARE_SETTINGS_DEFAULTS.clockFormat,
+      showSeconds: SHARE_SETTINGS_DEFAULTS.showSeconds,
+      searchEngine: SHARE_SETTINGS_DEFAULTS.searchEngine,
+      layoutPreset: SHARE_SETTINGS_DEFAULTS.layoutPreset,
+      clockPosition: SHARE_SETTINGS_DEFAULTS.clockPosition,
+      clockStyle: SHARE_SETTINGS_DEFAULTS.clockStyle,
       enableAISearch: false,
       isHydrated: false,
       isClockDialogOpen: false,
       isBackgroundDialogOpen: false,
       isResizeDialogOpen: false,
-      isDynamicWallpaper: true,
-      dynamicWallpapers: [
-        "https://homewalpaper.imurad.me/1351306.png",
-        "https://homewalpaper.imurad.me/1362858.jpeg",
-        "https://homewalpaper.imurad.me/573653.jpg",
-      ],
+      isDynamicWallpaper: SHARE_SETTINGS_DEFAULTS.isDynamicWallpaper,
+      dynamicWallpapers: DEFAULT_DYNAMIC_WALLPAPERS,
       setTheme: (theme) => set({ theme }),
       toggleAutoOrderTabs: () =>
         set((state) => ({ autoOrderTabs: !state.autoOrderTabs })),
@@ -164,26 +172,68 @@ export const useSettingsStore = create<SettingsState>()(
       setResizeDialogOpen: (open) => set({ isResizeDialogOpen: open }),
       setTabsPosition: (position) => set({ tabsPosition: position }),
       setDynamicWallpaper: (enabled) => set({ isDynamicWallpaper: enabled }),
+      getShareableSettings: () => {
+        const state = get();
+        return {
+          theme: state.theme,
+          language: state.language,
+          autoOrderTabs: state.autoOrderTabs,
+          showClock: state.showClock,
+          showRightSidebar: state.showRightSidebar,
+          tabsPosition: state.tabsPosition,
+          cardSize: state.cardSize,
+          cardRadius: state.cardRadius,
+          clockColor: state.clockColor,
+          showClockGlow: state.showClockGlow,
+          clockFormat: state.clockFormat,
+          showSeconds: state.showSeconds,
+          searchEngine: state.searchEngine,
+          layoutPreset: state.layoutPreset,
+          clockPosition: state.clockPosition,
+          clockStyle: state.clockStyle,
+          isDynamicWallpaper: state.isDynamicWallpaper,
+        };
+      },
+      applyShareProfileSettings: (settings) =>
+        set({
+          theme: settings.theme,
+          language: settings.language,
+          autoOrderTabs: settings.autoOrderTabs,
+          showClock: settings.showClock,
+          showRightSidebar: settings.showRightSidebar,
+          tabsPosition: settings.tabsPosition,
+          cardSize: settings.cardSize,
+          cardRadius: settings.cardRadius,
+          clockColor: settings.clockColor,
+          showClockGlow: settings.showClockGlow,
+          clockFormat: settings.clockFormat,
+          showSeconds: settings.showSeconds,
+          searchEngine: settings.searchEngine,
+          layoutPreset: settings.layoutPreset,
+          clockPosition: settings.clockPosition,
+          clockStyle: settings.clockStyle,
+          isDynamicWallpaper: settings.isDynamicWallpaper,
+        }),
       resetSettings: async () => {
         set({
-          theme: "system",
-          language: "bn",
-          autoOrderTabs: false,
-          cardSize: 5,
-          cardRadius: 0.5,
+          theme: SHARE_SETTINGS_DEFAULTS.theme,
+          language: SHARE_SETTINGS_DEFAULTS.language,
+          autoOrderTabs: SHARE_SETTINGS_DEFAULTS.autoOrderTabs,
+          cardSize: SHARE_SETTINGS_DEFAULTS.cardSize,
+          cardRadius: SHARE_SETTINGS_DEFAULTS.cardRadius,
           backgroundImage: null,
-          showClock: true,
-          showRightSidebar: true,
-          tabsPosition: "top",
-          isDynamicWallpaper: true,
-          clockColor: "#ffffff",
-          showClockGlow: false,
-          clockFormat: "12h",
-          showSeconds: false,
-          searchEngine: "google",
-          layoutPreset: "default",
-          clockPosition: "top-center",
-          clockStyle: "modern",
+          showClock: SHARE_SETTINGS_DEFAULTS.showClock,
+          showRightSidebar: SHARE_SETTINGS_DEFAULTS.showRightSidebar,
+          tabsPosition: SHARE_SETTINGS_DEFAULTS.tabsPosition,
+          isDynamicWallpaper: SHARE_SETTINGS_DEFAULTS.isDynamicWallpaper,
+          clockColor: SHARE_SETTINGS_DEFAULTS.clockColor,
+          showClockGlow: SHARE_SETTINGS_DEFAULTS.showClockGlow,
+          clockFormat: SHARE_SETTINGS_DEFAULTS.clockFormat,
+          showSeconds: SHARE_SETTINGS_DEFAULTS.showSeconds,
+          searchEngine: SHARE_SETTINGS_DEFAULTS.searchEngine,
+          layoutPreset: SHARE_SETTINGS_DEFAULTS.layoutPreset,
+          clockPosition: SHARE_SETTINGS_DEFAULTS.clockPosition,
+          clockStyle: SHARE_SETTINGS_DEFAULTS.clockStyle,
           isHydrated: true,
           isClockDialogOpen: false,
           isBackgroundDialogOpen: false,
@@ -195,16 +245,14 @@ export const useSettingsStore = create<SettingsState>()(
       name: "settings-store",
       version: 1,
       partialize: (state) => {
-        const {
-          isClockDialogOpen,
-          isBackgroundDialogOpen,
-          isResizeDialogOpen,
-          setClockDialogOpen,
-          setBackgroundDialogOpen,
-          setResizeDialogOpen,
-          ...persistedState
-        } = state;
-        return persistedState;
+        const persistedState = { ...state } as Record<string, unknown>;
+        delete persistedState.isClockDialogOpen;
+        delete persistedState.isBackgroundDialogOpen;
+        delete persistedState.isResizeDialogOpen;
+        delete persistedState.setClockDialogOpen;
+        delete persistedState.setBackgroundDialogOpen;
+        delete persistedState.setResizeDialogOpen;
+        return persistedState as Partial<SettingsState>;
       },
       onRehydrateStorage: () => (state) => {
         state?.setHydrated(true);
