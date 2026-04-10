@@ -80,8 +80,8 @@ const SearchModal = ({ open, onOpenChange }: SearchModalProps) => {
       url = getSearchUrl(query);
     }
 
-    // Open in new tab
-    window.open(url, "_blank", "noopener,noreferrer");
+    // Open in same tab
+    window.location.href = url;
 
     // Close modal
     onOpenChange(false);
