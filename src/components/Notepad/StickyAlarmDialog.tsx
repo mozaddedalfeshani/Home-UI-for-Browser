@@ -13,6 +13,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { useSettingsStore } from "@/store/settingsStore";
 import { useTranslation } from "@/constants/languages";
+import { useMediaUrl } from "@/hooks/useMediaUrl";
 import {
   StickyAlarmEvent,
   getPersistedStickyAlarmEvent,
@@ -23,9 +24,14 @@ import {
 
 export default function StickyAlarmDialog() {
   const language = useSettingsStore((state) => state.language);
+  const alarmSoundRef = useSettingsStore((state) => state.alarmSoundRef);
+  const ensureAlarmSoundCached = useSettingsStore(
+    (state) => state.ensureAlarmSoundCached,
+  );
   const t = useTranslation(language);
   const [activeAlarm, setActiveAlarm] = useState<StickyAlarmEvent | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const { url: alarmSoundUrl } = useMediaUrl(alarmSoundRef);
 
   useEffect(() => {
     const persistedAlarm = getPersistedStickyAlarmEvent();
@@ -41,8 +47,16 @@ export default function StickyAlarmDialog() {
   }, []);
 
   useEffect(() => {
+    if (!activeAlarm) {
+      return;
+    }
+
+    void ensureAlarmSoundCached();
+  }, [activeAlarm, ensureAlarmSoundCached]);
+
+  useEffect(() => {
     const audio = audioRef.current;
-    if (!audio || !activeAlarm) {
+    if (!audio || !activeAlarm || !alarmSoundUrl) {
       return;
     }
 
@@ -71,8 +85,8 @@ export default function StickyAlarmDialog() {
         await audio.play();
         isPlaying = true;
         stopRetry();
-      } catch (error) {
-        console.error("Failed to autoplay alarm sound:", error);
+      } catch {
+        // console.error("Failed to autoplay alarm sound:", error);
       }
     };
 
@@ -96,7 +110,7 @@ export default function StickyAlarmDialog() {
       audio.pause();
       audio.currentTime = 0;
     };
-  }, [activeAlarm, t]);
+  }, [activeAlarm, alarmSoundUrl]);
 
   useEffect(() => {
     const shouldBlockUnload = () => isStickyAlarmRunning();
@@ -170,7 +184,7 @@ export default function StickyAlarmDialog() {
     <>
       <audio
         ref={audioRef}
-        src="/video/alarmsounds.mp3"
+        src={alarmSoundUrl ?? undefined}
         preload="auto"
         className="hidden"
         loop
