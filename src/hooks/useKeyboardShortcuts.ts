@@ -11,7 +11,7 @@ export const useKeyboardShortcuts = ({ onSearchModalOpen }: UseKeyboardShortcuts
   const getTabByShortcut = useTabsStore((state) => state.getTabByShortcut);
 
   useEffect(() => {
-    console.log("Keyboard shortcuts hook initialized");
+    // console.log("Keyboard shortcuts hook initialized");
     
     const handleKeyDown = (event: KeyboardEvent) => {
       // Check if user is typing in an input field
@@ -43,7 +43,7 @@ export const useKeyboardShortcuts = ({ onSearchModalOpen }: UseKeyboardShortcuts
       const key = event.key === " " ? "Space" : event.key;
       const shortcutString = [...modifiers, key].join("+");
       
-      console.log("Key pressed:", event.key, "Modifiers:", modifiers, "Shortcut string:", shortcutString);
+      // console.log("Key pressed:", event.key, "Modifiers:", modifiers, "Shortcut string:", shortcutString);
 
       // Disable shortcuts if typing in an input field
       if (isInputField) {
@@ -52,10 +52,10 @@ export const useKeyboardShortcuts = ({ onSearchModalOpen }: UseKeyboardShortcuts
 
       // Check if this shortcut matches any tab
       const tab = getTabByShortcut(shortcutString);
-      console.log("Found tab for shortcut:", tab);
+      // console.log("Found tab for shortcut:", tab);
       
       if (tab) {
-        console.log("Opening tab:", tab.title, "URL:", tab.url);
+        // console.log("Opening tab:", tab.title, "URL:", tab.url);
         event.preventDefault();
         event.stopPropagation();
         
