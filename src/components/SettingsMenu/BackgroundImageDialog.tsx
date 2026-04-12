@@ -51,7 +51,7 @@ export function BackgroundImageDialog({ open, onOpenChange }: BackgroundImageDia
   };
 
   const handleSave = async () => {
-    console.log("Saving background image:", tempBackgroundImage);
+    // console.log("Saving background image:", tempBackgroundImage);
     await setBackgroundImage(tempBackgroundImage);
     onOpenChange(false);
   };
