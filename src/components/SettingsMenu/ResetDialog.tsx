@@ -15,6 +15,7 @@ import { Button } from "@/components/ui/button";
 import { useSettingsStore } from "@/store/settingsStore";
 import { useTabsStore } from "@/store/tabsStore";
 import { useNotepadStore } from "@/store/notepadStore";
+import { useSearchHistoryStore } from "@/store/searchHistoryStore";
 import { useTranslation } from "@/constants/languages";
 import { AlertTriangle } from "lucide-react";
 
@@ -33,6 +34,9 @@ export const ResetDialog = ({ children }: ResetDialogProps) => {
   const resetSettings = useSettingsStore((state) => state.resetSettings);
   const resetTabs = useTabsStore((state) => state.resetTabs);
   const resetNotepad = useNotepadStore((state) => state.resetNotepad);
+  const clearSearchHistory = useSearchHistoryStore(
+    (state) => state.clearSearchHistory,
+  );
 
   const handleReset = async () => {
     setIsResetting(true);
@@ -42,6 +46,7 @@ export const ResetDialog = ({ children }: ResetDialogProps) => {
       resetSettings();
       resetTabs();
       resetNotepad();
+      clearSearchHistory();
       
       // Close dialog
       setOpen(false);

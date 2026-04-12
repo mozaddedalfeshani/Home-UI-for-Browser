@@ -7,6 +7,8 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useSettingsStore } from "@/store/settingsStore";
 import { useTranslation } from "@/constants/languages";
+import { useSearchHistoryStore } from "@/store/searchHistoryStore";
+import { cn } from "@/lib/utils";
 
 interface SearchModalProps {
   open: boolean;
@@ -15,8 +17,13 @@ interface SearchModalProps {
 
 const SearchModal = ({ open, onOpenChange }: SearchModalProps) => {
   const [query, setQuery] = useState("");
+  const [activeIndex, setActiveIndex] = useState(-1);
   const inputRef = useRef<HTMLInputElement>(null);
   const { searchEngine, language } = useSettingsStore();
+  const historyEntries = useSearchHistoryStore((state) => state.entries);
+  const addSearchHistoryEntry = useSearchHistoryStore(
+    (state) => state.addSearchHistoryEntry,
+  );
   const t = useTranslation(language);
 
   // Focus input when modal opens
@@ -30,8 +37,13 @@ const SearchModal = ({ open, onOpenChange }: SearchModalProps) => {
   useEffect(() => {
     if (!open) {
       setQuery("");
+      setActiveIndex(-1);
     }
   }, [open]);
+
+  useEffect(() => {
+    setActiveIndex(-1);
+  }, [query]);
 
   const isUrl = (input: string): boolean => {
     // Check if it starts with http:// or https://
@@ -63,33 +75,80 @@ const SearchModal = ({ open, onOpenChange }: SearchModalProps) => {
     return `https://www.google.com/search?q=${encodedQuery}`;
   };
 
-  const handleSearch = () => {
-    if (!query.trim()) return;
+  const handleSearchValue = (value: string) => {
+    const trimmedValue = value.trim();
+    if (!trimmedValue) return;
 
     let url: string;
 
-    if (isUrl(query)) {
+    addSearchHistoryEntry(trimmedValue);
+
+    if (isUrl(trimmedValue)) {
       // It's a URL - add https:// if missing
-      if (query.startsWith("http://") || query.startsWith("https://")) {
-        url = query;
+      if (
+        trimmedValue.startsWith("http://") ||
+        trimmedValue.startsWith("https://")
+      ) {
+        url = trimmedValue;
       } else {
-        url = `https://${query}`;
+        url = `https://${trimmedValue}`;
       }
     } else {
       // It's a search query - use selected search engine
-      url = getSearchUrl(query);
+      url = getSearchUrl(trimmedValue);
     }
 
     // Open in same tab
-    window.location.href = url;
-
-    // Close modal
     onOpenChange(false);
+    window.location.href = url;
   };
 
+  const handleSearch = () => {
+    handleSearchValue(query);
+  };
+
+  const visibleHistoryEntries = historyEntries.filter((entry) => {
+    const normalizedQuery = query.trim().toLowerCase();
+    if (!normalizedQuery) {
+      return true;
+    }
+
+    return entry.normalizedValue.includes(normalizedQuery);
+  }).slice(0, 5);
+
+  const activeSuggestion =
+    activeIndex >= 0 ? visibleHistoryEntries[activeIndex] : undefined;
+
   const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter") {
+    if (e.key === "ArrowDown") {
+      if (!visibleHistoryEntries.length) {
+        return;
+      }
+
       e.preventDefault();
+      setActiveIndex((currentIndex) =>
+        currentIndex < 0
+          ? 0
+          : Math.min(currentIndex + 1, visibleHistoryEntries.length - 1),
+      );
+    } else if (e.key === "ArrowUp") {
+      if (!visibleHistoryEntries.length) {
+        return;
+      }
+
+      e.preventDefault();
+      setActiveIndex((currentIndex) =>
+        currentIndex < 0
+          ? visibleHistoryEntries.length - 1
+          : Math.max(currentIndex - 1, 0),
+      );
+    } else if (e.key === "Enter") {
+      e.preventDefault();
+      if (activeSuggestion) {
+        handleSearchValue(activeSuggestion.value);
+        return;
+      }
+
       handleSearch();
     } else if (e.key === "Escape") {
       e.preventDefault();
@@ -113,32 +172,57 @@ const SearchModal = ({ open, onOpenChange }: SearchModalProps) => {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-2xl w-full top-20 p-0">
+      <DialogContent className="sm:max-w-2xl w-full top-[58%] sm:top-[54%] p-0 overflow-hidden">
         <DialogTitle className="sr-only">Search</DialogTitle>
-        <div className="relative">
-          <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+        <div className="p-4 sm:p-5">
+          <div className="relative">
+            <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
 
-          <span className="absolute right-14 top-3 text-[11px] uppercase tracking-wide text-muted-foreground bg-muted/70 px-2 py-0.5 rounded-md border border-border/70">
-            {providerLabel}
-          </span>
+            <Input
+              ref={inputRef}
+              placeholder={`${t("search")} ${providerLabel} or enter a URL...`}
+              value={query}
+              onChange={handleInputChange}
+              onKeyDown={handleKeyDown}
+              className="pl-10 pr-32 h-12 text-base"
+            />
 
-          <Input
-            ref={inputRef}
-            placeholder={`${t("search")} ${providerLabel} or enter a URL...`}
-            value={query}
-            onChange={handleInputChange}
-            onKeyDown={handleKeyDown}
-            className="pl-10 pr-32 h-12 text-base"
-          />
+            <Button
+              type="button"
+              size="sm"
+              onClick={handleSearch}
+              className="absolute right-2 top-2 h-8 w-8 p-0"
+              disabled={!query.trim()}>
+              <SearchCheck />
+            </Button>
+          </div>
 
-          <Button
-            type="button"
-            size="sm"
-            onClick={handleSearch}
-            className="absolute right-2 top-2 h-8 w-8 p-0"
-            disabled={!query.trim()}>
-            <SearchCheck />
-          </Button>
+          <div className="mt-3 max-h-64 overflow-y-auto">
+            {visibleHistoryEntries.length > 0 && (
+              <div className="flex flex-col gap-1">
+                {visibleHistoryEntries.map((entry, index) => {
+                  const isActive = index === activeIndex;
+
+                  return (
+                    <button
+                      key={entry.id}
+                      type="button"
+                      onMouseEnter={() => setActiveIndex(index)}
+                      onMouseDown={(event) => event.preventDefault()}
+                      onClick={() => handleSearchValue(entry.value)}
+                      className={cn(
+                        "w-full rounded-lg px-3 py-2 text-left text-sm transition-colors",
+                        isActive
+                          ? "bg-primary/10 text-primary"
+                          : "hover:bg-accent hover:text-accent-foreground",
+                      )}>
+                      <span className="block truncate">{entry.value}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+          </div>
         </div>
       </DialogContent>
     </Dialog>
