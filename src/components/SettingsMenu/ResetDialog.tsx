@@ -48,8 +48,8 @@ export const ResetDialog = ({ children }: ResetDialogProps) => {
       
       // Reload the page to reflect changes
       window.location.reload();
-    } catch (error) {
-      console.error("Error resetting data:", error);
+    } catch {
+      // console.error("Error resetting data:", error);
     } finally {
       setIsResetting(false);
     }
