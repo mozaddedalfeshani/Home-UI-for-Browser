@@ -75,8 +75,8 @@ const Notepad = () => {
     if (Notification.permission === "default") {
       try {
         await Notification.requestPermission();
-      } catch (error) {
-        console.error("Notification permission error:", error);
+      } catch {
+        // console.error("Notification permission error:", error);
       }
     }
   };
