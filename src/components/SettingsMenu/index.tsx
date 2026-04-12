@@ -118,8 +118,8 @@ const SettingsMenu = () => {
       anchor.click();
       anchor.remove();
       URL.revokeObjectURL(url);
-    } catch (error) {
-      console.error("Failed to export profile:", error);
+    } catch {
+      // console.error("Failed to export profile:", error);
       alert(t("profileExportFailed"));
     }
   };
@@ -150,8 +150,8 @@ const SettingsMenu = () => {
 
       setPendingImportProfile(data);
       setIsImportConfirmOpen(true);
-    } catch (error) {
-      console.error("Failed to import profile file:", error);
+    } catch {
+      // console.error("Failed to import profile file:", error);
       alert(t("profileImportInvalid"));
     }
   };
@@ -175,8 +175,8 @@ const SettingsMenu = () => {
       setIsImportConfirmOpen(false);
       setPendingImportProfile(null);
       alert(t("profileImportSuccess"));
-    } catch (error) {
-      console.error("Failed to apply imported profile:", error);
+    } catch {
+      // console.error("Failed to apply imported profile:", error);
       alert(t("profileImportFailed"));
     } finally {
       setIsImporting(false);
