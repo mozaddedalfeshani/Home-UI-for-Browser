@@ -54,7 +54,7 @@ class MediaStorage {
         transaction.onabort = () => reject(new Error('Transaction was aborted'));
       });
     } catch (error) {
-      console.error('Error storing media:', error);
+      // console.error('Error storing media:', error);
       throw error;
     }
   }
