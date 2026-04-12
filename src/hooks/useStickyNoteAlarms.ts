@@ -25,8 +25,8 @@ const notifyStickyNoteReminder = async (title: string, body: string) => {
       if (permission === "granted") {
         new Notification(title, { body });
       }
-    } catch (error) {
-      console.error("Notification permission request failed:", error);
+    } catch {
+      // console.error("Notification permission request failed:", error);
     }
   }
 };
