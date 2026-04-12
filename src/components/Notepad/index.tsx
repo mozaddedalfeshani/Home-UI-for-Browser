@@ -1,13 +1,12 @@
 "use client";
 import { useState } from "react";
-import { Trash2, Copy, FileText, CheckCircle2, ListTodo, Plus, ArrowLeft, Search, Clock } from "lucide-react";
+import { Trash2, Copy, FileText, CheckCircle2, Plus, ArrowLeft, Search, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
-import { useNotepadStore, Note } from "@/store/notepadStore";
+import { useNotepadStore } from "@/store/notepadStore";
 import { useSettingsStore } from "@/store/settingsStore";
 import { useTranslation } from "@/constants/languages";
-import { cn } from "@/lib/utils";
 import { DeleteConfirmDialog } from "@/components/ui/DeleteConfirmDialog";
 
 const formatRelativeTime = (dateString: string) => {
@@ -45,17 +44,17 @@ const Notepad = () => {
   const wordCount = selectedNote?.content.trim() ? selectedNote.content.trim().split(/\s+/).length : 0;
 
   return (
-    <div className="h-full overflow-hidden flex flex-col bg-background/40 backdrop-blur-xl border-l border-border/40 shadow-2xl transition-all duration-300">
+    <div className="h-full overflow-hidden flex flex-col border-l border-border/60 bg-background/78 text-foreground shadow-2xl backdrop-blur-2xl transition-all duration-300">
       {/* Header */}
-      <div className="p-4 flex flex-col gap-4 border-b border-border/30 bg-background/20">
+      <div className="flex flex-col gap-4 border-b border-border/50 bg-background/70 p-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <div className="p-1.5 rounded-md bg-primary/10">
+            <div className="rounded-md border border-primary/15 bg-primary/10 p-1.5">
               <FileText className="h-4 w-4 text-primary" />
             </div>
-            <h1 className="text-sm font-bold tracking-tight text-foreground uppercase opacity-80">{t("notes")}</h1>
+            <h1 className="text-sm font-bold uppercase tracking-tight text-foreground/90">{t("notes")}</h1>
           </div>
-          <div className="flex items-center gap-2 px-2 py-0.5 rounded-full border border-border/50 bg-background/50">
+          <div className="flex items-center gap-2 rounded-full border border-border/60 bg-card/70 px-2 py-0.5 shadow-sm">
             <div className="h-1.5 w-1.5 rounded-full bg-green-500 animate-pulse" />
             <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-widest">Saved</span>
           </div>
@@ -108,13 +107,13 @@ const Notepad = () => {
                   value={selectedNote.title}
                   onChange={(e) => updateNote(selectedNote.id, { title: e.target.value })}
                   placeholder="Note Title"
-                  className="text-2xl font-bold bg-transparent border-0 p-0 focus-visible:ring-0 placeholder:opacity-30"
+                  className="border-0 bg-transparent p-1 text-2xl font-bold shadow-none focus-visible:border-transparent focus-visible:ring-0 placeholder:text-muted-foreground/35"
                 />
                 <Textarea
                   value={selectedNote.content}
                   onChange={(e) => updateNote(selectedNote.id, { content: e.target.value })}
                   placeholder={t("writeYourNotesHere")}
-                  className="flex-1 min-h-[400px] text-lg resize-none border-0 bg-transparent p-0 leading-relaxed text-foreground placeholder:text-muted-foreground/40 focus-visible:ring-0 selection:bg-primary/20"
+                  className="min-h-[400px] flex-1 resize-none border-0 bg-transparent p-1 text-lg leading-relaxed text-foreground shadow-none placeholder:text-muted-foreground/40 focus-visible:border-transparent focus-visible:ring-0 selection:bg-primary/20"
                   style={{ fontSize: '1.1rem', letterSpacing: '-0.01em' }}
                 />
               </div>
@@ -139,7 +138,7 @@ const Notepad = () => {
                 <Button 
                   onClick={() => addNote()} 
                   size="sm" 
-                  className="h-8 w-8 rounded-full p-0 bg-primary/10 text-primary hover:bg-primary/20"
+                  className="h-8 w-8 rounded-full border border-primary/15 bg-primary/10 p-0 text-primary hover:bg-primary/20"
                 >
                   <Plus className="h-4 w-4" />
                 </Button>
@@ -151,7 +150,7 @@ const Notepad = () => {
                   placeholder="Search notes..." 
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-9 h-9 rounded-xl bg-muted/20 border-border/10 focus-visible:ring-primary/20"
+                  className="h-9 rounded-xl border-border/50 bg-card/65 pl-9 shadow-sm focus-visible:ring-primary/20"
                 />
               </div>
 
@@ -165,7 +164,7 @@ const Notepad = () => {
                     <div
                       key={note.id}
                       onClick={() => selectNote(note.id)}
-                      className="group relative flex flex-col gap-2 p-4 rounded-2xl border border-border/20 bg-muted/5 hover:border-primary/20 hover:bg-muted/10 transition-all cursor-pointer"
+                      className="group relative cursor-pointer rounded-2xl border border-border/55 bg-card/60 p-4 transition-all hover:border-primary/25 hover:bg-accent/35"
                     >
                       <div className="flex items-start justify-between">
                         <h3 className="font-bold text-sm truncate pr-6 group-hover:text-primary transition-colors">
@@ -186,10 +185,10 @@ const Notepad = () => {
                           </Button>
                         </DeleteConfirmDialog>
                       </div>
-                      <p className="text-xs text-muted-foreground/60 line-clamp-2 leading-relaxed">
+                      <p className="line-clamp-2 text-xs leading-relaxed text-muted-foreground">
                         {note.content || "No content..."}
                       </p>
-                      <div className="flex items-center gap-1 mt-1 text-[9px] font-bold text-muted-foreground uppercase tracking-widest">
+                      <div className="mt-1 flex items-center gap-1 text-[9px] font-bold uppercase tracking-widest text-muted-foreground/85">
                         <Clock className="h-2.5 w-2.5" />
                         {formatRelativeTime(note.updatedAt)}
                       </div>
