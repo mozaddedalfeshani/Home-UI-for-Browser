@@ -66,7 +66,7 @@ export function PageClient() {
           sessionStorage.setItem("lastWallpaperIndex", randomIndex.toString());
           const selectedUrl = dynamicWallpapers[randomIndex];
           
-          console.log("Fetching dynamic wallpaper:", selectedUrl);
+          // console.log("Fetching dynamic wallpaper:", selectedUrl);
           
           // Add a cache-busting timestamp to bypass aggressive browser/proxy caching
           const response = await fetch(`/api/proxy-wallpaper?url=${encodeURIComponent(selectedUrl)}&_t=${Date.now()}`);
@@ -77,9 +77,9 @@ export function PageClient() {
           const file = new File([blob], filename, { type: blob.type });
           
           await setBackgroundImage(file);
-          console.log("Dynamic wallpaper updated successfully to index:", randomIndex);
-        } catch (error) {
-          console.error("Error updating dynamic wallpaper:", error);
+          // console.log("Dynamic wallpaper updated successfully to index:", randomIndex);
+        } catch {
+          // console.error("Error updating dynamic wallpaper:", error);
         }
       };
       
