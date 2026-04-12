@@ -29,8 +29,8 @@ export const useMediaUrl = (mediaRef: string | null) => {
           setUrl(data);
           setLoading(false);
         })
-        .catch((error) => {
-          console.error("Failed to load media:", error);
+        .catch(() => {
+          // console.error("Failed to load media:", error);
           setUrl(null);
           setLoading(false);
         });
