@@ -15,6 +15,9 @@ import { useSettingsStore } from "@/store/settingsStore";
 import { useTranslation } from "@/constants/languages";
 import {
   StickyAlarmEvent,
+  getPersistedStickyAlarmEvent,
+  isStickyAlarmRunning,
+  persistStickyAlarmEvent,
   subscribeStickyAlarmEvents,
 } from "@/lib/stickyAlarmEvents";
 
@@ -25,8 +28,15 @@ export default function StickyAlarmDialog() {
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   useEffect(() => {
+    const persistedAlarm = getPersistedStickyAlarmEvent();
+    if (persistedAlarm) {
+      setActiveAlarm(persistedAlarm);
+      persistStickyAlarmEvent(persistedAlarm);
+    }
+
     return subscribeStickyAlarmEvents((event) => {
       setActiveAlarm(event);
+      persistStickyAlarmEvent(event);
     });
   }, []);
 
@@ -86,37 +96,65 @@ export default function StickyAlarmDialog() {
       audio.pause();
       audio.currentTime = 0;
     };
-  }, [activeAlarm]);
+  }, [activeAlarm, t]);
 
   useEffect(() => {
-    if (!activeAlarm) {
-      return;
-    }
+    const shouldBlockUnload = () => isStickyAlarmRunning();
 
     const handleBeforeUnload = (event: BeforeUnloadEvent) => {
+      if (!shouldBlockUnload()) {
+        return;
+      }
       event.preventDefault();
-      event.returnValue = "";
+      event.returnValue = true;
+    };
+
+    const handleBeforeUnloadProperty = () => {
+      if (!shouldBlockUnload()) {
+        return undefined;
+      }
+      return true;
     };
 
     const handleRefreshShortcuts = (event: KeyboardEvent) => {
+      if (!shouldBlockUnload()) {
+        return;
+      }
+
       const isReloadKey = event.key === "F5";
       const isMetaReload =
         (event.ctrlKey || event.metaKey) &&
         event.key.toLowerCase() === "r";
-      if (isReloadKey || isMetaReload) {
+      const isMetaClose =
+        (event.ctrlKey || event.metaKey) &&
+        event.key.toLowerCase() === "w";
+      if (isReloadKey || isMetaReload || isMetaClose) {
         event.preventDefault();
       }
     };
 
-    window.onbeforeunload = handleBeforeUnload;
-    window.addEventListener("beforeunload", handleBeforeUnload);
-    window.addEventListener("keydown", handleRefreshShortcuts);
+    window.onbeforeunload = handleBeforeUnloadProperty;
+    const bodyWithBeforeUnload = document.body as
+      | (HTMLBodyElement & {
+          onbeforeunload: ((event: BeforeUnloadEvent) => unknown) | null;
+        })
+      | null;
+    if (bodyWithBeforeUnload) {
+      bodyWithBeforeUnload.onbeforeunload = handleBeforeUnloadProperty;
+    }
+    window.addEventListener("beforeunload", handleBeforeUnload, { capture: true });
+    window.addEventListener("keydown", handleRefreshShortcuts, { capture: true });
+    document.addEventListener("keydown", handleRefreshShortcuts, { capture: true });
     return () => {
       window.onbeforeunload = null;
-      window.removeEventListener("beforeunload", handleBeforeUnload);
-      window.removeEventListener("keydown", handleRefreshShortcuts);
+      if (bodyWithBeforeUnload) {
+        bodyWithBeforeUnload.onbeforeunload = null;
+      }
+      window.removeEventListener("beforeunload", handleBeforeUnload, { capture: true });
+      window.removeEventListener("keydown", handleRefreshShortcuts, { capture: true });
+      document.removeEventListener("keydown", handleRefreshShortcuts, { capture: true });
     };
-  }, [activeAlarm]);
+  }, []);
 
   const handleTurnOffAlarm = () => {
     const audio = audioRef.current;
@@ -124,6 +162,7 @@ export default function StickyAlarmDialog() {
       audio.pause();
       audio.currentTime = 0;
     }
+    persistStickyAlarmEvent(null);
     setActiveAlarm(null);
   };
 
