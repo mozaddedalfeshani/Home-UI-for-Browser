@@ -32,8 +32,8 @@ export async function GET(request: NextRequest) {
         "Cache-Control": "public, max-age=31536000, immutable", // Cache on server/CDN for 1 year
       },
     });
-  } catch (error) {
-    console.error("Proxy fetch error:", error);
+  } catch {
+    // console.error("Proxy fetch error:", error);
     return new NextResponse("Internal Server Error", { status: 500 });
   }
 }
