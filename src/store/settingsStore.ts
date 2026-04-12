@@ -46,6 +46,7 @@ interface SettingsState {
   isResizeDialogOpen: boolean;
   isDynamicWallpaper: boolean;
   dynamicWallpapers: string[];
+  alarmSoundRef: string | null;
   setTheme: (theme: Theme) => void;
   toggleAutoOrderTabs: () => void;
   toggleShowClock: () => void;
@@ -69,6 +70,7 @@ interface SettingsState {
   setResizeDialogOpen: (open: boolean) => void;
   setTabsPosition: (position: TabsPosition) => void;
   setDynamicWallpaper: (enabled: boolean) => void;
+  ensureAlarmSoundCached: () => Promise<string | null>;
   getShareableSettings: () => ShareProfileSettings;
   applyShareProfileSettings: (settings: ShareProfileSettings) => void;
   resetSettings: () => Promise<void>;
@@ -101,6 +103,7 @@ export const useSettingsStore = create<SettingsState>()(
       isResizeDialogOpen: false,
       isDynamicWallpaper: SHARE_SETTINGS_DEFAULTS.isDynamicWallpaper,
       dynamicWallpapers: DEFAULT_DYNAMIC_WALLPAPERS,
+      alarmSoundRef: null,
       setTheme: (theme) => set({ theme }),
       toggleAutoOrderTabs: () =>
         set((state) => ({ autoOrderTabs: !state.autoOrderTabs })),
@@ -111,7 +114,7 @@ export const useSettingsStore = create<SettingsState>()(
       setCardSize: (size) => set({ cardSize: size }),
       setCardRadius: (radius) => set({ cardRadius: radius }),
       setBackgroundImage: async (image) => {
-        console.log("Setting background image in store:", image);
+        // console.log("Setting background image in store:", image);
 
         // If it's a File object, store it in IndexedDB
         if (image instanceof File) {
@@ -119,20 +122,20 @@ export const useSettingsStore = create<SettingsState>()(
             const id = mediaStorage.generateId();
             const mediaRef = await mediaStorage.storeMedia(id, image);
             set({ backgroundImage: mediaRef });
-            console.log("Background image stored in IndexedDB:", mediaRef);
-          } catch (error) {
-            console.error(
-              "Failed to store background image in IndexedDB:",
-              error,
-            );
+            // console.log("Background image stored in IndexedDB:", mediaRef);
+          } catch {
+            // console.error(
+            //   "Failed to store background image in IndexedDB:",
+            //   error,
+            // );
 
             // Check file size for fallback decision
             const maxDataUrlSize = 5 * 1024 * 1024; // 5MB limit for data URL
 
             if (image.size > maxDataUrlSize) {
-              console.warn(
-                "File too large for data URL fallback, skipping background image",
-              );
+              // console.warn(
+              //   "File too large for data URL fallback, skipping background image",
+              // );
               // Don't set the background image if it's too large for data URL
               return;
             }
@@ -146,12 +149,12 @@ export const useSettingsStore = create<SettingsState>()(
                 reader.readAsDataURL(image);
               });
               set({ backgroundImage: dataUrl });
-              console.log("Background image stored as data URL fallback");
-            } catch (fallbackError) {
-              console.error(
-                "Failed to create data URL fallback:",
-                fallbackError,
-              );
+              // console.log("Background image stored as data URL fallback");
+            } catch {
+              // console.error(
+              //   "Failed to create data URL fallback:",
+              //   fallbackError,
+              // );
             }
           }
         } else {
@@ -174,6 +177,31 @@ export const useSettingsStore = create<SettingsState>()(
       setResizeDialogOpen: (open) => set({ isResizeDialogOpen: open }),
       setTabsPosition: (position) => set({ tabsPosition: position }),
       setDynamicWallpaper: (enabled) => set({ isDynamicWallpaper: enabled }),
+      ensureAlarmSoundCached: async () => {
+        const existingRef = get().alarmSoundRef;
+        if (existingRef) {
+          return existingRef;
+        }
+
+        try {
+          const response = await fetch("/video/alarmsounds.mp3");
+          if (!response.ok) {
+            throw new Error(`Failed to fetch alarm sound: ${response.status}`);
+          }
+
+          const blob = await response.blob();
+          const file = new File([blob], "alarmsounds.mp3", {
+            type: blob.type || "audio/mpeg",
+          });
+          const mediaId = mediaStorage.generateId();
+          const mediaRef = await mediaStorage.storeMedia(mediaId, file);
+          set({ alarmSoundRef: mediaRef });
+          return mediaRef;
+        } catch {
+          // console.error("Failed to cache alarm sound:", error);
+          return null;
+        }
+      },
       getShareableSettings: () => {
         const state = get();
         return {
