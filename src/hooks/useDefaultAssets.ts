@@ -22,13 +22,13 @@ export const useDefaultAssets = () => {
           return;
         }
 
-        console.log("Fetching live default wallpaper via proxy...");
+        // console.log("Fetching live default wallpaper via proxy...");
         // Use the proxy-wallpaper API to bypass CORS restrictions
         const proxyUrl = `/api/proxy-wallpaper?url=${encodeURIComponent(DEFAULT_WALLPAPER_URL)}`;
         const res = await fetch(proxyUrl);
         
         if (!res.ok) {
-            console.error("Failed to fetch default wallpaper via proxy:", res.statusText);
+            // console.error("Failed to fetch default wallpaper via proxy:", res.statusText);
             return;
         }
 
@@ -36,7 +36,7 @@ export const useDefaultAssets = () => {
         
         // Ensure we have a valid image blob
         if (!blob.type.startsWith('image/')) {
-            console.error("Fetched file is not a valid image");
+            // console.error("Fetched file is not a valid image");
             return;
         }
 
@@ -47,10 +47,10 @@ export const useDefaultAssets = () => {
         
         if (typeof window !== "undefined") {
           localStorage.setItem(CACHE_KEY, "true");
-          console.log("Default wallpaper successfully cached via proxy.");
+          // console.log("Default wallpaper successfully cached via proxy.");
         }
-      } catch (error) {
-        console.error("An error occurred during default asset initialization:", error);
+      } catch {
+        // console.error("An error occurred during default asset initialization:", error);
       }
     };
 
