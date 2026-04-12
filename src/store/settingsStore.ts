@@ -50,6 +50,7 @@ interface SettingsState {
   toggleAutoOrderTabs: () => void;
   toggleShowClock: () => void;
   toggleShowRightSidebar: () => void;
+  setShowRightSidebar: (show: boolean) => void;
   setCardSize: (size: number) => void;
   setCardRadius: (radius: number) => void;
   setBackgroundImage: (image: string | File | null) => Promise<void>;
@@ -106,6 +107,7 @@ export const useSettingsStore = create<SettingsState>()(
       toggleShowClock: () => set((state) => ({ showClock: !state.showClock })),
       toggleShowRightSidebar: () =>
         set((state) => ({ showRightSidebar: !state.showRightSidebar })),
+      setShowRightSidebar: (show) => set({ showRightSidebar: show }),
       setCardSize: (size) => set({ cardSize: size }),
       setCardRadius: (radius) => set({ cardRadius: radius }),
       setBackgroundImage: async (image) => {

@@ -10,9 +10,11 @@ import { useSettingsStore } from "@/store/settingsStore";
 import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
 import { useMediaUrl } from "@/hooks/useMediaUrl";
 import { useDefaultAssets } from "@/hooks/useDefaultAssets";
+import { useStickyNoteAlarms } from "@/hooks/useStickyNoteAlarms";
 import Image from "next/image";
 import GithubLink from "@/components/Home/GithubLink";
 import { cn } from "@/lib/utils";
+import StickyAlarmDialog from "@/components/Notepad/StickyAlarmDialog";
 
 export function PageClient() {
   const {
@@ -105,6 +107,8 @@ export function PageClient() {
   });
   // Ensure default background image on first visit
   useDefaultAssets();
+  // Keep sticky-note reminders active while dashboard tab is open
+  useStickyNoteAlarms();
 
   const { url: backgroundImageUrl_dummy } = useMediaUrl(backgroundImage); // already have backgroundImageUrl
 
@@ -244,6 +248,7 @@ export function PageClient() {
         open={isSearchModalOpen}
         onOpenChange={setIsSearchModalOpen}
       />
+      <StickyAlarmDialog />
     </div>
   );
 }
