@@ -11,6 +11,7 @@ export interface SearchHistoryEntry {
 interface SearchHistoryState {
   entries: SearchHistoryEntry[];
   addSearchHistoryEntry: (value: string) => void;
+  removeSearchHistoryEntry: (id: string) => void;
   clearSearchHistory: () => void;
 }
 
@@ -50,6 +51,10 @@ export const useSearchHistoryStore = create<SearchHistoryState>()(
           };
         });
       },
+      removeSearchHistoryEntry: (id: string) =>
+        set((state) => ({
+          entries: state.entries.filter((entry) => entry.id !== id),
+        })),
       clearSearchHistory: () => set({ entries: [] }),
     }),
     {
@@ -58,4 +63,3 @@ export const useSearchHistoryStore = create<SearchHistoryState>()(
     },
   ),
 );
-

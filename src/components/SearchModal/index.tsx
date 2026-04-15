@@ -9,6 +9,7 @@ import { useSettingsStore } from "@/store/settingsStore";
 import { useTranslation } from "@/constants/languages";
 import { useSearchHistoryStore } from "@/store/searchHistoryStore";
 import { useTabsStore } from "@/store/tabsStore";
+import { useTabClickHistoryStore } from "@/store/tabClickHistoryStore";
 import { cn } from "@/lib/utils";
 
 interface SearchModalProps {
@@ -36,7 +37,11 @@ const SearchModal = ({
   const addSearchHistoryEntry = useSearchHistoryStore(
     (state) => state.addSearchHistoryEntry,
   );
+  const addTabClickHistoryEntry = useTabClickHistoryStore(
+    (state) => state.addTabClickHistoryEntry,
+  );
   const tabs = useTabsStore((state) => state.tabs);
+  const incrementVisitCount = useTabsStore((state) => state.incrementVisitCount);
   const t = useTranslation(language);
 
   useEffect(() => {
@@ -156,6 +161,7 @@ const SearchModal = ({
       .map((tab) => ({
         id: `tab-${tab.id}`,
         type: "tab" as const,
+        tabId: tab.id,
         label: tab.title,
         sublabel: tab.url,
         value: tab.url,
@@ -193,6 +199,16 @@ const SearchModal = ({
   const handleSuggestionSelect = (suggestion: (typeof suggestionItems)[number]) => {
     if (suggestion.type === "tab") {
       onOpenChange(false);
+      const matchingTab = tabs.find((tab) => tab.id === suggestion.tabId);
+
+      if (matchingTab) {
+        addTabClickHistoryEntry({
+          id: matchingTab.id,
+          title: matchingTab.title,
+          url: matchingTab.url,
+        });
+        incrementVisitCount(matchingTab.id);
+      }
 
       if (suggestion.openInNewWindow) {
         window.open(suggestion.value, "_blank", "noopener,noreferrer");

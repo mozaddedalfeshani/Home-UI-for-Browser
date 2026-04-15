@@ -6,6 +6,7 @@ import Link from "next/link";
 import { DndProvider, useDrag, useDrop } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import { useTabsStore, Tab } from "@/store/tabsStore";
+import { useTabClickHistoryStore } from "@/store/tabClickHistoryStore";
 import { useSettingsStore } from "@/store/settingsStore";
 import { useTranslation } from "@/constants/languages";
 import { cn } from "@/lib/utils";
@@ -105,6 +106,9 @@ const SortableShortcutCard = ({
     setBackgroundDialogOpen,
     setResizeDialogOpen
   } = useSettingsStore();
+  const addTabClickHistoryEntry = useTabClickHistoryStore(
+    (state) => state.addTabClickHistoryEntry,
+  );
   const t = useTranslation(language);
 
   const [, drop] = useDrop<DragItem>({
@@ -148,6 +152,15 @@ const SortableShortcutCard = ({
   const accent = getAccent(tab.title || hostname);
   const favicon = getFaviconUrl(tab.url);
 
+  const handleShortcutClick = () => {
+    addTabClickHistoryEntry({
+      id: tab.id,
+      title: tab.title,
+      url: tab.url,
+    });
+    incrementVisitCount(tab.id);
+  };
+
   return (
     <ContextMenu>
       <ContextMenuTrigger asChild>
@@ -165,7 +178,7 @@ const SortableShortcutCard = ({
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label={`Open ${tab.title || hostname || 'shortcut'}`}
-                onClick={() => incrementVisitCount(tab.id)}
+                onClick={handleShortcutClick}
                 className="block [&:hover]:cursor-pointer"
                 style={{ textDecoration: 'none' }}>
                 <Card 

@@ -12,6 +12,7 @@ import {
   Image as ImageIcon,
   Clock,
   RotateCcw,
+  History,
 } from "lucide-react";
 import { useTheme } from "next-themes";
 import { cn } from "@/lib/utils";
@@ -46,6 +47,7 @@ import { parseShareProfile, type ShareProfileV1 } from "@/lib/shareProfile";
 import { ResizeShortcutsDialog } from "./ResizeShortcutsDialog";
 import { BackgroundImageDialog } from "./BackgroundImageDialog";
 import { ClockColorDialog } from "./ClockColorDialog";
+import { HistoryDialog } from "./HistoryDialog";
 import { ResetDialog } from "./ResetDialog";
 
 const SettingsMenu = () => {
@@ -54,6 +56,7 @@ const SettingsMenu = () => {
     useState<ShareProfileV1 | null>(null);
   const [isImportConfirmOpen, setIsImportConfirmOpen] = useState(false);
   const [isImporting, setIsImporting] = useState(false);
+  const [isHistoryDialogOpen, setIsHistoryDialogOpen] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const {
@@ -357,6 +360,14 @@ const SettingsMenu = () => {
             <Button
               variant="ghost"
               size="sm"
+              onClick={() => setIsHistoryDialogOpen(true)}
+              className="h-9 justify-start gap-2 px-2 text-[11px] font-normal">
+              <History className="h-3.5 w-3.5 text-muted-foreground" />
+              {t("history")}
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
               onClick={() => setResizeDialogOpen(true)}
               className="h-9 justify-start gap-2 px-2 text-[11px] font-normal">
               <Maximize2 className="h-3.5 w-3.5 text-muted-foreground" />
@@ -434,6 +445,11 @@ const SettingsMenu = () => {
       <ClockColorDialog
         open={isClockDialogOpen}
         onOpenChange={setClockDialogOpen}
+      />
+
+      <HistoryDialog
+        open={isHistoryDialogOpen}
+        onOpenChange={setIsHistoryDialogOpen}
       />
 
       <Dialog

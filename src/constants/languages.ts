@@ -30,6 +30,14 @@ export const TRANSLATIONS = {
     clockPosition: "Clock Position",
     searchEngine: "Search Engine",
     searchHistory: "Search History",
+    history: "History",
+    historyDescription:
+      "Recent searches and shortcut opens appear here in one timeline.",
+    noHistory: "No history yet",
+    historyEmptyDescription:
+      "Your searches and opened shortcuts will show up here.",
+    searchEntry: "Search",
+    shortcutEntry: "Shortcut",
     noSearchHistory: "No recent searches yet",
     layoutMode: "Layout Mode",
     layoutDefault: "Default",
@@ -193,6 +201,14 @@ export const TRANSLATIONS = {
     clockPosition: "ঘড়ির অবস্থান",
     searchEngine: "সার্চ ইঞ্জিন",
     searchHistory: "সার্চ হিস্টোরি",
+    history: "হিস্টোরি",
+    historyDescription:
+      "সাম্প্রতিক সার্চ এবং খোলা শর্টকাট এখানে একসাথে দেখাবে।",
+    noHistory: "এখনো কোনো হিস্টোরি নেই",
+    historyEmptyDescription:
+      "আপনার সার্চ এবং খোলা শর্টকাট এখানে দেখা যাবে।",
+    searchEntry: "সার্চ",
+    shortcutEntry: "শর্টকাট",
     noSearchHistory: "এখনো কোনো সাম্প্রতিক সার্চ নেই",
     layoutMode: "লেআউট মোড",
     layoutDefault: "ডিফল্ট",
