@@ -291,7 +291,7 @@ export function PageClient() {
 
       <div
         className={cn(
-          "fixed left-0 top-0 bottom-0 z-[80] w-[min(92vw,24rem)] transform transition-all duration-500 ease-out md:w-96",
+          "fixed left-0 top-0 bottom-0 z-[80] w-[min(94vw,26rem)] transform transition-all duration-500 ease-out md:w-[28rem]",
           isAISidebarVisible ? "translate-x-0" : "-translate-x-full",
         )}
       >
