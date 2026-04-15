@@ -199,7 +199,12 @@ const SettingsMenu = () => {
           <div className="flex items-center justify-between px-2 py-1.5">
             <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">{t("settings")}</span>
             <ResetDialog>
-              <Button variant="ghost" size="icon-sm" className="h-6 w-6 text-destructive hover:bg-destructive/10">
+              <Button
+                variant="ghost"
+                size="icon-sm"
+                className="h-6 w-6 text-destructive hover:bg-destructive/10"
+                aria-label="Reset settings"
+              >
                 <RotateCcw className="h-3 w-3" />
               </Button>
             </ResetDialog>
@@ -216,6 +221,7 @@ const SettingsMenu = () => {
                   size="icon-sm"
                   className="h-8 w-8"
                   onClick={() => handleThemeChange("light")}
+                  aria-label={t("light")}
                   title={t("light")}>
                   <Sun className="h-4 w-4" />
                 </Button>
@@ -224,6 +230,7 @@ const SettingsMenu = () => {
                   size="icon-sm"
                   className="h-8 w-8"
                   onClick={() => handleThemeChange("dark")}
+                  aria-label={t("dark")}
                   title={t("dark")}>
                   <Moon className="h-4 w-4" />
                 </Button>
@@ -232,6 +239,7 @@ const SettingsMenu = () => {
                   size="icon-sm"
                   className="h-8 w-8"
                   onClick={() => handleThemeChange("system")}
+                  aria-label={t("system")}
                   title={t("system")}>
                   <Monitor className="h-4 w-4" />
                 </Button>
