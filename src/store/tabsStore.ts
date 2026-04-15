@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import type { ShareProfileTab } from "@/lib/shareProfile";
+import { migrateShortcutToPrimaryModifier } from "@/lib/keyboardShortcuts";
 
 export interface Tab {
   id: string;
@@ -13,11 +14,11 @@ export interface Tab {
 }
 
 const DEFAULT_TABS: Tab[] = [
-  { id: "1", title: "YouTube", url: "https://www.youtube.com", createdAt: Date.now(), visitCount: 0, shortcut: "y" },
-  { id: "2", title: "Share Editor", url: "https://paper.imurad.me", createdAt: Date.now(), visitCount: 0, shortcut: "s" },
-  { id: "3", title: "GitHub", url: "https://github.com", createdAt: Date.now(), visitCount: 0, shortcut: "h" },
-  { id: "4", title: "Gemini", url: "https://gemini.google.com", createdAt: Date.now(), visitCount: 0, shortcut: "g" },
-  { id: "5", title: "ChatGPT", url: "https://chatgpt.com", createdAt: Date.now(), visitCount: 0, shortcut: "c" },
+  { id: "1", title: "YouTube", url: "https://www.youtube.com", createdAt: Date.now(), visitCount: 0, shortcut: migrateShortcutToPrimaryModifier("y") },
+  { id: "2", title: "Share Editor", url: "https://paper.imurad.me", createdAt: Date.now(), visitCount: 0, shortcut: migrateShortcutToPrimaryModifier("s") },
+  { id: "3", title: "GitHub", url: "https://github.com", createdAt: Date.now(), visitCount: 0, shortcut: migrateShortcutToPrimaryModifier("h") },
+  { id: "4", title: "Gemini", url: "https://gemini.google.com", createdAt: Date.now(), visitCount: 0, shortcut: migrateShortcutToPrimaryModifier("g") },
+  { id: "5", title: "ChatGPT", url: "https://chatgpt.com", createdAt: Date.now(), visitCount: 0, shortcut: migrateShortcutToPrimaryModifier("c") },
 ];
 
 interface TabsState {
@@ -141,7 +142,22 @@ export const useTabsStore = create<TabsState>()(
     }),
     {
       name: "tabs-store",
-      version: 1,
+      version: 2,
+      migrate: (persistedState: unknown) => {
+        const state = persistedState as TabsState | undefined;
+
+        if (!state?.tabs) {
+          return persistedState;
+        }
+
+        return {
+          ...state,
+          tabs: state.tabs.map((tab) => ({
+            ...tab,
+            shortcut: migrateShortcutToPrimaryModifier(tab.shortcut),
+          })),
+        };
+      },
     }
   )
 );
