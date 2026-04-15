@@ -16,6 +16,11 @@ import GithubLink from "@/components/Home/GithubLink";
 import { cn } from "@/lib/utils";
 import StickyAlarmDialog from "@/components/Notepad/StickyAlarmDialog";
 
+type SearchOpenRequest = {
+  id: number;
+  seedText: string;
+};
+
 export function PageClient() {
   const {
     showClock,
@@ -42,9 +47,13 @@ export function PageClient() {
   }, [backgroundImageUrl]);
 
   const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
-  const [searchInitialQuery, setSearchInitialQuery] = useState("");
+  const [searchOpenRequest, setSearchOpenRequest] = useState<SearchOpenRequest>({
+    id: 0,
+    seedText: "",
+  });
   const [isSidebarVisible, setIsSidebarVisible] = useState(false);
   const isSearchModalOpenRef = useRef(false);
+  const isSearchInputReadyRef = useRef(false);
 
   useEffect(() => {
     isSearchModalOpenRef.current = isSearchModalOpen;
@@ -52,10 +61,14 @@ export function PageClient() {
 
   const handleSearchModalOpenChange = (nextOpen: boolean) => {
     isSearchModalOpenRef.current = nextOpen;
+    isSearchInputReadyRef.current = false;
     setIsSearchModalOpen(nextOpen);
 
     if (!nextOpen) {
-      setSearchInitialQuery("");
+      setSearchOpenRequest((currentRequest) => ({
+        id: currentRequest.id,
+        seedText: "",
+      }));
     }
   };
 
@@ -120,11 +133,22 @@ export function PageClient() {
   useKeyboardShortcuts({
     onSearchModalOpen: (initialQuery) => {
       if (initialQuery) {
-        setSearchInitialQuery((currentQuery) =>
-          isSearchModalOpenRef.current ? `${currentQuery}${initialQuery}` : initialQuery
-        );
+        setSearchOpenRequest((currentRequest) => ({
+          id: currentRequest.id + 1,
+          seedText:
+            isSearchModalOpenRef.current && !isSearchInputReadyRef.current
+              ? `${currentRequest.seedText}${initialQuery}`
+              : initialQuery,
+        }));
+      } else if (!isSearchModalOpenRef.current) {
+        setSearchOpenRequest((currentRequest) => ({
+          id: currentRequest.id + 1,
+          seedText: "",
+        }));
       }
+
       isSearchModalOpenRef.current = true;
+      isSearchInputReadyRef.current = false;
       setIsSearchModalOpen(true);
     },
   });
@@ -268,7 +292,10 @@ export function PageClient() {
       <SearchModal
         open={isSearchModalOpen}
         onOpenChange={handleSearchModalOpenChange}
-        initialQuery={searchInitialQuery}
+        openRequest={searchOpenRequest}
+        onInputReady={() => {
+          isSearchInputReadyRef.current = true;
+        }}
       />
       <StickyAlarmDialog />
     </div>

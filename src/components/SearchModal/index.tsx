@@ -8,56 +8,70 @@ import { Button } from "@/components/ui/button";
 import { useSettingsStore } from "@/store/settingsStore";
 import { useTranslation } from "@/constants/languages";
 import { useSearchHistoryStore } from "@/store/searchHistoryStore";
+import { useTabsStore } from "@/store/tabsStore";
 import { cn } from "@/lib/utils";
 
 interface SearchModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  initialQuery?: string;
+  openRequest: {
+    id: number;
+    seedText: string;
+  };
+  onInputReady?: () => void;
 }
 
 const SearchModal = ({
   open,
   onOpenChange,
-  initialQuery = "",
+  openRequest,
+  onInputReady,
 }: SearchModalProps) => {
   const [query, setQuery] = useState("");
   const [activeIndex, setActiveIndex] = useState(-1);
   const inputRef = useRef<HTMLInputElement>(null);
+  const lastAppliedRequestIdRef = useRef(0);
   const { searchEngine, language } = useSettingsStore();
   const historyEntries = useSearchHistoryStore((state) => state.entries);
   const addSearchHistoryEntry = useSearchHistoryStore(
     (state) => state.addSearchHistoryEntry,
   );
+  const tabs = useTabsStore((state) => state.tabs);
   const t = useTranslation(language);
 
   useEffect(() => {
     if (open && inputRef.current) {
       inputRef.current.focus();
+      onInputReady?.();
     }
-  }, [open]);
+  }, [open, onInputReady]);
 
   useEffect(() => {
-    if (open) {
-      setQuery(initialQuery);
+    if (!open) {
+      setQuery("");
       setActiveIndex(-1);
       return;
     }
 
-    setQuery("");
-    setActiveIndex(-1);
-  }, [open, initialQuery]);
-
-  useEffect(() => {
-    if (!open) {
+    if (openRequest.id === 0 || lastAppliedRequestIdRef.current === openRequest.id) {
       return;
     }
 
-    if (inputRef.current) {
-      const nextCursorPosition = inputRef.current.value.length;
-      inputRef.current.setSelectionRange(nextCursorPosition, nextCursorPosition);
-    }
-  }, [open, query]);
+    lastAppliedRequestIdRef.current = openRequest.id;
+    setQuery(openRequest.seedText);
+    setActiveIndex(-1);
+
+    requestAnimationFrame(() => {
+      if (!inputRef.current) {
+        return;
+      }
+
+      inputRef.current.focus();
+      const cursorPosition = openRequest.seedText.length;
+      inputRef.current.setSelectionRange(cursorPosition, cursorPosition);
+      onInputReady?.();
+    });
+  }, [open, openRequest, onInputReady]);
 
   useEffect(() => {
     setActiveIndex(-1);
@@ -125,21 +139,75 @@ const SearchModal = ({
     handleSearchValue(query);
   };
 
-  const visibleHistoryEntries = historyEntries.filter((entry) => {
-    const normalizedQuery = query.trim().toLowerCase();
-    if (!normalizedQuery) {
-      return true;
-    }
+  const normalizedQuery = query.trim().toLowerCase();
 
-    return entry.normalizedValue.includes(normalizedQuery);
-  }).slice(0, 5);
+  const suggestionItems = [
+    ...tabs
+      .filter((tab) => {
+        if (!normalizedQuery) {
+          return true;
+        }
+
+        return [tab.title, tab.url, tab.shortcut]
+          .filter(Boolean)
+          .some((value) => value!.toLowerCase().includes(normalizedQuery));
+      })
+      .slice(0, 5)
+      .map((tab) => ({
+        id: `tab-${tab.id}`,
+        type: "tab" as const,
+        label: tab.title,
+        sublabel: tab.url,
+        value: tab.url,
+        openInNewWindow: tab.openInNewWindow,
+      })),
+    ...historyEntries
+      .filter((entry) => {
+        if (!normalizedQuery) {
+          return true;
+        }
+
+        return entry.normalizedValue.includes(normalizedQuery);
+      })
+      .filter(
+        (entry) =>
+          !tabs.some(
+            (tab) =>
+              tab.url === entry.value ||
+              tab.title.trim().toLowerCase() === entry.normalizedValue,
+          ),
+      )
+      .slice(0, 5)
+      .map((entry) => ({
+        id: `history-${entry.id}`,
+        type: "history" as const,
+        label: entry.value,
+        sublabel: t("searchHistory"),
+        value: entry.value,
+      })),
+  ].slice(0, 6);
 
   const activeSuggestion =
-    activeIndex >= 0 ? visibleHistoryEntries[activeIndex] : undefined;
+    activeIndex >= 0 ? suggestionItems[activeIndex] : undefined;
+
+  const handleSuggestionSelect = (suggestion: (typeof suggestionItems)[number]) => {
+    if (suggestion.type === "tab") {
+      onOpenChange(false);
+
+      if (suggestion.openInNewWindow) {
+        window.open(suggestion.value, "_blank", "noopener,noreferrer");
+      } else {
+        window.location.href = suggestion.value;
+      }
+      return;
+    }
+
+    handleSearchValue(suggestion.value);
+  };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "ArrowDown") {
-      if (!visibleHistoryEntries.length) {
+      if (!suggestionItems.length) {
         return;
       }
 
@@ -147,23 +215,23 @@ const SearchModal = ({
       setActiveIndex((currentIndex) =>
         currentIndex < 0
           ? 0
-          : Math.min(currentIndex + 1, visibleHistoryEntries.length - 1),
+          : Math.min(currentIndex + 1, suggestionItems.length - 1),
       );
     } else if (e.key === "ArrowUp") {
-      if (!visibleHistoryEntries.length) {
+      if (!suggestionItems.length) {
         return;
       }
 
       e.preventDefault();
       setActiveIndex((currentIndex) =>
         currentIndex < 0
-          ? visibleHistoryEntries.length - 1
+          ? suggestionItems.length - 1
           : Math.max(currentIndex - 1, 0),
       );
     } else if (e.key === "Enter") {
       e.preventDefault();
       if (activeSuggestion) {
-        handleSearchValue(activeSuggestion.value);
+        handleSuggestionSelect(activeSuggestion);
         return;
       }
 
@@ -190,11 +258,11 @@ const SearchModal = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContentBottom className="w-full p-0 overflow-hidden rounded-t-2xl border-border/60 bg-background/95 backdrop-blur-xl sm:bottom-8 sm:max-w-2xl sm:rounded-2xl">
+      <DialogContentBottom className="w-full border-0 bg-transparent p-4 shadow-none sm:bottom-8 sm:max-w-2xl">
         <DialogTitle className="sr-only">Search</DialogTitle>
-        <div className="p-4 sm:p-5">
+        <div className="mx-auto w-full max-w-2xl">
           <div className="relative">
-            <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+            <Search className="pointer-events-none absolute left-5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground/70" />
 
             <Input
               ref={inputRef}
@@ -202,7 +270,7 @@ const SearchModal = ({
               value={query}
               onChange={handleInputChange}
               onKeyDown={handleKeyDown}
-              className="pl-10 pr-32 h-12 text-base"
+              className="h-14 rounded-full border border-border/50 bg-background/92 pl-12 pr-16 text-base shadow-none backdrop-blur-md focus-visible:border-primary/40 focus-visible:ring-0"
             />
 
             <Button
@@ -210,38 +278,43 @@ const SearchModal = ({
               size="sm"
               onClick={handleSearch}
               aria-label={`Search with ${providerLabel}`}
-              className="absolute right-2 top-2 h-8 w-8 p-0"
+              className="absolute right-3 top-1/2 h-9 w-9 -translate-y-1/2 rounded-full border border-border/50 bg-background/90 p-0 text-muted-foreground shadow-none hover:bg-accent hover:text-foreground"
               disabled={!query.trim()}>
               <SearchCheck aria-hidden="true" />
             </Button>
           </div>
 
-          <div className="mt-3 max-h-64 overflow-y-auto">
-            {visibleHistoryEntries.length > 0 && (
-              <div className="flex flex-col gap-1">
-                {visibleHistoryEntries.map((entry, index) => {
-                  const isActive = index === activeIndex;
+          {suggestionItems.length > 0 && (
+            <div className="mt-2 overflow-hidden rounded-3xl border border-border/40 bg-background/88 p-2 backdrop-blur-md">
+              <div className="max-h-64 overflow-y-auto">
+                <div className="flex flex-col gap-1">
+                  {suggestionItems.map((suggestion, index) => {
+                    const isActive = index === activeIndex;
 
-                  return (
-                    <button
-                      key={entry.id}
-                      type="button"
-                      onMouseEnter={() => setActiveIndex(index)}
-                      onMouseDown={(event) => event.preventDefault()}
-                      onClick={() => handleSearchValue(entry.value)}
-                      className={cn(
-                        "w-full rounded-lg px-3 py-2 text-left text-sm transition-colors",
-                        isActive
-                          ? "bg-primary/10 text-primary"
-                          : "hover:bg-accent hover:text-accent-foreground",
-                      )}>
-                      <span className="block truncate">{entry.value}</span>
-                    </button>
-                  );
-                })}
+                    return (
+                      <button
+                        key={suggestion.id}
+                        type="button"
+                        onMouseEnter={() => setActiveIndex(index)}
+                        onMouseDown={(event) => event.preventDefault()}
+                        onClick={() => handleSuggestionSelect(suggestion)}
+                        className={cn(
+                          "w-full rounded-2xl border border-transparent px-4 py-3 text-left text-sm text-foreground/90 transition-colors",
+                          isActive
+                            ? "border-primary/20 bg-primary/10 text-primary"
+                            : "hover:border-border/40 hover:bg-accent/40 hover:text-foreground",
+                        )}>
+                        <span className="block truncate font-medium">{suggestion.label}</span>
+                        <span className="mt-0.5 block truncate text-xs text-muted-foreground">
+                          {suggestion.sublabel}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
-            )}
-          </div>
+            </div>
+          )}
         </div>
       </DialogContentBottom>
     </Dialog>
