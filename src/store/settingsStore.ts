@@ -16,7 +16,6 @@ export type ClockStyle = "classic" | "modern";
 export type TabsPosition = "top" | "center" | "bottom";
 
 export const DEFAULT_DYNAMIC_WALLPAPERS = [
-  "https://homewalpaper.imurad.me/1351306.png",
   "https://homewalpaper.imurad.me/1362858.jpeg",
   "https://homewalpaper.imurad.me/573653.jpg",
 ];
