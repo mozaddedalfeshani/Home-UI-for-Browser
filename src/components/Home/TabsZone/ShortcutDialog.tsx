@@ -18,6 +18,11 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { useTabsStore, Tab } from "@/store/tabsStore";
 import { useSettingsStore } from "@/store/settingsStore";
 import { useTranslation } from "@/constants/languages";
+import {
+  buildShortcutString,
+  getPrimaryModifierLabel,
+  hasPrimaryModifier,
+} from "@/lib/keyboardShortcuts";
 
 interface ShortcutDialogProps {
   tab: Tab;
@@ -34,6 +39,7 @@ export const ShortcutDialog = ({ tab, children }: ShortcutDialogProps) => {
   const getTabByShortcut = useTabsStore((state) => state.getTabByShortcut);
   const language = useSettingsStore((state) => state.language);
   const t = useTranslation(language);
+  const primaryModifierLabel = getPrimaryModifierLabel();
 
   // Initialize form with tab data when dialog opens
   useEffect(() => {
@@ -66,21 +72,16 @@ export const ShortcutDialog = ({ tab, children }: ShortcutDialogProps) => {
       event.preventDefault();
       event.stopPropagation();
 
-      const modifiers = [];
-      if (event.ctrlKey) modifiers.push("Ctrl");
-      if (event.altKey) modifiers.push("Alt");
-      if (event.shiftKey) modifiers.push("Shift");
-      if (event.metaKey) modifiers.push("Meta");
-
-      // Don't allow shortcuts with only modifiers
-      if (event.key === "Control" || event.key === "Alt" || event.key === "Shift" || event.key === "Meta") {
+      const shortcutString = buildShortcutString(event);
+      if (!shortcutString) {
         return;
       }
 
-      const key = event.key === " " ? "Space" : event.key;
-      const shortcutString = [...modifiers, key].join("+");
+      if (!hasPrimaryModifier(shortcutString)) {
+        setError(`${primaryModifierLabel}+... is required`);
+        return;
+      }
 
-      // Check if shortcut is already in use by another tab
       const existingTab = getTabByShortcut(shortcutString);
       if (existingTab && existingTab.id !== tab.id) {
         setError(t("shortcutInUse"));
@@ -96,7 +97,7 @@ export const ShortcutDialog = ({ tab, children }: ShortcutDialogProps) => {
       document.addEventListener("keydown", handleKeyDown);
       return () => document.removeEventListener("keydown", handleKeyDown);
     }
-  }, [isRecording, getTabByShortcut, tab.id, t]);
+  }, [isRecording, getTabByShortcut, primaryModifierLabel, tab.id, t]);
 
   const startRecording = () => {
     setIsRecording(true);
@@ -132,7 +133,11 @@ export const ShortcutDialog = ({ tab, children }: ShortcutDialogProps) => {
             <div className="flex gap-2">
               <Input
                 id="shortcut-input"
-                placeholder={isRecording ? t("pressKeys") : "None"}
+                placeholder={
+                  isRecording
+                    ? `${t("pressKeys")} (${primaryModifierLabel}+...)`
+                    : "None"
+                }
                 value={shortcut}
                 readOnly
                 className={isRecording ? "ring-2 ring-primary" : ""}
@@ -155,6 +160,9 @@ export const ShortcutDialog = ({ tab, children }: ShortcutDialogProps) => {
                 </Button>
               )}
             </div>
+            <p className="text-xs text-muted-foreground">
+              Use {primaryModifierLabel}+key so normal typing can open search without triggering shortcuts.
+            </p>
           </div>
           <div className="flex items-center space-x-2">
             <Checkbox
