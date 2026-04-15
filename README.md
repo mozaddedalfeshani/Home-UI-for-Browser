@@ -1,206 +1,128 @@
-# MCLX Home UI for Browser
+# Home UI for Browser - আপনার ব্যক্তিগত ড্যাশবোর্ড
 
-Personal browser start page, but actually productive.
-English-first docs with Bangla flavor, so team-er sobai easily bujhte pare.
+Language: English | [বাংলা দেখুন](README.bn.md)
 
-MCLX Home UI for Browser is a customizable home dashboard built with Next.js + TypeScript. It combines shortcuts, notes, search, visual customization, and now a strong left AI sidebar with Agent profiles.
+MCLX Home UI for Browser is a personal dashboard for your browser start page. This README is intentionally focused on product features and practical daily value.
 
-## Why this project
+## What This App Does
 
-Default new-tab pages are often too basic. Ei project-er goal holo:
+- Gives you a clean, customizable home screen
+- Keeps your most-used links and notes in one place
+- Adds an AI sidebar you can configure for different tasks
+- Saves your setup locally so your workflow stays consistent
 
-- Fast daily access to favorite websites
-- Clean but rich customization
-- Lightweight persistence without backend
-- AI assistant integrated directly into the layout
+## All Features
 
-## Core Features
+### 1) Home and Shortcut Management
 
-### Home + Shortcuts
+- Create, edit, and remove shortcut cards
+- Drag and drop to reorder shortcuts
+- Track visit count for each shortcut
+- Auto-order mode to prioritize frequently used sites
+- Optional open-in-new-window behavior
+- Keyboard shortcut mapping per shortcut
 
-- Smart shortcut cards
-- Drag and drop reordering
-- Visit tracking
-- Keyboard shortcut mapping per tab
-- Optional open in new window
-- Multiple layout presets
+### 2) Visual and Layout Customization
 
-### Visual Customization
+- Theme controls (light, dark, system)
+- Clock visibility, style, position, and formatting options
+- Clock color and glow customization
+- Shortcut card size and radius adjustments
+- Background image/video support
+- Dynamic wallpaper mode for fresh visuals
+- Layout presets for default, compact, and focus use-cases
 
-- Theme modes: light, dark, system
-- Clock show/hide, style, position, color, glow
-- Shortcut card sizing and radius
-- Background image/video upload
-- Dynamic wallpaper support through proxy route
+### 3) Search Experience
 
-### Notepad
+- Unified quick search modal
+- Multiple search engine options
+- Search history support for faster repeat actions
 
-- Persistent notes
-- Search within notes
-- Copy support
-- Sticky alarm flow and note utilities
+### 4) Notepad System
 
-### Search Modal
+- Persistent note storage
+- Quick search inside notes
+- Copy note content easily
+- Sticky alarm utilities for reminders
 
-- Multi-engine search support
-- Quick open behavior
-- History integration
+### 5) Left Sidebar AI Assistant
 
-## New Feature Focus: Left Sidebar Agents
+- Side panel chat experience integrated into the homepage
+- Provider setup and profile controls
+- Streamed AI responses for better reading flow
+- Markdown-friendly AI message rendering
+- One-click copy for AI replies
+- Save AI reply directly as a note
 
-Eta hocche current biggest upgrade.
+### 6) Left Sidebar Agents (New)
 
-The left AI sidebar now supports a complete Agent-based workflow so you can switch between different AI personalities/configs instantly.
+- Create saved Agent profiles from the sidebar
+- Per-agent provider selection
+- Per-agent API key
+- Per-agent model
+- Per-agent rules
+- Per-agent language behavior
+- Per-agent tone/behavior preset
+- Switch agents instantly from Agent menu
+- Active agent indicator in header
+- Leave Agent mode and return to your general AI setup
+- Agent profiles persist after refresh
 
-### What you get
+## Life-Saving Features
 
-- Agent profile creation from sidebar
-- Per-agent provider config: DeepSeek or OpenRouter
-- Per-agent model selection: Supports OpenRouter model fetch + manual model entry
-- Per-agent API key, rules, language, behavior
-- Agent switch menu with active status indicator
-- Leave agent mode and return to general config
-- Sidebar chat uses active agent profile automatically
+These are the features most users end up relying on every day.
 
-### Sidebar capabilities (with agents)
+### Fast Recovery and Control
 
-- Streaming AI responses
-- Optional send-history behavior for conversation context
-- Markdown rendering in AI replies
-- Copy AI reply as markdown
-- Save AI reply to Notepad with AI-generated title
-- Provider-aware error handling for better feedback
+- Reset options to recover from broken configuration states
+- Clear chat quickly when switching context
+- Leave Agent mode instantly and fall back to baseline setup
 
-### Agent persistence model
+### Time-Saving Workflow Boosters
 
-Agents are stored locally using Zustand persist, so browser refresh-er por-o profiles thake.
+- Keyboard shortcuts for rapid navigation
+- Auto-order shortcuts so high-frequency links stay on top
+- Save AI answers directly to notes instead of copy-paste juggling
+- Reuse Agent profiles instead of re-entering prompt/rule setup each time
 
-- Agent store keeps profile metadata and timestamps
-- AI sidebar store keeps general config + active agent state
-- Switching agent applies profile instantly
-- Leaving agent mode restores general baseline config
+### Focus and Context Management
 
-## Tech Stack
+- Layout presets for low-distraction mode
+- Optional message-history toggle for cleaner or richer AI context
+- Rules/language/behavior controls to keep AI outputs consistent
 
-- Next.js 16
-- React 19
-- TypeScript 5
-- Tailwind CSS 4
-- Zustand (persist middleware)
-- shadcn/ui + Radix UI
-- Hugeicons + Lucide icons
-- React Markdown + remark-gfm
+## Feature Walkthrough
 
-## Project Structure
+### Daily Setup in 1 Minute
 
-High-level structure:
+1. Add your top shortcuts
+2. Tune layout and visuals
+3. Open AI sidebar and configure provider
+4. Create 1-2 Agents for repeated tasks
+5. Start work from one screen
 
-- src/app: App router, layout, page entry, API routes
-- src/components: UI feature modules
-- src/store: Zustand stores
-- src/hooks: reusable hooks
-- src/lib: utility functions and storage helpers
+### Recommended Agent Workflow
 
-Agent-related component organization (new structure):
+1. Create an Agent for coding help
+2. Create another Agent for writing/research
+3. Switch by task instead of rewriting instructions
+4. Save useful AI outputs to Notepad
 
-- src/components/AgentMenu/index.tsx: Barrel exports for Agent menu module
-- src/components/AgentMenu/AgentMenu/index.tsx: Agent switch/dropdown UI
-- src/components/AgentMenu/AgentForm/index.tsx: Agent creation form
-- src/components/AgentMenu/AgentSheet/index.tsx: Agent creation sheet wrapper
-- src/components/AISidebar/index.tsx: Left sidebar AI experience
-- src/store/agentStore.ts: Saved Agent profiles
-- src/store/aiSidebarStore.ts: Runtime AI config + active agent state
+## Documentation
 
-## Getting Started
+- English README: [README.md](README.md)
+- Bangla README: [README.bn.md](README.bn.md)
+- Privacy policy: [privacy-policy.md](privacy-policy.md)
 
-### Requirements
+## Contributing
 
-- Node.js 18+
-- Bun recommended (npm/yarn also works)
+Contributions are welcome.
 
-### Install
-
-1. Clone repo
-
-git clone https://github.com/mozaddedalfeshani/mclx-home-ui-for-browser.git
-cd mclx-home-ui-for-browser
-
-2. Install dependencies
-
-bun install
-
-Or:
-
-npm install
-
-3. Run dev server
-
-bun run dev
-
-Open:
-
-http://localhost:3000
-
-### Build and run
-
-bun run build
-bun run start
-
-## Available Scripts
-
-- bun run dev: Start development server
-- bun run build: Build production bundle
-- bun run start: Run production server
-- bun run lint: Run ESLint checks
-
-## Usage Guide
-
-### Basic setup flow
-
-1. Open app
-2. Configure shortcuts + visuals from settings
-3. Use notepad and search modal as needed
-
-### AI sidebar flow
-
-1. Open left sidebar
-2. Add provider and API key in setup
-3. Optionally tune rules, language, behavior
-4. Start chat
-
-### Agent flow (recommended)
-
-1. Open Agent menu (bot icon in sidebar header)
-2. Create Agent profile
-3. Fill name, description, provider, key, model, rules, language, behavior
-4. Switch to agent from dropdown
-5. Chat with active agent config
-6. Leave agent mode anytime
-
-## Data and Privacy Notes
-
-- This app is frontend-first and stores data locally
-- Agent/API settings are persisted in local browser storage
-- Background media can use IndexedDB/local storage helpers
-- Check privacy-policy.md for project policy details
-
-## Contribution
-
-Contributions are welcome. Bhalo improvements always appreciated.
-
-Suggested flow:
-
-1. Fork repo
-2. Create feature branch
-3. Commit clearly
-4. Open PR with screenshots or short video for UI changes
+1. Fork the repository
+2. Create a feature branch
+3. Commit your updates clearly
+4. Open a pull request with screenshots for UI changes
 
 ## License
 
 MIT License.
-
-## Credits
-
-Built with love in Bangladesh.
-
-If this project helps you, repo-te star dite vulben na.
