@@ -197,6 +197,7 @@ const Notepad = () => {
                     size="sm"
                     onClick={() => handleCopy(selectedNote.content)}
                     className="h-8 w-8 p-0 hover:bg-primary/10 hover:text-primary transition-colors"
+                    aria-label={copied ? "Copied" : "Copy note"}
                   >
                     {copied ? <CheckCircle2 className="h-4 w-4 text-green-500" /> : <Copy className="h-3.5 w-3.5" />}
                   </Button>
@@ -209,6 +210,7 @@ const Notepad = () => {
                       variant="ghost"
                       size="sm"
                       className="h-8 w-8 p-0 text-destructive hover:bg-destructive/10 transition-colors"
+                      aria-label={t("deleteStickyNoteTitle")}
                     >
                       <Trash2 className="h-3.5 w-3.5" />
                     </Button>
@@ -322,6 +324,7 @@ const Notepad = () => {
                   onClick={() => addNote()} 
                   size="sm" 
                   className="h-8 w-8 rounded-full border border-primary/15 bg-primary/10 p-0 text-primary hover:bg-primary/20"
+                  aria-label="Create new note"
                 >
                   <Plus className="h-4 w-4" />
                 </Button>
@@ -378,6 +381,7 @@ const Notepad = () => {
                             variant="ghost"
                             size="icon"
                             onClick={(e) => e.stopPropagation()}
+                            aria-label={t("deleteStickyNoteTitle")}
                             className="absolute right-2 top-2 h-7 w-7 opacity-0 group-hover:opacity-100 hover:text-destructive hover:bg-destructive/10 transition-all rounded-full"
                           >
                             <Trash2 className="h-3.5 w-3.5" />
