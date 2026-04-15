@@ -13,10 +13,12 @@ import {
   SentIcon,
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
-import {
-  Loader2,
-} from "lucide-react";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
+import { Copy, Loader2 } from "lucide-react";
 import { toast } from "sonner";
+import AgentMenu from "@/components/AgentMenu";
+import { AgentForm } from "@/components/AgentMenu";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -191,7 +193,13 @@ const getProviderConfig = (
   provider: AIProvider,
   apiKey: string,
   openRouterModel: string,
-) => {
+): {
+  endpoint: string;
+  headers: Record<string, string>;
+  bodyBase: {
+    model: string;
+  };
+} => {
   if (provider === "openrouter") {
     return {
       endpoint: "https://openrouter.ai/api/v1/chat/completions",
@@ -223,12 +231,14 @@ const AISidebar = ({ open, onClose }: AISidebarProps) => {
   const [draftMessage, setDraftMessage] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [savingMessageId, setSavingMessageId] = useState<string | null>(null);
+  const [copyingMessageId, setCopyingMessageId] = useState<string | null>(null);
   const [isModelsOpen, setIsModelsOpen] = useState(false);
   const [availableModels, setAvailableModels] = useState<string[]>([]);
   const [isLoadingModels, setIsLoadingModels] = useState(false);
   const [modelsError, setModelsError] = useState<string | null>(null);
   const [showApiKey, setShowApiKey] = useState(false);
   const [isConfigMode, setIsConfigMode] = useState(false);
+  const [isAgentCreateMode, setIsAgentCreateMode] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const scrollRef = useRef<HTMLDivElement | null>(null);
   const modelsPopoverRef = useRef<HTMLDivElement | null>(null);
@@ -240,6 +250,7 @@ const AISidebar = ({ open, onClose }: AISidebarProps) => {
     rules,
     language,
     behavior,
+    activeAgentName,
     sendHistory,
     messages,
     isConfigured,
@@ -347,13 +358,7 @@ const AISidebar = ({ open, onClose }: AISidebarProps) => {
     };
 
     void fetchModels();
-  }, [
-    apiKey,
-    availableModels.length,
-    isLoadingModels,
-    isModelsOpen,
-    provider,
-  ]);
+  }, [apiKey, availableModels.length, isLoadingModels, isModelsOpen, provider]);
 
   const handleSetupSubmit = () => {
     if (!apiKey.trim()) {
@@ -403,7 +408,9 @@ const AISidebar = ({ open, onClose }: AISidebarProps) => {
       );
     }
 
-    const title = extractMessageContent(payload).replace(/^["'`]+|["'`]+$/g, "").trim();
+    const title = extractMessageContent(payload)
+      .replace(/^["'`]+|["'`]+$/g, "")
+      .trim();
 
     if (!title) {
       throw new Error("The AI did not return a usable note title.");
@@ -412,7 +419,10 @@ const AISidebar = ({ open, onClose }: AISidebarProps) => {
     return title;
   };
 
-  const handleSaveMessageToNote = async (messageId: string, content: string) => {
+  const handleSaveMessageToNote = async (
+    messageId: string,
+    content: string,
+  ) => {
     if (savingMessageId || !content.trim()) {
       return;
     }
@@ -624,7 +634,24 @@ const AISidebar = ({ open, onClose }: AISidebarProps) => {
     }
   };
 
+  const handleCopyMessage = async (messageId: string, content: string) => {
+    if (!content.trim()) {
+      return;
+    }
+
+    try {
+      setCopyingMessageId(messageId);
+      await navigator.clipboard.writeText(content);
+      toast.success("Markdown copied.");
+    } catch {
+      toast.error("Failed to copy markdown.");
+    } finally {
+      setCopyingMessageId(null);
+    }
+  };
+
   const showSetup = !isConfigured || isConfigMode;
+  const showSidebarForm = showSetup || isAgentCreateMode;
 
   return (
     <TooltipProvider delayDuration={120}>
@@ -645,20 +672,30 @@ const AISidebar = ({ open, onClose }: AISidebarProps) => {
                   AI Assistant
                 </p>
                 <p className="text-[11px] text-muted-foreground">
-                  {providerMeta.label}
+                  {activeAgentName
+                    ? `${activeAgentName} · ${providerMeta.label}`
+                    : providerMeta.label}
                 </p>
               </div>
             </div>
             <div className="flex items-center gap-1">
+              <AgentMenu
+                onCreateRequested={() => {
+                  setIsConfigMode(false);
+                  setIsAgentCreateMode(true);
+                }}
+              />
               {!showSetup ? (
                 <Button
                   type="button"
                   variant="ghost"
                   size="icon-sm"
-                  onClick={() => setIsConfigMode(true)}
+                  onClick={() => {
+                    setIsAgentCreateMode(false);
+                    setIsConfigMode(true);
+                  }}
                   className="h-8 w-8 rounded-full"
-                  aria-label="Open AI settings"
-                >
+                  aria-label="Open AI settings">
                   <HugeiconsIcon
                     icon={AiSettingIcon}
                     size={18}
@@ -672,27 +709,24 @@ const AISidebar = ({ open, onClose }: AISidebarProps) => {
                 size="icon-sm"
                 onClick={onClose}
                 className="h-8 w-8 rounded-full"
-                aria-label="Close AI sidebar"
-              >
-                <HugeiconsIcon
-                  icon={Cancel01Icon}
-                  size={18}
-                  strokeWidth={2}
-                />
+                aria-label="Close AI sidebar">
+                <HugeiconsIcon icon={Cancel01Icon} size={18} strokeWidth={2} />
               </Button>
             </div>
           </div>
 
-          {showSetup ? (
+          {showSidebarForm ? (
             <div className="flex flex-1 flex-col overflow-y-auto px-4 py-5">
-              {isConfigured ? (
+              {isConfigured || isAgentCreateMode ? (
                 <Button
                   type="button"
                   variant="ghost"
                   size="sm"
-                  onClick={() => setIsConfigMode(false)}
-                  className="-ml-2 mb-4 h-8 w-fit gap-2 text-muted-foreground hover:text-foreground"
-                >
+                  onClick={() => {
+                    setIsConfigMode(false);
+                    setIsAgentCreateMode(false);
+                  }}
+                  className="-ml-2 mb-4 h-8 w-fit gap-2 text-muted-foreground hover:text-foreground">
                   <HugeiconsIcon
                     icon={ArrowLeft01Icon}
                     size={18}
@@ -702,157 +736,186 @@ const AISidebar = ({ open, onClose }: AISidebarProps) => {
                 </Button>
               ) : null}
 
-              <div className="mb-6 rounded-2xl border border-primary/10 bg-gradient-to-br from-primary/12 via-primary/5 to-transparent p-4">
-                <div className="mb-3 flex items-center gap-2 text-primary">
-                  <HugeiconsIcon
-                    icon={AiIdeaIcon}
-                    size={18}
-                    strokeWidth={2}
-                  />
-                  <span className="text-sm font-semibold">
-                    Connect your AI provider
-                  </span>
-                </div>
-                <p className="text-sm leading-6 text-muted-foreground">
-                  Choose a provider, paste your API key, and continue to the chat
-                  panel. Chat history is not sent by default unless you enable it
-                  from the composer footer.
-                </p>
-              </div>
-
-              <div className="space-y-5">
-                <div className="space-y-2">
-                  <label className="text-sm font-semibold text-foreground">
-                    Provider
-                  </label>
-                  <select
-                    value={provider}
-                    onChange={(event) =>
-                      setProvider(event.target.value as AIProvider)
-                    }
-                    className="border-input focus-visible:border-ring focus-visible:ring-ring/50 dark:bg-input/30 flex h-12 w-full rounded-xl border bg-transparent px-4 text-sm text-foreground outline-none focus-visible:ring-[3px]"
-                  >
-                    {PROVIDERS.map((item) => (
-                      <option key={item.value} value={item.value}>
-                        {item.label}
-                      </option>
-                    ))}
-                  </select>
-                  <p className="text-xs text-muted-foreground">
-                    {providerMeta.subtitle}
-                  </p>
-                </div>
-
-                <div className="space-y-2">
-                  <label className="text-sm font-semibold text-foreground">
-                    API Key
-                  </label>
-                  <div className="relative">
-                    <Input
-                      type={showApiKey ? "text" : "password"}
-                      value={apiKey}
-                      onChange={(event) => setApiKey(event.target.value)}
-                      placeholder={`Enter your ${providerMeta.label} API key`}
-                      className="h-12 rounded-xl pr-12"
-                    />
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="icon-sm"
-                      onClick={() => setShowApiKey((current) => !current)}
-                      className="absolute right-2 top-1/2 h-8 w-8 -translate-y-1/2 rounded-full"
-                      aria-label={showApiKey ? "Hide API key" : "Show API key"}
-                    >
+              {isAgentCreateMode ? (
+                <>
+                  <div className="mb-6 rounded-2xl border border-primary/10 bg-gradient-to-br from-primary/12 via-primary/5 to-transparent p-4">
+                    <div className="mb-3 flex items-center gap-2 text-primary">
                       <HugeiconsIcon
-                        icon={Key02Icon}
+                        icon={AiIdeaIcon}
                         size={18}
                         strokeWidth={2}
                       />
+                      <span className="text-sm font-semibold">
+                        Create an agent in this sidebar
+                      </span>
+                    </div>
+                    <p className="text-sm leading-6 text-muted-foreground">
+                      Set up a dedicated agent profile with its own provider,
+                      model, API key, rules, language, and behavior, all without
+                      leaving the left panel.
+                    </p>
+                  </div>
+                  <AgentForm
+                    onCreated={() => {
+                      setIsAgentCreateMode(false);
+                    }}
+                  />
+                </>
+              ) : (
+                <>
+                  <div className="mb-6 rounded-2xl border border-primary/10 bg-gradient-to-br from-primary/12 via-primary/5 to-transparent p-4">
+                    <div className="mb-3 flex items-center gap-2 text-primary">
+                      <HugeiconsIcon
+                        icon={AiIdeaIcon}
+                        size={18}
+                        strokeWidth={2}
+                      />
+                      <span className="text-sm font-semibold">
+                        Connect your AI provider
+                      </span>
+                    </div>
+                    <p className="text-sm leading-6 text-muted-foreground">
+                      Choose a provider, paste your API key, and continue to the
+                      chat panel. Chat history is not sent by default unless you
+                      enable it from the composer footer.
+                    </p>
+                  </div>
+
+                  <div className="space-y-5">
+                    <div className="space-y-2">
+                      <label className="text-sm font-semibold text-foreground">
+                        Provider
+                      </label>
+                      <select
+                        value={provider}
+                        onChange={(event) =>
+                          setProvider(event.target.value as AIProvider)
+                        }
+                        className="border-input focus-visible:border-ring focus-visible:ring-ring/50 dark:bg-input/30 flex h-12 w-full rounded-xl border bg-transparent px-4 text-sm text-foreground outline-none focus-visible:ring-[3px]">
+                        {PROVIDERS.map((item) => (
+                          <option key={item.value} value={item.value}>
+                            {item.label}
+                          </option>
+                        ))}
+                      </select>
+                      <p className="text-xs text-muted-foreground">
+                        {providerMeta.subtitle}
+                      </p>
+                    </div>
+
+                    <div className="space-y-2">
+                      <label className="text-sm font-semibold text-foreground">
+                        API Key
+                      </label>
+                      <div className="relative">
+                        <Input
+                          type={showApiKey ? "text" : "password"}
+                          value={apiKey}
+                          onChange={(event) => setApiKey(event.target.value)}
+                          placeholder={`Enter your ${providerMeta.label} API key`}
+                          className="h-12 rounded-xl pr-12"
+                        />
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon-sm"
+                          onClick={() => setShowApiKey((current) => !current)}
+                          className="absolute right-2 top-1/2 h-8 w-8 -translate-y-1/2 rounded-full"
+                          aria-label={
+                            showApiKey ? "Hide API key" : "Show API key"
+                          }>
+                          <HugeiconsIcon
+                            icon={Key02Icon}
+                            size={18}
+                            strokeWidth={2}
+                          />
+                        </Button>
+                      </div>
+                    </div>
+
+                    <div className="grid gap-4">
+                      <div className="space-y-2">
+                        <label className="text-sm font-semibold text-foreground">
+                          Rules
+                        </label>
+                        <Textarea
+                          value={rules}
+                          onChange={(event) => setRules(event.target.value)}
+                          placeholder="Write custom rules for the assistant..."
+                          className="min-h-24 rounded-xl text-sm"
+                        />
+                      </div>
+
+                      <div className="grid gap-4 sm:grid-cols-2">
+                        <div className="space-y-2">
+                          <label className="text-sm font-semibold text-foreground">
+                            Language
+                          </label>
+                          <select
+                            value={language}
+                            onChange={(event) =>
+                              setLanguage(
+                                event.target.value as AILanguagePreset,
+                              )
+                            }
+                            className="border-input focus-visible:border-ring focus-visible:ring-ring/50 dark:bg-input/30 flex h-11 w-full rounded-xl border bg-transparent px-4 text-sm text-foreground outline-none focus-visible:ring-[3px]">
+                            {LANGUAGE_OPTIONS.map((item) => (
+                              <option key={item.value} value={item.value}>
+                                {item.label}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+
+                        <div className="space-y-2">
+                          <label className="text-sm font-semibold text-foreground">
+                            Behavior
+                          </label>
+                          <select
+                            value={behavior}
+                            onChange={(event) =>
+                              setBehavior(
+                                event.target.value as AIBehaviorPreset,
+                              )
+                            }
+                            className="border-input focus-visible:border-ring focus-visible:ring-ring/50 dark:bg-input/30 flex h-11 w-full rounded-xl border bg-transparent px-4 text-sm text-foreground outline-none focus-visible:ring-[3px]">
+                            {BEHAVIOR_OPTIONS.map((item) => (
+                              <option key={item.value} value={item.value}>
+                                {item.label}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+                      </div>
+                    </div>
+
+                    {errorMessage ? (
+                      <div className="rounded-xl border border-destructive/20 bg-destructive/10 px-3 py-2 text-sm text-destructive">
+                        {errorMessage}
+                      </div>
+                    ) : null}
+
+                    <Button
+                      type="button"
+                      onClick={handleSetupSubmit}
+                      className="h-12 rounded-xl bg-primary/85 text-primary-foreground hover:bg-primary">
+                      Next
                     </Button>
                   </div>
-                </div>
-
-                <div className="grid gap-4">
-                  <div className="space-y-2">
-                    <label className="text-sm font-semibold text-foreground">
-                      Rules
-                    </label>
-                    <Textarea
-                      value={rules}
-                      onChange={(event) =>
-                        setRules(event.target.value)
-                      }
-                      placeholder="Write custom rules for the assistant..."
-                      className="min-h-24 rounded-xl text-sm"
-                    />
-                  </div>
-
-                  <div className="grid gap-4 sm:grid-cols-2">
-                    <div className="space-y-2">
-                      <label className="text-sm font-semibold text-foreground">
-                        Language
-                      </label>
-                      <select
-                        value={language}
-                        onChange={(event) =>
-                          setLanguage(event.target.value as AILanguagePreset)
-                        }
-                        className="border-input focus-visible:border-ring focus-visible:ring-ring/50 dark:bg-input/30 flex h-11 w-full rounded-xl border bg-transparent px-4 text-sm text-foreground outline-none focus-visible:ring-[3px]"
-                      >
-                        {LANGUAGE_OPTIONS.map((item) => (
-                          <option key={item.value} value={item.value}>
-                            {item.label}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-
-                    <div className="space-y-2">
-                      <label className="text-sm font-semibold text-foreground">
-                        Behavior
-                      </label>
-                      <select
-                        value={behavior}
-                        onChange={(event) =>
-                          setBehavior(event.target.value as AIBehaviorPreset)
-                        }
-                        className="border-input focus-visible:border-ring focus-visible:ring-ring/50 dark:bg-input/30 flex h-11 w-full rounded-xl border bg-transparent px-4 text-sm text-foreground outline-none focus-visible:ring-[3px]"
-                      >
-                        {BEHAVIOR_OPTIONS.map((item) => (
-                          <option key={item.value} value={item.value}>
-                            {item.label}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-                  </div>
-                </div>
-
-                {errorMessage ? (
-                  <div className="rounded-xl border border-destructive/20 bg-destructive/10 px-3 py-2 text-sm text-destructive">
-                    {errorMessage}
-                  </div>
-                ) : null}
-
-                <Button
-                  type="button"
-                  onClick={handleSetupSubmit}
-                  className="h-12 rounded-xl bg-primary/85 text-primary-foreground hover:bg-primary"
-                >
-                  Next
-                </Button>
-              </div>
+                </>
+              )}
             </div>
           ) : (
             <>
               <div
                 ref={scrollRef}
-                className="flex-1 space-y-3 overflow-y-auto px-4 py-4"
-              >
+                className="flex-1 space-y-3 overflow-y-auto px-4 py-4">
                 {messages.length ? (
                   messages.map((message) => {
                     const isUser = message.role === "user";
                     const isSavingThisMessage = savingMessageId === message.id;
+                    const isCopyingThisMessage =
+                      copyingMessageId === message.id;
 
                     return (
                       <div
@@ -862,16 +925,102 @@ const AISidebar = ({ open, onClose }: AISidebarProps) => {
                           isUser
                             ? "ml-auto bg-card text-card-foreground"
                             : "bg-primary/15 text-foreground",
-                        )}
-                      >
+                        )}>
                         <p className="mb-1 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
                           {isUser ? "You" : providerMeta.label}
                         </p>
-                        <p className="whitespace-pre-wrap break-words">
-                          {message.content}
-                        </p>
+                        {isUser ? (
+                          <p className="whitespace-pre-wrap break-words">
+                            {message.content}
+                          </p>
+                        ) : (
+                          <div className="ai-markdown break-words text-sm leading-6">
+                            <ReactMarkdown
+                              remarkPlugins={[remarkGfm]}
+                              components={{
+                                p: ({ children }) => (
+                                  <p className="mb-3 last:mb-0">{children}</p>
+                                ),
+                                ul: ({ children }) => (
+                                  <ul className="mb-3 list-disc space-y-1 pl-5 last:mb-0">
+                                    {children}
+                                  </ul>
+                                ),
+                                ol: ({ children }) => (
+                                  <ol className="mb-3 list-decimal space-y-1 pl-5 last:mb-0">
+                                    {children}
+                                  </ol>
+                                ),
+                                li: ({ children }) => <li>{children}</li>,
+                                strong: ({ children }) => (
+                                  <strong className="font-semibold text-foreground">
+                                    {children}
+                                  </strong>
+                                ),
+                                a: ({ children, href }) => (
+                                  <a
+                                    href={href}
+                                    target="_blank"
+                                    rel="noreferrer"
+                                    className="text-primary underline underline-offset-4">
+                                    {children}
+                                  </a>
+                                ),
+                                code: ({ children, className }) => {
+                                  const isBlock = Boolean(className);
+
+                                  if (isBlock) {
+                                    return (
+                                      <code className="block overflow-x-auto rounded-xl bg-background/70 px-3 py-2 font-mono text-xs text-foreground">
+                                        {children}
+                                      </code>
+                                    );
+                                  }
+
+                                  return (
+                                    <code className="rounded bg-background/70 px-1.5 py-0.5 font-mono text-[0.85em] text-foreground">
+                                      {children}
+                                    </code>
+                                  );
+                                },
+                                pre: ({ children }) => (
+                                  <pre className="mb-3 overflow-x-auto rounded-xl bg-background/70 p-3 last:mb-0">
+                                    {children}
+                                  </pre>
+                                ),
+                                blockquote: ({ children }) => (
+                                  <blockquote className="mb-3 border-l-2 border-primary/40 pl-4 italic text-muted-foreground last:mb-0">
+                                    {children}
+                                  </blockquote>
+                                ),
+                              }}>
+                              {message.content}
+                            </ReactMarkdown>
+                          </div>
+                        )}
                         {!isUser ? (
-                          <div className="mt-3 flex justify-end">
+                          <div className="mt-3 flex justify-end gap-2">
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="sm"
+                              onClick={() =>
+                                void handleCopyMessage(
+                                  message.id,
+                                  message.content,
+                                )
+                              }
+                              disabled={
+                                isCopyingThisMessage || !message.content.trim()
+                              }
+                              className="h-8 rounded-full px-3 text-xs text-muted-foreground hover:bg-background/60 hover:text-foreground">
+                              {isCopyingThisMessage ? (
+                                <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                              ) : (
+                                <Copy className="h-3.5 w-3.5" />
+                              )}
+                              <span>Copy</span>
+                            </Button>
                             <Button
                               type="button"
                               variant="ghost"
@@ -885,8 +1034,7 @@ const AISidebar = ({ open, onClose }: AISidebarProps) => {
                               disabled={
                                 isSavingThisMessage || !message.content.trim()
                               }
-                              className="h-8 rounded-full px-3 text-xs text-muted-foreground hover:bg-background/60 hover:text-foreground"
-                            >
+                              className="h-8 rounded-full px-3 text-xs text-muted-foreground hover:bg-background/60 hover:text-foreground">
                               {isSavingThisMessage ? (
                                 <Loader2 className="h-3.5 w-3.5 animate-spin" />
                               ) : (
@@ -915,9 +1063,9 @@ const AISidebar = ({ open, onClose }: AISidebarProps) => {
                       Start a conversation
                     </p>
                     <p className="mt-2 max-w-xs text-sm leading-6 text-muted-foreground">
-                      Send a prompt and the assistant will answer here. History is
-                      only included in the API request when you enable the footer
-                      toggle.
+                      Send a prompt and the assistant will answer here. History
+                      is only included in the API request when you enable the
+                      footer toggle.
                     </p>
                   </div>
                 )}
@@ -936,7 +1084,7 @@ const AISidebar = ({ open, onClose }: AISidebarProps) => {
                     onChange={(event) => setDraftMessage(event.target.value)}
                     onKeyDown={handleComposerKeyDown}
                     placeholder="Say something..."
-                    className="min-h-28 resize-none border-0 bg-transparent px-1 py-1 text-sm shadow-none focus-visible:border-transparent focus-visible:ring-0"
+                    className="h-28 resize-none overflow-y-auto border-0 bg-transparent px-1 py-1 text-sm shadow-none focus-visible:border-transparent focus-visible:ring-0"
                   />
 
                   <div className="mt-3 flex items-center justify-between gap-3">
@@ -953,8 +1101,7 @@ const AISidebar = ({ open, onClose }: AISidebarProps) => {
                                 : "border-border/60 bg-muted/60",
                             )}
                             aria-pressed={sendHistory}
-                            aria-label="Toggle sending chat history"
-                          >
+                            aria-label="Toggle sending chat history">
                             <span
                               className={cn(
                                 "inline-block h-5 w-5 rounded-full bg-white shadow-md transition-transform duration-200",
@@ -976,9 +1123,10 @@ const AISidebar = ({ open, onClose }: AISidebarProps) => {
                             type="button"
                             variant="ghost"
                             size="sm"
-                            onClick={() => setIsModelsOpen((current) => !current)}
-                            className="h-9 rounded-full px-3 text-xs text-muted-foreground"
-                          >
+                            onClick={() =>
+                              setIsModelsOpen((current) => !current)
+                            }
+                            className="h-9 rounded-full px-3 text-xs text-muted-foreground">
                             Models
                           </Button>
 
@@ -1005,8 +1153,7 @@ const AISidebar = ({ open, onClose }: AISidebarProps) => {
                                     openRouterModel === "openrouter/auto"
                                       ? "bg-primary/12 text-primary"
                                       : "hover:bg-muted/70",
-                                  )}
-                                >
+                                  )}>
                                   openrouter/auto
                                 </button>
 
@@ -1021,7 +1168,9 @@ const AISidebar = ({ open, onClose }: AISidebarProps) => {
                                   </div>
                                 ) : (
                                   availableModels
-                                    .filter((model) => model !== "openrouter/auto")
+                                    .filter(
+                                      (model) => model !== "openrouter/auto",
+                                    )
                                     .map((model) => (
                                       <button
                                         key={model}
@@ -1035,8 +1184,7 @@ const AISidebar = ({ open, onClose }: AISidebarProps) => {
                                           openRouterModel === model
                                             ? "bg-primary/12 text-primary"
                                             : "hover:bg-muted/70",
-                                        )}
-                                      >
+                                        )}>
                                         {model}
                                       </button>
                                     ))
@@ -1052,8 +1200,7 @@ const AISidebar = ({ open, onClose }: AISidebarProps) => {
                         variant="ghost"
                         size="sm"
                         onClick={clearMessages}
-                        className="h-9 rounded-full px-3 text-xs text-muted-foreground"
-                      >
+                        className="h-9 rounded-full px-3 text-xs text-muted-foreground">
                         Clear chat
                       </Button>
                     </div>
@@ -1062,8 +1209,7 @@ const AISidebar = ({ open, onClose }: AISidebarProps) => {
                       type="button"
                       onClick={() => void handleSendMessage()}
                       disabled={!draftMessage.trim() || isSubmitting}
-                      className="h-10 rounded-full px-4"
-                    >
+                      className="h-10 rounded-full px-4">
                       {isSubmitting ? (
                         <Loader2 className="h-4 w-4 animate-spin" />
                       ) : (

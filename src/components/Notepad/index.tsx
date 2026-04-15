@@ -229,8 +229,8 @@ const Notepad = () => {
                   value={selectedNote.content}
                   onChange={(e) => updateNote(selectedNote.id, { content: e.target.value })}
                   placeholder={t("writeYourNotesHere")}
-                  className="min-h-[400px] flex-1 resize-none border-0 bg-transparent p-1 text-lg leading-relaxed text-foreground shadow-none placeholder:text-muted-foreground/40 focus-visible:border-transparent focus-visible:ring-0 selection:bg-primary/20"
-                  style={{ fontSize: '1.1rem', letterSpacing: '-0.01em' }}
+                  className="h-[360px] resize-none overflow-y-auto border-0 bg-transparent p-1 text-sm leading-6 text-foreground shadow-none placeholder:text-muted-foreground/40 focus-visible:border-transparent focus-visible:ring-0 selection:bg-primary/20"
+                  style={{ letterSpacing: "-0.01em" }}
                 />
               </div>
 
