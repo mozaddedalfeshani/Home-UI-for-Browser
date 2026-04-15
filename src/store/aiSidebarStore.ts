@@ -18,6 +18,7 @@ export interface AIChatMessage {
 interface AISidebarState {
   provider: AIProvider;
   apiKey: string;
+  openRouterModel: string;
   rules: string;
   language: AILanguagePreset;
   behavior: AIBehaviorPreset;
@@ -26,13 +27,15 @@ interface AISidebarState {
   isConfigured: boolean;
   setProvider: (provider: AIProvider) => void;
   setApiKey: (apiKey: string) => void;
+  setOpenRouterModel: (openRouterModel: string) => void;
   setRules: (rules: string) => void;
   setLanguage: (language: AILanguagePreset) => void;
   setBehavior: (behavior: AIBehaviorPreset) => void;
   setSendHistory: (sendHistory: boolean) => void;
   completeSetup: () => void;
   resetSetup: () => void;
-  addMessage: (message: Omit<AIChatMessage, "id" | "createdAt">) => void;
+  addMessage: (message: Omit<AIChatMessage, "id" | "createdAt">) => string;
+  updateMessageContent: (id: string, content: string) => void;
   clearMessages: () => void;
 }
 
@@ -41,6 +44,7 @@ export const useAISidebarStore = create<AISidebarState>()(
     (set) => ({
       provider: "deepseek",
       apiKey: "",
+      openRouterModel: "openrouter/auto",
       rules: "",
       language: "english",
       behavior: "balanced",
@@ -49,22 +53,32 @@ export const useAISidebarStore = create<AISidebarState>()(
       isConfigured: false,
       setProvider: (provider) => set({ provider }),
       setApiKey: (apiKey) => set({ apiKey }),
+      setOpenRouterModel: (openRouterModel) => set({ openRouterModel }),
       setRules: (rules) => set({ rules }),
       setLanguage: (language) => set({ language }),
       setBehavior: (behavior) => set({ behavior }),
       setSendHistory: (sendHistory) => set({ sendHistory }),
       completeSetup: () => set({ isConfigured: true }),
       resetSetup: () => set({ isConfigured: false }),
-      addMessage: (message) =>
+      addMessage: (message) => {
+        const id = crypto.randomUUID();
         set((state) => ({
           messages: [
             ...state.messages,
             {
-              id: crypto.randomUUID(),
+              id,
               createdAt: Date.now(),
               ...message,
             },
           ],
+        }));
+        return id;
+      },
+      updateMessageContent: (id, content) =>
+        set((state) => ({
+          messages: state.messages.map((message) =>
+            message.id === id ? { ...message, content } : message,
+          ),
         })),
       clearMessages: () => set({ messages: [] }),
     }),
@@ -74,6 +88,7 @@ export const useAISidebarStore = create<AISidebarState>()(
       partialize: (state) => ({
         provider: state.provider,
         apiKey: state.apiKey,
+        openRouterModel: state.openRouterModel,
         rules: state.rules,
         language: state.language,
         behavior: state.behavior,

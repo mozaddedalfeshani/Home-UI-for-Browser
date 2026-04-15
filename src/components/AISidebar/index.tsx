@@ -2,16 +2,20 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
-  Bot,
-  ChevronLeft,
-  History,
-  KeyRound,
+  AiChat01Icon,
+  AiIdeaIcon,
+  AiSettingIcon,
+  ArrowLeft01Icon,
+  BotIcon,
+  Cancel01Icon,
+  Key02Icon,
+  SentIcon,
+} from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
+import {
   Loader2,
-  PanelLeftClose,
-  SendHorizonal,
-  Settings2,
-  Sparkles,
 } from "lucide-react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -90,12 +94,64 @@ const getSystemPrompt = (
   return `${ruleInstruction} ${languageInstruction} ${behaviorInstruction}`;
 };
 
+const extractDeltaContent = (payload: unknown) => {
+  const parsed = payload as {
+    choices?: Array<{
+      delta?: {
+        content?: string;
+        reasoning?: string;
+      };
+      message?: {
+        content?: string;
+      };
+    }>;
+  };
+
+  const choice = parsed.choices?.[0];
+
+  return (
+    choice?.delta?.content ??
+    choice?.delta?.reasoning ??
+    choice?.message?.content ??
+    ""
+  );
+};
+
+const getProviderErrorMessage = (payload: unknown, fallback: string) => {
+  const parsed = payload as {
+    error?: {
+      message?: string;
+      code?: number | string;
+      metadata?: {
+        raw?: string;
+        provider_name?: string;
+      };
+    };
+  };
+
+  const rawMessage = parsed.error?.metadata?.raw?.trim();
+  if (rawMessage) {
+    return rawMessage;
+  }
+
+  const providerMessage = parsed.error?.message?.trim();
+  if (providerMessage) {
+    return providerMessage;
+  }
+
+  return fallback;
+};
+
 interface AISidebarProps {
   open: boolean;
   onClose: () => void;
 }
 
-const getProviderConfig = (provider: AIProvider, apiKey: string) => {
+const getProviderConfig = (
+  provider: AIProvider,
+  apiKey: string,
+  openRouterModel: string,
+) => {
   if (provider === "openrouter") {
     return {
       endpoint: "https://openrouter.ai/api/v1/chat/completions",
@@ -106,7 +162,7 @@ const getProviderConfig = (provider: AIProvider, apiKey: string) => {
         "X-Title": "Home UI for Browser",
       },
       bodyBase: {
-        model: "openrouter/auto",
+        model: openRouterModel || "openrouter/auto",
       },
     };
   }
@@ -126,14 +182,20 @@ const getProviderConfig = (provider: AIProvider, apiKey: string) => {
 const AISidebar = ({ open, onClose }: AISidebarProps) => {
   const [draftMessage, setDraftMessage] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isModelsOpen, setIsModelsOpen] = useState(false);
+  const [availableModels, setAvailableModels] = useState<string[]>([]);
+  const [isLoadingModels, setIsLoadingModels] = useState(false);
+  const [modelsError, setModelsError] = useState<string | null>(null);
   const [showApiKey, setShowApiKey] = useState(false);
   const [isConfigMode, setIsConfigMode] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const scrollRef = useRef<HTMLDivElement | null>(null);
+  const modelsPopoverRef = useRef<HTMLDivElement | null>(null);
 
   const {
     provider,
     apiKey,
+    openRouterModel,
     rules,
     language,
     behavior,
@@ -142,12 +204,14 @@ const AISidebar = ({ open, onClose }: AISidebarProps) => {
     isConfigured,
     setProvider,
     setApiKey,
+    setOpenRouterModel,
     setRules,
     setLanguage,
     setBehavior,
     setSendHistory,
     completeSetup,
     addMessage,
+    updateMessageContent,
     clearMessages,
   } = useAISidebarStore();
 
@@ -166,6 +230,88 @@ const AISidebar = ({ open, onClose }: AISidebarProps) => {
       behavior: "smooth",
     });
   }, [messages, open]);
+
+  useEffect(() => {
+    if (!isModelsOpen) {
+      return;
+    }
+
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        modelsPopoverRef.current &&
+        !modelsPopoverRef.current.contains(event.target as Node)
+      ) {
+        setIsModelsOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [isModelsOpen]);
+
+  useEffect(() => {
+    if (
+      !isModelsOpen ||
+      provider !== "openrouter" ||
+      availableModels.length > 0 ||
+      isLoadingModels
+    ) {
+      return;
+    }
+
+    const fetchModels = async () => {
+      setIsLoadingModels(true);
+      setModelsError(null);
+
+      try {
+        const response = await fetch("https://openrouter.ai/api/v1/models", {
+          headers: apiKey.trim()
+            ? {
+                Authorization: `Bearer ${apiKey.trim()}`,
+              }
+            : undefined,
+        });
+
+        const payload = (await response.json()) as {
+          data?: Array<{ id?: string }>;
+          error?: { message?: string };
+        };
+
+        if (!response.ok) {
+          throw new Error(
+            getProviderErrorMessage(
+              payload,
+              "Unable to load OpenRouter models.",
+            ),
+          );
+        }
+
+        const modelIds = (payload.data ?? [])
+          .map((item) => item.id?.trim())
+          .filter((item): item is string => Boolean(item))
+          .sort((first, second) => first.localeCompare(second));
+
+        setAvailableModels(modelIds.length ? modelIds : ["openrouter/auto"]);
+      } catch (error) {
+        const message =
+          error instanceof Error
+            ? error.message
+            : "Unable to load OpenRouter models.";
+        setModelsError(message);
+        toast.error(message);
+      } finally {
+        setIsLoadingModels(false);
+      }
+    };
+
+    void fetchModels();
+  }, [
+    apiKey,
+    availableModels.length,
+    isLoadingModels,
+    isModelsOpen,
+    provider,
+  ]);
 
   const handleSetupSubmit = () => {
     if (!apiKey.trim()) {
@@ -198,7 +344,11 @@ const AISidebar = ({ open, onClose }: AISidebarProps) => {
     setIsSubmitting(true);
 
     try {
-      const providerConfig = getProviderConfig(provider, apiKey.trim());
+      const providerConfig = getProviderConfig(
+        provider,
+        apiKey.trim(),
+        openRouterModel,
+      );
       const systemPrompt = getSystemPrompt(rules, language, behavior);
       const payloadMessages = [
         {
@@ -221,35 +371,120 @@ const AISidebar = ({ open, onClose }: AISidebarProps) => {
         headers: providerConfig.headers,
         body: JSON.stringify({
           ...providerConfig.bodyBase,
+          stream: true,
           messages: payloadMessages,
         }),
       });
 
-      const payload = (await response.json()) as {
-        error?: { message?: string };
-        choices?: Array<{ message?: { content?: string } }>;
-      };
-
       if (!response.ok) {
+        const payload = (await response.json()) as {
+          error?: {
+            message?: string;
+            code?: number | string;
+            metadata?: {
+              raw?: string;
+              provider_name?: string;
+            };
+          };
+        };
         throw new Error(
-          payload.error?.message ?? "Unable to reach the provider right now.",
+          getProviderErrorMessage(
+            payload,
+            "Unable to reach the provider right now.",
+          ),
         );
       }
 
-      const assistantMessage =
-        payload.choices?.[0]?.message?.content?.trim() ||
-        "No response content returned.";
-
-      addMessage({
+      const assistantMessageId = addMessage({
         role: "assistant",
-        content: assistantMessage,
+        content: "",
       });
+
+      if (!response.body) {
+        updateMessageContent(
+          assistantMessageId,
+          "No response stream returned.",
+        );
+        return;
+      }
+
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let accumulatedContent = "";
+      let pendingChunk = "";
+
+      while (true) {
+        const { value, done } = await reader.read();
+
+        if (done) {
+          break;
+        }
+
+        pendingChunk += decoder.decode(value, { stream: true });
+        const events = pendingChunk.split("\n\n");
+        pendingChunk = events.pop() ?? "";
+
+        for (const event of events) {
+          const lines = event
+            .split("\n")
+            .map((line) => line.trim())
+            .filter(Boolean);
+
+          for (const line of lines) {
+            if (!line.startsWith("data:")) {
+              continue;
+            }
+
+            const jsonPayload = line.slice(5).trim();
+
+            if (!jsonPayload || jsonPayload === "[DONE]") {
+              continue;
+            }
+
+            try {
+              const parsed = JSON.parse(jsonPayload) as unknown;
+              const nextDelta = extractDeltaContent(parsed);
+
+              if (!nextDelta) {
+                continue;
+              }
+
+              accumulatedContent += nextDelta;
+              updateMessageContent(assistantMessageId, accumulatedContent);
+            } catch {
+              // Ignore non-JSON event payloads in the stream.
+            }
+          }
+        }
+      }
+
+      const trailingChunk = pendingChunk.trim();
+      if (trailingChunk.startsWith("data:")) {
+        const trailingPayload = trailingChunk.slice(5).trim();
+        if (trailingPayload && trailingPayload !== "[DONE]") {
+          try {
+            const parsed = JSON.parse(trailingPayload) as unknown;
+            const nextDelta = extractDeltaContent(parsed);
+            if (nextDelta) {
+              accumulatedContent += nextDelta;
+            }
+          } catch {
+            // Ignore trailing payload parsing failures.
+          }
+        }
+      }
+
+      updateMessageContent(
+        assistantMessageId,
+        accumulatedContent || "No response content returned.",
+      );
     } catch (error) {
       const message =
         error instanceof Error
           ? error.message
           : "Something went wrong while sending the message.";
 
+      toast.error(message);
       addMessage({
         role: "assistant",
         content: `Error: ${message}`,
@@ -277,7 +512,12 @@ const AISidebar = ({ open, onClose }: AISidebarProps) => {
           <div className="flex items-center justify-between border-b border-border/50 bg-background/70 px-4 py-4">
             <div className="flex items-center gap-2">
               <div className="rounded-xl border border-primary/15 bg-primary/10 p-2">
-                <Bot className="h-4 w-4 text-primary" />
+                <HugeiconsIcon
+                  icon={BotIcon}
+                  size={18}
+                  strokeWidth={2}
+                  className="text-primary"
+                />
               </div>
               <div>
                 <p className="text-sm font-bold uppercase tracking-tight text-foreground/90">
@@ -298,7 +538,11 @@ const AISidebar = ({ open, onClose }: AISidebarProps) => {
                   className="h-8 w-8 rounded-full"
                   aria-label="Open AI settings"
                 >
-                  <Settings2 className="h-4 w-4" />
+                  <HugeiconsIcon
+                    icon={AiSettingIcon}
+                    size={18}
+                    strokeWidth={2}
+                  />
                 </Button>
               ) : null}
               <Button
@@ -309,7 +553,11 @@ const AISidebar = ({ open, onClose }: AISidebarProps) => {
                 className="h-8 w-8 rounded-full"
                 aria-label="Close AI sidebar"
               >
-                <PanelLeftClose className="h-4 w-4" />
+                <HugeiconsIcon
+                  icon={Cancel01Icon}
+                  size={18}
+                  strokeWidth={2}
+                />
               </Button>
             </div>
           </div>
@@ -324,14 +572,22 @@ const AISidebar = ({ open, onClose }: AISidebarProps) => {
                   onClick={() => setIsConfigMode(false)}
                   className="-ml-2 mb-4 h-8 w-fit gap-2 text-muted-foreground hover:text-foreground"
                 >
-                  <ChevronLeft className="h-4 w-4" />
+                  <HugeiconsIcon
+                    icon={ArrowLeft01Icon}
+                    size={18}
+                    strokeWidth={2}
+                  />
                   Back to chat
                 </Button>
               ) : null}
 
               <div className="mb-6 rounded-2xl border border-primary/10 bg-gradient-to-br from-primary/12 via-primary/5 to-transparent p-4">
                 <div className="mb-3 flex items-center gap-2 text-primary">
-                  <Sparkles className="h-4 w-4" />
+                  <HugeiconsIcon
+                    icon={AiIdeaIcon}
+                    size={18}
+                    strokeWidth={2}
+                  />
                   <span className="text-sm font-semibold">
                     Connect your AI provider
                   </span>
@@ -386,7 +642,11 @@ const AISidebar = ({ open, onClose }: AISidebarProps) => {
                       className="absolute right-2 top-1/2 h-8 w-8 -translate-y-1/2 rounded-full"
                       aria-label={showApiKey ? "Hide API key" : "Show API key"}
                     >
-                      <KeyRound className="h-4 w-4" />
+                      <HugeiconsIcon
+                        icon={Key02Icon}
+                        size={18}
+                        strokeWidth={2}
+                      />
                     </Button>
                   </div>
                 </div>
@@ -493,7 +753,12 @@ const AISidebar = ({ open, onClose }: AISidebarProps) => {
                   })
                 ) : (
                   <div className="flex h-full min-h-[320px] flex-col items-center justify-center rounded-3xl border border-dashed border-border/60 bg-muted/20 px-6 text-center">
-                    <Bot className="mb-3 h-10 w-10 text-primary/80" />
+                    <HugeiconsIcon
+                      icon={AiChat01Icon}
+                      size={42}
+                      strokeWidth={1.8}
+                      className="mb-3 text-primary/80"
+                    />
                     <p className="text-base font-semibold text-foreground">
                       Start a conversation
                     </p>
@@ -526,22 +791,25 @@ const AISidebar = ({ open, onClose }: AISidebarProps) => {
                     <div className="flex items-center gap-2">
                       <Tooltip>
                         <TooltipTrigger asChild>
-                          <Button
+                          <button
                             type="button"
-                            variant="ghost"
-                            size="icon-sm"
                             onClick={() => setSendHistory(!sendHistory)}
                             className={cn(
-                              "h-9 w-9 rounded-full",
+                              "relative inline-flex h-7 w-12 items-center rounded-full border transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/60",
                               sendHistory
-                                ? "bg-primary/15 text-primary hover:bg-primary/20"
-                                : "text-muted-foreground hover:bg-muted",
+                                ? "border-emerald-400/70 bg-emerald-500/90"
+                                : "border-border/60 bg-muted/60",
                             )}
                             aria-pressed={sendHistory}
                             aria-label="Toggle sending chat history"
                           >
-                            <History className="h-4 w-4" />
-                          </Button>
+                            <span
+                              className={cn(
+                                "inline-block h-5 w-5 rounded-full bg-white shadow-md transition-transform duration-200",
+                                sendHistory ? "translate-x-6" : "translate-x-1",
+                              )}
+                            />
+                          </button>
                         </TooltipTrigger>
                         <TooltipContent side="top">
                           {sendHistory
@@ -549,6 +817,83 @@ const AISidebar = ({ open, onClose }: AISidebarProps) => {
                             : "Only the current message will be sent"}
                         </TooltipContent>
                       </Tooltip>
+
+                      {provider === "openrouter" ? (
+                        <div className="relative" ref={modelsPopoverRef}>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => setIsModelsOpen((current) => !current)}
+                            className="h-9 rounded-full px-3 text-xs text-muted-foreground"
+                          >
+                            Models
+                          </Button>
+
+                          {isModelsOpen ? (
+                            <div className="absolute bottom-full left-0 mb-2 w-72 rounded-2xl border border-border/70 bg-background/95 p-2 shadow-2xl backdrop-blur-xl">
+                              <div className="mb-2 px-2 py-1">
+                                <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                                  OpenRouter Models
+                                </p>
+                                <p className="mt-1 truncate text-[11px] text-foreground/80">
+                                  {openRouterModel}
+                                </p>
+                              </div>
+
+                              <div className="max-h-64 space-y-1 overflow-y-auto">
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    setOpenRouterModel("openrouter/auto");
+                                    setIsModelsOpen(false);
+                                  }}
+                                  className={cn(
+                                    "flex w-full items-center rounded-xl px-3 py-2 text-left text-sm transition-colors",
+                                    openRouterModel === "openrouter/auto"
+                                      ? "bg-primary/12 text-primary"
+                                      : "hover:bg-muted/70",
+                                  )}
+                                >
+                                  openrouter/auto
+                                </button>
+
+                                {isLoadingModels ? (
+                                  <div className="flex items-center gap-2 px-3 py-3 text-sm text-muted-foreground">
+                                    <Loader2 className="h-4 w-4 animate-spin" />
+                                    Loading models...
+                                  </div>
+                                ) : modelsError ? (
+                                  <div className="px-3 py-3 text-sm text-destructive">
+                                    {modelsError}
+                                  </div>
+                                ) : (
+                                  availableModels
+                                    .filter((model) => model !== "openrouter/auto")
+                                    .map((model) => (
+                                      <button
+                                        key={model}
+                                        type="button"
+                                        onClick={() => {
+                                          setOpenRouterModel(model);
+                                          setIsModelsOpen(false);
+                                        }}
+                                        className={cn(
+                                          "flex w-full items-center rounded-xl px-3 py-2 text-left text-sm transition-colors",
+                                          openRouterModel === model
+                                            ? "bg-primary/12 text-primary"
+                                            : "hover:bg-muted/70",
+                                        )}
+                                      >
+                                        {model}
+                                      </button>
+                                    ))
+                                )}
+                              </div>
+                            </div>
+                          ) : null}
+                        </div>
+                      ) : null}
 
                       <Button
                         type="button"
@@ -570,7 +915,11 @@ const AISidebar = ({ open, onClose }: AISidebarProps) => {
                       {isSubmitting ? (
                         <Loader2 className="h-4 w-4 animate-spin" />
                       ) : (
-                        <SendHorizonal className="h-4 w-4" />
+                        <HugeiconsIcon
+                          icon={SentIcon}
+                          size={18}
+                          strokeWidth={2}
+                        />
                       )}
                     </Button>
                   </div>
