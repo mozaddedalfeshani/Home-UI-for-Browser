@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { Search, SearchCheck } from "lucide-react";
-import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContentBottom, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useSettingsStore } from "@/store/settingsStore";
@@ -13,9 +13,14 @@ import { cn } from "@/lib/utils";
 interface SearchModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  initialQuery?: string;
 }
 
-const SearchModal = ({ open, onOpenChange }: SearchModalProps) => {
+const SearchModal = ({
+  open,
+  onOpenChange,
+  initialQuery = "",
+}: SearchModalProps) => {
   const [query, setQuery] = useState("");
   const [activeIndex, setActiveIndex] = useState(-1);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -26,20 +31,33 @@ const SearchModal = ({ open, onOpenChange }: SearchModalProps) => {
   );
   const t = useTranslation(language);
 
-  // Focus input when modal opens
   useEffect(() => {
     if (open && inputRef.current) {
       inputRef.current.focus();
     }
   }, [open]);
 
-  // Reset query when modal closes
+  useEffect(() => {
+    if (open) {
+      setQuery(initialQuery);
+      setActiveIndex(-1);
+      return;
+    }
+
+    setQuery("");
+    setActiveIndex(-1);
+  }, [open, initialQuery]);
+
   useEffect(() => {
     if (!open) {
-      setQuery("");
-      setActiveIndex(-1);
+      return;
     }
-  }, [open]);
+
+    if (inputRef.current) {
+      const nextCursorPosition = inputRef.current.value.length;
+      inputRef.current.setSelectionRange(nextCursorPosition, nextCursorPosition);
+    }
+  }, [open, query]);
 
   useEffect(() => {
     setActiveIndex(-1);
@@ -172,7 +190,7 @@ const SearchModal = ({ open, onOpenChange }: SearchModalProps) => {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-2xl w-full top-[58%] sm:top-[54%] p-0 overflow-hidden">
+      <DialogContentBottom className="w-full p-0 overflow-hidden rounded-t-2xl border-border/60 bg-background/95 backdrop-blur-xl sm:bottom-8 sm:max-w-2xl sm:rounded-2xl">
         <DialogTitle className="sr-only">Search</DialogTitle>
         <div className="p-4 sm:p-5">
           <div className="relative">
@@ -191,9 +209,10 @@ const SearchModal = ({ open, onOpenChange }: SearchModalProps) => {
               type="button"
               size="sm"
               onClick={handleSearch}
+              aria-label={`Search with ${providerLabel}`}
               className="absolute right-2 top-2 h-8 w-8 p-0"
               disabled={!query.trim()}>
-              <SearchCheck />
+              <SearchCheck aria-hidden="true" />
             </Button>
           </div>
 
@@ -224,7 +243,7 @@ const SearchModal = ({ open, onOpenChange }: SearchModalProps) => {
             )}
           </div>
         </div>
-      </DialogContent>
+      </DialogContentBottom>
     </Dialog>
   );
 };
