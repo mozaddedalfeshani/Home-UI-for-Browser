@@ -45,7 +45,7 @@ const getHostname = (rawUrl: string) => {
 const getFaviconUrl = (rawUrl: string) => {
   try {
     const parsed = new URL(rawUrl);
-    return `https://www.google.com/s2/favicons?sz=128&domain=${parsed.origin}`;
+    return `/api/proxy-favicon?url=${encodeURIComponent(parsed.origin)}`;
   } catch {
     return undefined;
   }
@@ -354,4 +354,3 @@ export const TabsList = () => {
     </div>
   );
 };
-
