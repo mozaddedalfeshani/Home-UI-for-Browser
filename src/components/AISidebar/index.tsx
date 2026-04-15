@@ -9,6 +9,7 @@ import {
   BotIcon,
   Cancel01Icon,
   Key02Icon,
+  MoveIcon,
   SentIcon,
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
@@ -26,6 +27,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
+import { useNotepadStore } from "@/store/notepadStore";
 import {
   type AIProvider,
   type AIBehaviorPreset,
@@ -94,6 +96,32 @@ const getSystemPrompt = (
   return `${ruleInstruction} ${languageInstruction} ${behaviorInstruction}`;
 };
 
+const getTitlePrompt = (rules: string, language: AILanguagePreset) => {
+  const languageInstruction =
+    language === "bangla"
+      ? "Return the title in Bangla."
+      : language === "auto"
+        ? "Return the title in the same language as the assistant message."
+        : "Return the title in English.";
+
+  const rulesInstruction = rules.trim()
+    ? `Additional user rules to respect when naming: ${rules.trim()}`
+    : "";
+
+  return [
+    "Generate one concise sticky-note title for the provided assistant message.",
+    "Return only the title text.",
+    "Do not use quotation marks.",
+    "Do not use markdown.",
+    "Do not add prefixes like Title:.",
+    "Keep it short and note-friendly.",
+    languageInstruction,
+    rulesInstruction,
+  ]
+    .filter(Boolean)
+    .join(" ");
+};
+
 const extractDeltaContent = (payload: unknown) => {
   const parsed = payload as {
     choices?: Array<{
@@ -142,6 +170,18 @@ const getProviderErrorMessage = (payload: unknown, fallback: string) => {
   return fallback;
 };
 
+const extractMessageContent = (payload: unknown) => {
+  const parsed = payload as {
+    choices?: Array<{
+      message?: {
+        content?: string;
+      };
+    }>;
+  };
+
+  return parsed.choices?.[0]?.message?.content?.trim() ?? "";
+};
+
 interface AISidebarProps {
   open: boolean;
   onClose: () => void;
@@ -182,6 +222,7 @@ const getProviderConfig = (
 const AISidebar = ({ open, onClose }: AISidebarProps) => {
   const [draftMessage, setDraftMessage] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [savingMessageId, setSavingMessageId] = useState<string | null>(null);
   const [isModelsOpen, setIsModelsOpen] = useState(false);
   const [availableModels, setAvailableModels] = useState<string[]>([]);
   const [isLoadingModels, setIsLoadingModels] = useState(false);
@@ -214,6 +255,7 @@ const AISidebar = ({ open, onClose }: AISidebarProps) => {
     updateMessageContent,
     clearMessages,
   } = useAISidebarStore();
+  const addNote = useNotepadStore((state) => state.addNote);
 
   const providerMeta = useMemo(
     () => PROVIDERS.find((item) => item.value === provider) ?? PROVIDERS[0],
@@ -322,6 +364,85 @@ const AISidebar = ({ open, onClose }: AISidebarProps) => {
     setErrorMessage(null);
     completeSetup();
     setIsConfigMode(false);
+  };
+
+  const generateNoteTitle = async (content: string) => {
+    const providerConfig = getProviderConfig(
+      provider,
+      apiKey.trim(),
+      openRouterModel,
+    );
+
+    const response = await fetch(providerConfig.endpoint, {
+      method: "POST",
+      headers: providerConfig.headers,
+      body: JSON.stringify({
+        ...providerConfig.bodyBase,
+        stream: false,
+        messages: [
+          {
+            role: "system",
+            content: getTitlePrompt(rules, language),
+          },
+          {
+            role: "user",
+            content,
+          },
+        ],
+      }),
+    });
+
+    const payload = (await response.json()) as unknown;
+
+    if (!response.ok) {
+      throw new Error(
+        getProviderErrorMessage(
+          payload,
+          "Unable to generate a note title right now.",
+        ),
+      );
+    }
+
+    const title = extractMessageContent(payload).replace(/^["'`]+|["'`]+$/g, "").trim();
+
+    if (!title) {
+      throw new Error("The AI did not return a usable note title.");
+    }
+
+    return title;
+  };
+
+  const handleSaveMessageToNote = async (messageId: string, content: string) => {
+    if (savingMessageId || !content.trim()) {
+      return;
+    }
+
+    if (!apiKey.trim()) {
+      const message = "Add your API key first.";
+      setErrorMessage(message);
+      setIsConfigMode(true);
+      toast.error(message);
+      return;
+    }
+
+    setSavingMessageId(messageId);
+
+    try {
+      const title = await generateNoteTitle(content);
+      addNote({
+        title,
+        content,
+      });
+      toast.success("Note created from AI reply.");
+    } catch (error) {
+      const message =
+        error instanceof Error
+          ? error.message
+          : "Unable to create a note from this AI reply.";
+      toast.error(message);
+    } finally {
+      setSavingMessageId(null);
+    }
   };
 
   const handleSendMessage = async () => {
@@ -731,6 +852,7 @@ const AISidebar = ({ open, onClose }: AISidebarProps) => {
                 {messages.length ? (
                   messages.map((message) => {
                     const isUser = message.role === "user";
+                    const isSavingThisMessage = savingMessageId === message.id;
 
                     return (
                       <div
@@ -748,6 +870,36 @@ const AISidebar = ({ open, onClose }: AISidebarProps) => {
                         <p className="whitespace-pre-wrap break-words">
                           {message.content}
                         </p>
+                        {!isUser ? (
+                          <div className="mt-3 flex justify-end">
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="sm"
+                              onClick={() =>
+                                void handleSaveMessageToNote(
+                                  message.id,
+                                  message.content,
+                                )
+                              }
+                              disabled={
+                                isSavingThisMessage || !message.content.trim()
+                              }
+                              className="h-8 rounded-full px-3 text-xs text-muted-foreground hover:bg-background/60 hover:text-foreground"
+                            >
+                              {isSavingThisMessage ? (
+                                <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                              ) : (
+                                <HugeiconsIcon
+                                  icon={MoveIcon}
+                                  size={16}
+                                  strokeWidth={2}
+                                />
+                              )}
+                              <span>Save to note</span>
+                            </Button>
+                          </div>
+                        ) : null}
                       </div>
                     );
                   })

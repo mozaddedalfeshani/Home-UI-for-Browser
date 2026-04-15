@@ -350,16 +350,16 @@ const Notepad = () => {
                     <div
                       key={note.id}
                       onClick={() => selectNote(note.id)}
-                      className="group relative cursor-pointer rounded-2xl border border-border/55 bg-card/60 p-4 transition-all hover:border-primary/25 hover:bg-accent/35"
+                      className="group relative w-full overflow-hidden cursor-pointer rounded-2xl border border-border/55 bg-card/60 p-4 transition-all hover:border-primary/25 hover:bg-accent/35"
                     >
                       <div className="flex items-start justify-between">
-                        <div className="space-y-1 pr-6">
-                          <h3 className="font-bold text-sm truncate group-hover:text-primary transition-colors">
+                        <div className="min-w-0 flex-1 space-y-1 pr-10">
+                          <h3 className="truncate text-sm font-bold transition-colors group-hover:text-primary">
                             {note.title || t("untitledStickyNote")}
                           </h3>
                           {note.alarmStatus !== "none" && (
                             <span
-                              className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[9px] font-semibold uppercase tracking-wide ${
+                              className={`inline-flex max-w-full items-center gap-1 rounded-full px-2 py-0.5 text-[9px] font-semibold uppercase tracking-wide ${
                                 note.alarmStatus === "scheduled"
                                   ? "border border-primary/30 bg-primary/10 text-primary"
                                   : "border border-amber-500/40 bg-amber-500/10 text-amber-600 dark:text-amber-300"
@@ -388,7 +388,7 @@ const Notepad = () => {
                           </Button>
                         </DeleteConfirmDialog>
                       </div>
-                      <p className="line-clamp-2 text-xs leading-relaxed text-muted-foreground">
+                      <p className="mt-2 line-clamp-2 max-w-full break-words text-xs leading-relaxed text-muted-foreground">
                         {note.content || t("noStickyContent")}
                       </p>
                       <div className="mt-1 flex items-center gap-1 text-[9px] font-bold uppercase tracking-widest text-muted-foreground/85">
