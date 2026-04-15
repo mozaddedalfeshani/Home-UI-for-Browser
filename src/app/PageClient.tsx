@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import DigitalClock from "@/components/Home/ClockZone/Clock";
 import TabsZone from "@/components/Home/TabsZone";
 import SettingsMenu from "@/components/SettingsMenu";
@@ -42,7 +42,22 @@ export function PageClient() {
   }, [backgroundImageUrl]);
 
   const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
+  const [searchInitialQuery, setSearchInitialQuery] = useState("");
   const [isSidebarVisible, setIsSidebarVisible] = useState(false);
+  const isSearchModalOpenRef = useRef(false);
+
+  useEffect(() => {
+    isSearchModalOpenRef.current = isSearchModalOpen;
+  }, [isSearchModalOpen]);
+
+  const handleSearchModalOpenChange = (nextOpen: boolean) => {
+    isSearchModalOpenRef.current = nextOpen;
+    setIsSearchModalOpen(nextOpen);
+
+    if (!nextOpen) {
+      setSearchInitialQuery("");
+    }
+  };
 
   // Dynamic Wallpaper Logic: Pick a new one on every refresh
   useEffect(() => {
@@ -85,7 +100,7 @@ export function PageClient() {
       
       fetchNewWallpaper();
     }
-  }, [isHydrated, isDynamicWallpaper]); // Only run when hydrated or dynamic mode toggled
+  }, [dynamicWallpapers, isDynamicWallpaper, isHydrated, setBackgroundImage]); // Only run when hydrated or dynamic mode toggled
 
   const shouldShowRightSidebar = showRightSidebar && layoutPreset !== "focus";
   const leftPaneClass = shouldShowRightSidebar
@@ -103,14 +118,20 @@ export function PageClient() {
 
   // Initialize keyboard shortcuts
   useKeyboardShortcuts({
-    onSearchModalOpen: () => setIsSearchModalOpen(true),
+    onSearchModalOpen: (initialQuery) => {
+      if (initialQuery) {
+        setSearchInitialQuery((currentQuery) =>
+          isSearchModalOpenRef.current ? `${currentQuery}${initialQuery}` : initialQuery
+        );
+      }
+      isSearchModalOpenRef.current = true;
+      setIsSearchModalOpen(true);
+    },
   });
   // Ensure default background image on first visit
   useDefaultAssets();
   // Keep sticky-note reminders active while dashboard tab is open
   useStickyNoteAlarms();
-
-  const { url: backgroundImageUrl_dummy } = useMediaUrl(backgroundImage); // already have backgroundImageUrl
 
   // Show skeleton screen while store is hydrating
   if (!isHydrated) {
@@ -246,7 +267,8 @@ export function PageClient() {
       <GithubLink />
       <SearchModal
         open={isSearchModalOpen}
-        onOpenChange={setIsSearchModalOpen}
+        onOpenChange={handleSearchModalOpenChange}
+        initialQuery={searchInitialQuery}
       />
       <StickyAlarmDialog />
     </div>
