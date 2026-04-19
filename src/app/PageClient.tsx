@@ -12,6 +12,7 @@ import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
 import { useMediaUrl } from "@/hooks/useMediaUrl";
 import { useDefaultAssets } from "@/hooks/useDefaultAssets";
 import { useStickyNoteAlarms } from "@/hooks/useStickyNoteAlarms";
+import { registerSiteVisit } from "@/lib/analyticsClient";
 import Image from "next/image";
 import GithubLink from "@/components/Home/GithubLink";
 import { cn } from "@/lib/utils";
@@ -167,6 +168,14 @@ export function PageClient() {
   useDefaultAssets();
   // Keep sticky-note reminders active while dashboard tab is open
   useStickyNoteAlarms();
+
+  // Deferred analytics: fire 2 seconds after page load to avoid blocking render
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      void registerSiteVisit();
+    }, 2000);
+    return () => clearTimeout(timer);
+  }, []);
 
   // Show skeleton screen while store is hydrating
   if (!isHydrated) {
