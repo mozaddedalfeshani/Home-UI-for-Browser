@@ -1,0 +1,15 @@
+{
+  "searchQueries": {},
+  "visitCounts": {
+    "site-homepage": {
+      "key": "site-homepage",
+      "tabId": "site-homepage",
+      "title": "Home UI",
+      "url": "http://localhost:3000",
+      "source": "site-load",
+      "count": 10,
+      "createdAt": "2026-04-19T20:52:37.107Z",
+      "updatedAt": "2026-04-19T20:56:18.176Z"
+    }
+  }
+}
