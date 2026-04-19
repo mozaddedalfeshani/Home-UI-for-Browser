@@ -27,6 +27,7 @@ export function PageClient() {
   const {
     showClock,
     showRightSidebar,
+    enableLeftSidebarHover,
     backgroundImage,
     isHydrated,
     clockPosition,
@@ -282,7 +283,7 @@ export function PageClient() {
         ) : null}
       </div>
 
-      {!isAISidebarVisible ? (
+      {enableLeftSidebarHover && !isAISidebarVisible ? (
         <div
           className="fixed left-0 top-0 bottom-0 z-[65] hidden w-8 cursor-e-resize md:block"
           onMouseEnter={() => setIsAISidebarVisible(true)}
