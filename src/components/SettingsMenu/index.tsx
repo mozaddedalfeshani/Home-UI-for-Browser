@@ -23,7 +23,6 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
-  LayoutPreset,
   SearchEngine,
   TabsPosition,
   useSettingsStore,
@@ -50,7 +49,6 @@ const SettingsMenu = () => {
     enableLeftSidebarHover,
     enableSearchHoverZone,
     searchEngine,
-    layoutPreset,
     tabsPosition,
     isClockDialogOpen,
     isBackgroundDialogOpen,
@@ -59,7 +57,6 @@ const SettingsMenu = () => {
     setTheme: setSettingsTheme,
     setLanguage,
     setSearchEngine,
-    setLayoutPreset,
     setTabsPosition,
     setDynamicWallpaper,
     toggleAutoOrderTabs,
@@ -84,10 +81,6 @@ const SettingsMenu = () => {
 
   const handleSearchEngineChange = (newEngine: string) => {
     setSearchEngine(newEngine as SearchEngine);
-  };
-
-  const handleLayoutPresetChange = (nextPreset: string) => {
-    setLayoutPreset(nextPreset as LayoutPreset);
   };
 
   // Translation function
@@ -210,7 +203,7 @@ const SettingsMenu = () => {
           </div>
 
           {/* Layout Selection */}
-          <div className="px-2 py-2">
+          {/* <div className="px-2 py-2">
             <span className="mb-2 block text-[10px] font-medium uppercase text-muted-foreground/70">
               {t("layoutMode")}
             </span>
@@ -231,7 +224,7 @@ const SettingsMenu = () => {
                 </button>
               ))}
             </div>
-          </div>
+          </div> */}
 
           {/* Shortcut Position Selection */}
           <div className="px-2 py-2">
