@@ -64,6 +64,7 @@ const SettingsMenu = () => {
     language,
     autoOrderTabs,
     showRightSidebar,
+    enableLeftSidebarHover,
     searchEngine,
     layoutPreset,
     tabsPosition,
@@ -79,6 +80,7 @@ const SettingsMenu = () => {
     setDynamicWallpaper,
     toggleAutoOrderTabs,
     toggleShowRightSidebar,
+    toggleLeftSidebarHover,
     setClockDialogOpen,
     setBackgroundDialogOpen,
     setResizeDialogOpen,
@@ -313,7 +315,7 @@ const SettingsMenu = () => {
           <div className="px-2 py-2">
             <span className="mb-2 block text-[10px] font-medium uppercase text-muted-foreground/70">{t("shortcutPosition")}</span>
             <div className="flex rounded-md border border-border/50 bg-background/50 p-0.5">
-              {["top", "center", "bottom"].map((pos) => (
+              {["top", "center"].map((pos) => (
                 <button
                   key={pos}
                   onClick={() => setTabsPosition(pos as TabsPosition)}
@@ -334,6 +336,7 @@ const SettingsMenu = () => {
             {[
               { id: "autoOrderTabs", label: t("autoOrderTabs"), checked: autoOrderTabs, onCheckedChange: toggleAutoOrderTabs },
               { id: "showRightSidebar", label: t("showRightSidebar"), checked: showRightSidebar, onCheckedChange: toggleShowRightSidebar },
+              { id: "enableLeftSidebarHover", label: t("enableLeftSidebarHover"), checked: enableLeftSidebarHover, onCheckedChange: toggleLeftSidebarHover },
               { id: "dynamicWallpaper", label: t("dynamicWallpaper"), checked: isDynamicWallpaper, onCheckedChange: () => setDynamicWallpaper(!isDynamicWallpaper) },
             ].map((item) => (
               <div key={item.id} className="flex items-center justify-between rounded-md px-2 py-1 hover:bg-accent/50">
