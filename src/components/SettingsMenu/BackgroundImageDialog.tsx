@@ -2,6 +2,7 @@
 
 import { useState, useRef } from "react";
 import { Upload, X, Image as ImageIcon } from "lucide-react";
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -18,14 +19,19 @@ interface BackgroundImageDialogProps {
   onOpenChange: (open: boolean) => void;
 }
 
-export function BackgroundImageDialog({ open, onOpenChange }: BackgroundImageDialogProps) {
-  const { 
-    backgroundImage, 
+export function BackgroundImageDialog({
+  open,
+  onOpenChange,
+}: BackgroundImageDialogProps) {
+  const {
+    backgroundImage,
     setBackgroundImage,
     isDynamicWallpaper,
-    setDynamicWallpaper
+    setDynamicWallpaper,
   } = useSettingsStore();
-  const [tempBackgroundImage, setTempBackgroundImage] = useState<string | File | null>(backgroundImage);
+  const [tempBackgroundImage, setTempBackgroundImage] = useState<
+    string | File | null
+  >(backgroundImage);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -34,10 +40,12 @@ export function BackgroundImageDialog({ open, onOpenChange }: BackgroundImageDia
       // Check file size (50MB limit)
       const maxSize = 50 * 1024 * 1024; // 50MB in bytes
       if (file.size > maxSize) {
-        alert(`File size too large. Please select a file smaller than 50MB. Current size: ${(file.size / (1024 * 1024)).toFixed(2)}MB`);
+        alert(
+          `File size too large. Please select a file smaller than 50MB. Current size: ${(file.size / (1024 * 1024)).toFixed(2)}MB`,
+        );
         return;
       }
-      
+
       // Store the file object directly instead of converting to data URL
       setTempBackgroundImage(file);
     }
@@ -46,7 +54,7 @@ export function BackgroundImageDialog({ open, onOpenChange }: BackgroundImageDia
   const handleRemoveImage = () => {
     setTempBackgroundImage(null);
     if (fileInputRef.current) {
-      fileInputRef.current.value = '';
+      fileInputRef.current.value = "";
     }
   };
 
@@ -73,7 +81,7 @@ export function BackgroundImageDialog({ open, onOpenChange }: BackgroundImageDia
             Choose a background image for your homepage.
           </DialogDescription>
         </DialogHeader>
-        
+
         <div className="space-y-4 py-4">
           <input
             ref={fileInputRef}
@@ -82,23 +90,21 @@ export function BackgroundImageDialog({ open, onOpenChange }: BackgroundImageDia
             onChange={handleImageUpload}
             className="hidden"
           />
-          
+
           <div className="space-y-3">
             <Button
               variant="outline"
               onClick={() => fileInputRef.current?.click()}
-              className="w-full h-12"
-            >
+              className="w-full h-12">
               <Upload className="mr-2 h-4 w-4" />
               {tempBackgroundImage ? "Change Image" : "Upload Image"}
             </Button>
-            
+
             {tempBackgroundImage && (
               <Button
                 variant="outline"
                 onClick={handleRemoveImage}
-                className="w-full"
-              >
+                className="w-full">
                 <X className="mr-2 h-4 w-4" />
                 Remove Image
               </Button>
@@ -116,18 +122,25 @@ export function BackgroundImageDialog({ open, onOpenChange }: BackgroundImageDia
               <button
                 type="button"
                 onClick={() => setDynamicWallpaper(!isDynamicWallpaper)}
-                className={`relative h-5 w-10 rounded-full transition-colors ${isDynamicWallpaper ? "bg-primary" : "bg-muted"}`}
-              >
-                <div className={`absolute top-0.5 h-4 w-4 rounded-full bg-background transition-all ${isDynamicWallpaper ? "translate-x-5" : "translate-x-0.5"}`} />
+                className={`relative h-5 w-10 rounded-full transition-colors ${isDynamicWallpaper ? "bg-primary" : "bg-muted"}`}>
+                <div
+                  className={`absolute top-0.5 h-4 w-4 rounded-full bg-background transition-all ${isDynamicWallpaper ? "translate-x-5" : "translate-x-0.5"}`}
+                />
               </button>
             </div>
           </div>
 
           {tempBackgroundImage && !isDynamicWallpaper && (
             <div className="rounded-lg border overflow-hidden shadow-xl ring-1 ring-black/5">
-              <img
-                src={tempBackgroundImage instanceof File ? URL.createObjectURL(tempBackgroundImage) : tempBackgroundImage}
+              <Image
+                src={
+                  tempBackgroundImage instanceof File
+                    ? URL.createObjectURL(tempBackgroundImage)
+                    : tempBackgroundImage
+                }
                 alt="Background preview"
+                width={400}
+                height={160}
                 className="w-full h-40 object-cover"
               />
             </div>
