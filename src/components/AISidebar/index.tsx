@@ -668,9 +668,14 @@ const AISidebar = ({ open, onClose }: AISidebarProps) => {
                 />
               </div>
               <div>
-                <p className="text-sm font-bold uppercase tracking-tight text-foreground/90">
-                  AI Assistant
-                </p>
+                <div className="flex items-center gap-2">
+                  <p className="text-sm font-bold uppercase tracking-tight text-foreground/90">
+                    AI Assistant
+                  </p>
+                  <span className="rounded-full bg-primary/15 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-widest text-primary">
+                    Beta
+                  </span>
+                </div>
                 <p className="text-[11px] text-muted-foreground">
                   {activeAgentName
                     ? `${activeAgentName} · ${providerMeta.label}`
