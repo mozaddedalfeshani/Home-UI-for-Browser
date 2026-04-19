@@ -1,231 +1,28 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import {
-  AiChat01Icon,
-  AiIdeaIcon,
-  AiSettingIcon,
-  ArrowLeft01Icon,
-  BotIcon,
-  Cancel01Icon,
-  Key02Icon,
-  MoveIcon,
-  SentIcon,
-} from "@hugeicons/core-free-icons";
-import { HugeiconsIcon } from "@hugeicons/react";
-import ReactMarkdown from "react-markdown";
-import remarkGfm from "remark-gfm";
-import { Copy, Loader2 } from "lucide-react";
 import { toast } from "sonner";
-import AgentMenu from "@/components/AgentMenu";
-import { AgentForm } from "@/components/AgentMenu";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
-import { cn } from "@/lib/utils";
+import { TooltipProvider } from "@/components/ui/tooltip";
 import { useNotepadStore } from "@/store/notepadStore";
+import { useAISidebarStore } from "@/store/aiSidebarStore";
+import { AISidebarHeader } from "./ai-sidebar-header";
+import { AISidebarSetup } from "./ai-sidebar-setup";
+import { AISidebarChat } from "./ai-sidebar-chat";
+import { AISidebarComposer } from "./ai-sidebar-composer";
 import {
-  type AIProvider,
-  type AIBehaviorPreset,
-  type AILanguagePreset,
-  useAISidebarStore,
-} from "@/store/aiSidebarStore";
-
-const PROVIDERS: Array<{
-  value: AIProvider;
-  label: string;
-  subtitle: string;
-}> = [
-  {
-    value: "deepseek",
-    label: "DeepSeek",
-    subtitle: "api.deepseek.com",
-  },
-  {
-    value: "openrouter",
-    label: "OpenRouter",
-    subtitle: "openrouter.ai",
-  },
-];
-
-const LANGUAGE_OPTIONS: Array<{
-  value: AILanguagePreset;
-  label: string;
-}> = [
-  { value: "english", label: "English" },
-  { value: "bangla", label: "Bangla" },
-  { value: "auto", label: "Auto Detect" },
-];
-
-const BEHAVIOR_OPTIONS: Array<{
-  value: AIBehaviorPreset;
-  label: string;
-}> = [
-  { value: "balanced", label: "Balanced" },
-  { value: "friendly", label: "Friendly" },
-  { value: "professional", label: "Professional" },
-];
-
-const getSystemPrompt = (
-  rules: string,
-  language: AILanguagePreset,
-  behavior: AIBehaviorPreset,
-) => {
-  const ruleInstruction = rules.trim()
-    ? `Additional rules: ${rules.trim()}`
-    : "Be clear, helpful, and practical.";
-
-  const languageInstruction =
-    language === "bangla"
-      ? "Respond in Bangla."
-      : language === "auto"
-        ? "Match the user's language when possible."
-        : "Respond in English.";
-
-  const behaviorInstruction =
-    behavior === "friendly"
-      ? "Use a warm, friendly tone."
-      : behavior === "professional"
-        ? "Use a professional, concise tone."
-        : "Use a balanced and approachable tone.";
-
-  return `${ruleInstruction} ${languageInstruction} ${behaviorInstruction}`;
-};
-
-const getTitlePrompt = (rules: string, language: AILanguagePreset) => {
-  const languageInstruction =
-    language === "bangla"
-      ? "Return the title in Bangla."
-      : language === "auto"
-        ? "Return the title in the same language as the assistant message."
-        : "Return the title in English.";
-
-  const rulesInstruction = rules.trim()
-    ? `Additional user rules to respect when naming: ${rules.trim()}`
-    : "";
-
-  return [
-    "Generate one concise sticky-note title for the provided assistant message.",
-    "Return only the title text.",
-    "Do not use quotation marks.",
-    "Do not use markdown.",
-    "Do not add prefixes like Title:.",
-    "Keep it short and note-friendly.",
-    languageInstruction,
-    rulesInstruction,
-  ]
-    .filter(Boolean)
-    .join(" ");
-};
-
-const extractDeltaContent = (payload: unknown) => {
-  const parsed = payload as {
-    choices?: Array<{
-      delta?: {
-        content?: string;
-        reasoning?: string;
-      };
-      message?: {
-        content?: string;
-      };
-    }>;
-  };
-
-  const choice = parsed.choices?.[0];
-
-  return (
-    choice?.delta?.content ??
-    choice?.delta?.reasoning ??
-    choice?.message?.content ??
-    ""
-  );
-};
-
-const getProviderErrorMessage = (payload: unknown, fallback: string) => {
-  const parsed = payload as {
-    error?: {
-      message?: string;
-      code?: number | string;
-      metadata?: {
-        raw?: string;
-        provider_name?: string;
-      };
-    };
-  };
-
-  const rawMessage = parsed.error?.metadata?.raw?.trim();
-  if (rawMessage) {
-    return rawMessage;
-  }
-
-  const providerMessage = parsed.error?.message?.trim();
-  if (providerMessage) {
-    return providerMessage;
-  }
-
-  return fallback;
-};
-
-const extractMessageContent = (payload: unknown) => {
-  const parsed = payload as {
-    choices?: Array<{
-      message?: {
-        content?: string;
-      };
-    }>;
-  };
-
-  return parsed.choices?.[0]?.message?.content?.trim() ?? "";
-};
+  getProviderConfig,
+  getSystemPrompt,
+  getTitlePrompt,
+  extractDeltaContent,
+  extractMessageContent,
+  getProviderErrorMessage,
+} from "./ai-sidebar-utils";
+import { PROVIDERS } from "./ai-sidebar-constants";
 
 interface AISidebarProps {
   open: boolean;
   onClose: () => void;
 }
-
-const getProviderConfig = (
-  provider: AIProvider,
-  apiKey: string,
-  openRouterModel: string,
-): {
-  endpoint: string;
-  headers: Record<string, string>;
-  bodyBase: {
-    model: string;
-  };
-} => {
-  if (provider === "openrouter") {
-    return {
-      endpoint: "https://openrouter.ai/api/v1/chat/completions",
-      headers: {
-        Authorization: `Bearer ${apiKey}`,
-        "Content-Type": "application/json",
-        "HTTP-Referer": "https://home-ui.local",
-        "X-Title": "Home UI for Browser",
-      },
-      bodyBase: {
-        model: openRouterModel || "openrouter/auto",
-      },
-    };
-  }
-
-  return {
-    endpoint: "https://api.deepseek.com/chat/completions",
-    headers: {
-      Authorization: `Bearer ${apiKey}`,
-      "Content-Type": "application/json",
-    },
-    bodyBase: {
-      model: "deepseek-chat",
-    },
-  };
-};
 
 const AISidebar = ({ open, onClose }: AISidebarProps) => {
   const [draftMessage, setDraftMessage] = useState("");
@@ -236,11 +33,9 @@ const AISidebar = ({ open, onClose }: AISidebarProps) => {
   const [availableModels, setAvailableModels] = useState<string[]>([]);
   const [isLoadingModels, setIsLoadingModels] = useState(false);
   const [modelsError, setModelsError] = useState<string | null>(null);
-  const [showApiKey, setShowApiKey] = useState(false);
   const [isConfigMode, setIsConfigMode] = useState(false);
   const [isAgentCreateMode, setIsAgentCreateMode] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [setupStep, setSetupStep] = useState(1);
   const scrollRef = useRef<HTMLDivElement | null>(null);
   const modelsPopoverRef = useRef<HTMLDivElement | null>(null);
 
@@ -360,17 +155,6 @@ const AISidebar = ({ open, onClose }: AISidebarProps) => {
 
     void fetchModels();
   }, [apiKey, availableModels.length, isLoadingModels, isModelsOpen, provider]);
-
-  const handleSetupSubmit = () => {
-    if (!apiKey.trim()) {
-      setErrorMessage("Please enter an API key to continue.");
-      return;
-    }
-
-    setErrorMessage(null);
-    completeSetup();
-    setIsConfigMode(false);
-  };
 
   const generateNoteTitle = async (content: string) => {
     const providerConfig = getProviderConfig(
@@ -626,15 +410,6 @@ const AISidebar = ({ open, onClose }: AISidebarProps) => {
     }
   };
 
-  const handleComposerKeyDown = (
-    event: React.KeyboardEvent<HTMLTextAreaElement>,
-  ) => {
-    if (event.key === "Enter" && !event.shiftKey) {
-      event.preventDefault();
-      void handleSendMessage();
-    }
-  };
-
   const handleCopyMessage = async (messageId: string, content: string) => {
     if (!content.trim()) {
       return;
@@ -658,701 +433,84 @@ const AISidebar = ({ open, onClose }: AISidebarProps) => {
     <TooltipProvider delayDuration={120}>
       <div className="h-full overflow-hidden rounded-r-3xl border-r border-border/60 bg-background/78 text-foreground shadow-2xl backdrop-blur-2xl transition-all duration-300">
         <div className="flex h-full flex-col">
-          <div className="flex items-center justify-between border-b border-border/50 bg-background/70 px-4 py-4">
-            <div className="flex items-center gap-2">
-              <div className="rounded-xl border border-primary/15 bg-primary/10 p-2">
-                <HugeiconsIcon
-                  icon={BotIcon}
-                  size={18}
-                  strokeWidth={2}
-                  className="text-primary"
-                />
-              </div>
-              <div>
-                <div className="flex items-center gap-2">
-                  <p className="text-sm font-bold uppercase tracking-tight text-foreground/90">
-                    AI Assistant
-                  </p>
-                  <span className="rounded-full bg-primary/15 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-widest text-primary">
-                    Beta
-                  </span>
-                </div>
-                <p className="text-[11px] text-muted-foreground">
-                  {activeAgentName
-                    ? `${activeAgentName} · ${providerMeta.label}`
-                    : providerMeta.label}
-                </p>
-              </div>
-            </div>
-            <div className="flex items-center gap-1">
-              <AgentMenu
-                onCreateRequested={() => {
-                  setIsConfigMode(false);
-                  setIsAgentCreateMode(true);
-                }}
-              />
-              {!showSetup ? (
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon-sm"
-                  onClick={() => {
-                    setIsAgentCreateMode(false);
-                    setSetupStep(1);
-                    setErrorMessage(null);
-                    setIsConfigMode(true);
-                  }}
-                  className="h-8 w-8 rounded-full"
-                  aria-label="Open AI settings">
-                  <HugeiconsIcon
-                    icon={AiSettingIcon}
-                    size={18}
-                    strokeWidth={2}
-                  />
-                </Button>
-              ) : null}
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon-sm"
-                onClick={onClose}
-                className="h-8 w-8 rounded-full"
-                aria-label="Close AI sidebar">
-                <HugeiconsIcon icon={Cancel01Icon} size={18} strokeWidth={2} />
-              </Button>
-            </div>
-          </div>
+          <AISidebarHeader
+            activeAgentName={activeAgentName}
+            providerLabel={providerMeta.label}
+            showSetup={showSetup}
+            onSettingsOpen={() => {
+              setIsAgentCreateMode(false);
+              setErrorMessage(null);
+              setIsConfigMode(true);
+            }}
+            onClose={onClose}
+            onAgentCreateRequested={() => {
+              setIsConfigMode(false);
+              setIsAgentCreateMode(true);
+            }}
+          />
 
           {showSidebarForm ? (
-            <div className="flex flex-1 flex-col overflow-y-auto px-4 py-5">
-              {isConfigured || isAgentCreateMode ? (
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => {
-                    setIsConfigMode(false);
-                    setIsAgentCreateMode(false);
-                  }}
-                  className="-ml-2 mb-4 h-8 w-fit gap-2 text-muted-foreground hover:text-foreground">
-                  <HugeiconsIcon
-                    icon={ArrowLeft01Icon}
-                    size={18}
-                    strokeWidth={2}
-                  />
-                  Back to chat
-                </Button>
-              ) : null}
-
-              {isAgentCreateMode ? (
-                <>
-                  <div className="mb-5 rounded-2xl border border-primary/10 bg-gradient-to-br from-primary/12 via-primary/5 to-transparent p-4">
-                    <div className="mb-2 flex items-center gap-2 text-primary">
-                      <HugeiconsIcon
-                        icon={AiIdeaIcon}
-                        size={18}
-                        strokeWidth={2}
-                      />
-                      <span className="text-sm font-semibold">
-                        Create an agent
-                      </span>
-                    </div>
-                    <p className="text-sm leading-6 text-muted-foreground">
-                      A dedicated profile with its own provider, model, API key,
-                      rules, language, and behavior.
-                    </p>
-                  </div>
-                  <AgentForm onCreated={() => setIsAgentCreateMode(false)} />
-                </>
-              ) : (
-                <>
-                  {/* Step progress indicator */}
-                  <div className="mb-6">
-                    <div className="mb-3 flex items-center gap-1.5">
-                      {[1, 2, 3].map((s) => (
-                        <div
-                          key={s}
-                          className="flex flex-1 items-center gap-1.5">
-                          <div
-                            className={cn(
-                              "flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[11px] font-bold transition-all duration-200",
-                              setupStep === s
-                                ? "bg-primary text-primary-foreground shadow-sm"
-                                : setupStep > s
-                                  ? "bg-primary/20 text-primary"
-                                  : "bg-muted text-muted-foreground",
-                            )}>
-                            {s}
-                          </div>
-                          {s < 3 && (
-                            <div
-                              className={cn(
-                                "h-px flex-1 rounded-full transition-all duration-300",
-                                setupStep > s
-                                  ? "bg-primary/40"
-                                  : "bg-border/50",
-                              )}
-                            />
-                          )}
-                        </div>
-                      ))}
-                    </div>
-                    <p className="text-[11px] text-muted-foreground">
-                      {setupStep === 1 && "Step 1 of 3 — Choose provider"}
-                      {setupStep === 2 && "Step 2 of 3 — API key"}
-                      {setupStep === 3 && "Step 3 of 3 — Preferences"}
-                    </p>
-                  </div>
-
-                  {/* Step 1 — Provider */}
-                  {setupStep === 1 && (
-                    <div className="space-y-4">
-                      <div>
-                        <p className="text-base font-semibold text-foreground">
-                          Choose a provider
-                        </p>
-                        <p className="mt-1 text-sm text-muted-foreground">
-                          Your credentials are saved locally and never leave
-                          your device.
-                        </p>
-                      </div>
-                      <div className="grid gap-3">
-                        {PROVIDERS.map((item) => (
-                          <button
-                            key={item.value}
-                            type="button"
-                            onClick={() => setProvider(item.value)}
-                            className={cn(
-                              "flex w-full items-center gap-3 rounded-2xl border p-4 text-left transition-all duration-150",
-                              provider === item.value
-                                ? "border-primary/50 bg-primary/10 ring-1 ring-primary/20"
-                                : "border-border/60 bg-card/30 hover:border-primary/30 hover:bg-primary/5",
-                            )}>
-                            <div
-                              className={cn(
-                                "flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border text-sm font-bold transition-colors",
-                                provider === item.value
-                                  ? "border-primary/30 bg-primary/15 text-primary"
-                                  : "border-border/50 bg-muted/50 text-muted-foreground",
-                              )}>
-                              {item.label[0]}
-                            </div>
-                            <div className="min-w-0 flex-1">
-                              <p className="text-sm font-semibold text-foreground">
-                                {item.label}
-                              </p>
-                              <p className="text-xs text-muted-foreground">
-                                {item.subtitle}
-                              </p>
-                            </div>
-                            <div
-                              className={cn(
-                                "h-2.5 w-2.5 shrink-0 rounded-full transition-all",
-                                provider === item.value
-                                  ? "bg-primary"
-                                  : "bg-transparent",
-                              )}
-                            />
-                          </button>
-                        ))}
-                      </div>
-                      <Button
-                        type="button"
-                        onClick={() => setSetupStep(2)}
-                        className="h-11 w-full rounded-xl">
-                        Continue
-                      </Button>
-                    </div>
-                  )}
-
-                  {/* Step 2 — API Key */}
-                  {setupStep === 2 && (
-                    <div className="space-y-4">
-                      <div>
-                        <p className="text-base font-semibold text-foreground">
-                          Enter your API key
-                        </p>
-                        <p className="mt-1 text-sm text-muted-foreground">
-                          Stored only in your browser — never sent to any
-                          server.
-                        </p>
-                      </div>
-                      <div className="space-y-2">
-                        <label className="text-sm font-semibold text-foreground">
-                          {providerMeta.label} API Key
-                        </label>
-                        <div className="relative">
-                          <Input
-                            type={showApiKey ? "text" : "password"}
-                            value={apiKey}
-                            onChange={(event) => setApiKey(event.target.value)}
-                            onKeyDown={(e) => {
-                              if (e.key === "Enter" && apiKey.trim()) {
-                                setErrorMessage(null);
-                                setSetupStep(3);
-                              }
-                            }}
-                            placeholder="sk-..."
-                            className="h-12 rounded-xl pr-12"
-                            autoFocus
-                          />
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            size="icon-sm"
-                            onClick={() => setShowApiKey((c) => !c)}
-                            className="absolute right-2 top-1/2 h-8 w-8 -translate-y-1/2 rounded-full"
-                            aria-label={
-                              showApiKey ? "Hide API key" : "Show API key"
-                            }>
-                            <HugeiconsIcon
-                              icon={Key02Icon}
-                              size={18}
-                              strokeWidth={2}
-                            />
-                          </Button>
-                        </div>
-                      </div>
-                      {errorMessage ? (
-                        <div className="rounded-xl border border-destructive/20 bg-destructive/10 px-3 py-2 text-sm text-destructive">
-                          {errorMessage}
-                        </div>
-                      ) : null}
-                      <div className="flex gap-2">
-                        <Button
-                          type="button"
-                          variant="outline"
-                          onClick={() => {
-                            setErrorMessage(null);
-                            setSetupStep(1);
-                          }}
-                          className="h-11 flex-1 rounded-xl">
-                          Back
-                        </Button>
-                        <Button
-                          type="button"
-                          onClick={() => {
-                            if (!apiKey.trim()) {
-                              setErrorMessage(
-                                "Please enter your API key to continue.",
-                              );
-                              return;
-                            }
-                            setErrorMessage(null);
-                            setSetupStep(3);
-                          }}
-                          className="h-11 flex-1 rounded-xl">
-                          Continue
-                        </Button>
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Step 3 — Preferences */}
-                  {setupStep === 3 && (
-                    <div className="space-y-5">
-                      <div>
-                        <p className="text-base font-semibold text-foreground">
-                          Set your preferences
-                        </p>
-                        <p className="mt-1 text-sm text-muted-foreground">
-                          Optional — you can change these anytime from settings.
-                        </p>
-                      </div>
-                      <div className="space-y-2">
-                        <label className="text-sm font-semibold text-foreground">
-                          Language
-                        </label>
-                        <div className="grid grid-cols-3 gap-2">
-                          {LANGUAGE_OPTIONS.map((item) => (
-                            <button
-                              key={item.value}
-                              type="button"
-                              onClick={() => setLanguage(item.value)}
-                              className={cn(
-                                "rounded-xl border py-2.5 text-sm font-medium transition-all duration-150",
-                                language === item.value
-                                  ? "border-primary/50 bg-primary/10 text-primary"
-                                  : "border-border/60 bg-card/30 text-muted-foreground hover:border-primary/30 hover:text-foreground",
-                              )}>
-                              {item.label}
-                            </button>
-                          ))}
-                        </div>
-                      </div>
-                      <div className="space-y-2">
-                        <label className="text-sm font-semibold text-foreground">
-                          Behavior
-                        </label>
-                        <div className="grid grid-cols-3 gap-2">
-                          {BEHAVIOR_OPTIONS.map((item) => (
-                            <button
-                              key={item.value}
-                              type="button"
-                              onClick={() => setBehavior(item.value)}
-                              className={cn(
-                                "rounded-xl border py-2.5 text-sm font-medium transition-all duration-150",
-                                behavior === item.value
-                                  ? "border-primary/50 bg-primary/10 text-primary"
-                                  : "border-border/60 bg-card/30 text-muted-foreground hover:border-primary/30 hover:text-foreground",
-                              )}>
-                              {item.label}
-                            </button>
-                          ))}
-                        </div>
-                      </div>
-                      <div className="space-y-2">
-                        <label className="text-sm font-semibold text-foreground">
-                          Custom Rules{" "}
-                          <span className="text-xs font-normal text-muted-foreground">
-                            (optional)
-                          </span>
-                        </label>
-                        <Textarea
-                          value={rules}
-                          onChange={(event) => setRules(event.target.value)}
-                          placeholder="e.g. Always reply concisely. Avoid markdown."
-                          className="min-h-20 rounded-xl text-sm"
-                        />
-                      </div>
-                      <div className="flex gap-2">
-                        <Button
-                          type="button"
-                          variant="outline"
-                          onClick={() => setSetupStep(2)}
-                          className="h-11 flex-1 rounded-xl">
-                          Back
-                        </Button>
-                        <Button
-                          type="button"
-                          onClick={handleSetupSubmit}
-                          className="h-11 flex-1 rounded-xl">
-                          Start chatting
-                        </Button>
-                      </div>
-                    </div>
-                  )}
-                </>
-              )}
-            </div>
+            <AISidebarSetup
+              isConfigured={isConfigured}
+              isAgentCreateMode={isAgentCreateMode}
+              provider={provider}
+              apiKey={apiKey}
+              language={language}
+              behavior={behavior}
+              rules={rules}
+              providerLabel={providerMeta.label}
+              onBack={() => {
+                setIsConfigMode(false);
+                setIsAgentCreateMode(false);
+              }}
+              onSetProvider={setProvider}
+              onSetApiKey={setApiKey}
+              onSetLanguage={setLanguage}
+              onSetBehavior={setBehavior}
+              onSetRules={setRules}
+              onSetupComplete={() => {
+                completeSetup();
+                setIsConfigMode(false);
+              }}
+              onAgentCreated={() => setIsAgentCreateMode(false)}
+            />
           ) : (
             <>
-              <div
+              <AISidebarChat
                 ref={scrollRef}
-                className="flex-1 space-y-3 overflow-y-auto px-4 py-4">
-                {messages.length ? (
-                  messages.map((message) => {
-                    const isUser = message.role === "user";
-                    const isSavingThisMessage = savingMessageId === message.id;
-                    const isCopyingThisMessage =
-                      copyingMessageId === message.id;
-
-                    return (
-                      <div
-                        key={message.id}
-                        className={cn(
-                          "max-w-[90%] rounded-2xl px-4 py-3 text-sm leading-6 shadow-sm",
-                          isUser
-                            ? "ml-auto bg-card text-card-foreground"
-                            : "bg-primary/15 text-foreground",
-                        )}>
-                        <p className="mb-1 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
-                          {isUser ? "You" : providerMeta.label}
-                        </p>
-                        {isUser ? (
-                          <p className="whitespace-pre-wrap break-words">
-                            {message.content}
-                          </p>
-                        ) : (
-                          <div className="ai-markdown break-words text-sm leading-6">
-                            <ReactMarkdown
-                              remarkPlugins={[remarkGfm]}
-                              components={{
-                                p: ({ children }) => (
-                                  <p className="mb-3 last:mb-0">{children}</p>
-                                ),
-                                ul: ({ children }) => (
-                                  <ul className="mb-3 list-disc space-y-1 pl-5 last:mb-0">
-                                    {children}
-                                  </ul>
-                                ),
-                                ol: ({ children }) => (
-                                  <ol className="mb-3 list-decimal space-y-1 pl-5 last:mb-0">
-                                    {children}
-                                  </ol>
-                                ),
-                                li: ({ children }) => <li>{children}</li>,
-                                strong: ({ children }) => (
-                                  <strong className="font-semibold text-foreground">
-                                    {children}
-                                  </strong>
-                                ),
-                                a: ({ children, href }) => (
-                                  <a
-                                    href={href}
-                                    target="_blank"
-                                    rel="noreferrer"
-                                    className="text-primary underline underline-offset-4">
-                                    {children}
-                                  </a>
-                                ),
-                                code: ({ children, className }) => {
-                                  const isBlock = Boolean(className);
-
-                                  if (isBlock) {
-                                    return (
-                                      <code className="block overflow-x-auto rounded-xl bg-background/70 px-3 py-2 font-mono text-xs text-foreground">
-                                        {children}
-                                      </code>
-                                    );
-                                  }
-
-                                  return (
-                                    <code className="rounded bg-background/70 px-1.5 py-0.5 font-mono text-[0.85em] text-foreground">
-                                      {children}
-                                    </code>
-                                  );
-                                },
-                                pre: ({ children }) => (
-                                  <pre className="mb-3 overflow-x-auto rounded-xl bg-background/70 p-3 last:mb-0">
-                                    {children}
-                                  </pre>
-                                ),
-                                blockquote: ({ children }) => (
-                                  <blockquote className="mb-3 border-l-2 border-primary/40 pl-4 italic text-muted-foreground last:mb-0">
-                                    {children}
-                                  </blockquote>
-                                ),
-                              }}>
-                              {message.content}
-                            </ReactMarkdown>
-                          </div>
-                        )}
-                        {!isUser ? (
-                          <div className="mt-3 flex justify-end gap-2">
-                            <Button
-                              type="button"
-                              variant="ghost"
-                              size="sm"
-                              onClick={() =>
-                                void handleCopyMessage(
-                                  message.id,
-                                  message.content,
-                                )
-                              }
-                              disabled={
-                                isCopyingThisMessage || !message.content.trim()
-                              }
-                              className="h-8 rounded-full px-3 text-xs text-muted-foreground hover:bg-background/60 hover:text-foreground">
-                              {isCopyingThisMessage ? (
-                                <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                              ) : (
-                                <Copy className="h-3.5 w-3.5" />
-                              )}
-                              <span>Copy</span>
-                            </Button>
-                            <Button
-                              type="button"
-                              variant="ghost"
-                              size="sm"
-                              onClick={() =>
-                                void handleSaveMessageToNote(
-                                  message.id,
-                                  message.content,
-                                )
-                              }
-                              disabled={
-                                isSavingThisMessage || !message.content.trim()
-                              }
-                              className="h-8 rounded-full px-3 text-xs text-muted-foreground hover:bg-background/60 hover:text-foreground">
-                              {isSavingThisMessage ? (
-                                <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                              ) : (
-                                <HugeiconsIcon
-                                  icon={MoveIcon}
-                                  size={16}
-                                  strokeWidth={2}
-                                />
-                              )}
-                              <span>Save to note</span>
-                            </Button>
-                          </div>
-                        ) : null}
-                      </div>
-                    );
-                  })
-                ) : (
-                  <div className="flex h-full min-h-[320px] flex-col items-center justify-center rounded-3xl border border-dashed border-border/60 bg-muted/20 px-6 text-center">
-                    <HugeiconsIcon
-                      icon={AiChat01Icon}
-                      size={42}
-                      strokeWidth={1.8}
-                      className="mb-3 text-primary/80"
-                    />
-                    <p className="text-base font-semibold text-foreground">
-                      Start a conversation
-                    </p>
-                    <p className="mt-2 max-w-xs text-sm leading-6 text-muted-foreground">
-                      Send a prompt and the assistant will answer here. History
-                      is only included in the API request when you enable the
-                      footer toggle.
-                    </p>
-                  </div>
-                )}
-              </div>
-
-              <div className="border-t border-border/50 bg-background/65 p-4">
-                {errorMessage ? (
-                  <div className="mb-3 rounded-xl border border-destructive/20 bg-destructive/10 px-3 py-2 text-sm text-destructive">
-                    {errorMessage}
-                  </div>
-                ) : null}
-
-                <div className="rounded-3xl border border-border/60 bg-card/55 p-3 shadow-sm">
-                  <Textarea
-                    value={draftMessage}
-                    onChange={(event) => setDraftMessage(event.target.value)}
-                    onKeyDown={handleComposerKeyDown}
-                    placeholder="Say something..."
-                    className="h-28 resize-none overflow-y-auto border-0 bg-transparent px-1 py-1 text-sm shadow-none focus-visible:border-transparent focus-visible:ring-0"
-                  />
-
-                  <div className="mt-3 flex items-center justify-between gap-3">
-                    <div className="flex items-center gap-2">
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <button
-                            type="button"
-                            onClick={() => setSendHistory(!sendHistory)}
-                            className={cn(
-                              "relative inline-flex h-7 w-12 items-center rounded-full border transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/60",
-                              sendHistory
-                                ? "border-emerald-400/70 bg-emerald-500/90"
-                                : "border-border/60 bg-muted/60",
-                            )}
-                            aria-pressed={sendHistory}
-                            aria-label="Toggle sending chat history">
-                            <span
-                              className={cn(
-                                "inline-block h-5 w-5 rounded-full bg-white shadow-md transition-transform duration-200",
-                                sendHistory ? "translate-x-6" : "translate-x-1",
-                              )}
-                            />
-                          </button>
-                        </TooltipTrigger>
-                        <TooltipContent side="top">
-                          {sendHistory
-                            ? "Chat history will be sent"
-                            : "Only the current message will be sent"}
-                        </TooltipContent>
-                      </Tooltip>
-
-                      {provider === "openrouter" ? (
-                        <div className="relative" ref={modelsPopoverRef}>
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            size="sm"
-                            onClick={() =>
-                              setIsModelsOpen((current) => !current)
-                            }
-                            className="h-9 rounded-full px-3 text-xs text-muted-foreground">
-                            Models
-                          </Button>
-
-                          {isModelsOpen ? (
-                            <div className="absolute bottom-full left-0 mb-2 w-72 rounded-2xl border border-border/70 bg-background/95 p-2 shadow-2xl backdrop-blur-xl">
-                              <div className="mb-2 px-2 py-1">
-                                <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                                  OpenRouter Models
-                                </p>
-                                <p className="mt-1 truncate text-[11px] text-foreground/80">
-                                  {openRouterModel}
-                                </p>
-                              </div>
-
-                              <div className="max-h-64 space-y-1 overflow-y-auto">
-                                <button
-                                  type="button"
-                                  onClick={() => {
-                                    setOpenRouterModel("openrouter/auto");
-                                    setIsModelsOpen(false);
-                                  }}
-                                  className={cn(
-                                    "flex w-full items-center rounded-xl px-3 py-2 text-left text-sm transition-colors",
-                                    openRouterModel === "openrouter/auto"
-                                      ? "bg-primary/12 text-primary"
-                                      : "hover:bg-muted/70",
-                                  )}>
-                                  openrouter/auto
-                                </button>
-
-                                {isLoadingModels ? (
-                                  <div className="flex items-center gap-2 px-3 py-3 text-sm text-muted-foreground">
-                                    <Loader2 className="h-4 w-4 animate-spin" />
-                                    Loading models...
-                                  </div>
-                                ) : modelsError ? (
-                                  <div className="px-3 py-3 text-sm text-destructive">
-                                    {modelsError}
-                                  </div>
-                                ) : (
-                                  availableModels
-                                    .filter(
-                                      (model) => model !== "openrouter/auto",
-                                    )
-                                    .map((model) => (
-                                      <button
-                                        key={model}
-                                        type="button"
-                                        onClick={() => {
-                                          setOpenRouterModel(model);
-                                          setIsModelsOpen(false);
-                                        }}
-                                        className={cn(
-                                          "flex w-full items-center rounded-xl px-3 py-2 text-left text-sm transition-colors",
-                                          openRouterModel === model
-                                            ? "bg-primary/12 text-primary"
-                                            : "hover:bg-muted/70",
-                                        )}>
-                                        {model}
-                                      </button>
-                                    ))
-                                )}
-                              </div>
-                            </div>
-                          ) : null}
-                        </div>
-                      ) : null}
-
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        onClick={clearMessages}
-                        className="h-9 rounded-full px-3 text-xs text-muted-foreground">
-                        Clear chat
-                      </Button>
-                    </div>
-
-                    <Button
-                      type="button"
-                      onClick={() => void handleSendMessage()}
-                      disabled={!draftMessage.trim() || isSubmitting}
-                      className="h-10 rounded-full px-4">
-                      {isSubmitting ? (
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                      ) : (
-                        <HugeiconsIcon
-                          icon={SentIcon}
-                          size={18}
-                          strokeWidth={2}
-                        />
-                      )}
-                    </Button>
-                  </div>
-                </div>
-              </div>
+                messages={messages}
+                providerLabel={providerMeta.label}
+                savingMessageId={savingMessageId}
+                copyingMessageId={copyingMessageId}
+                onCopyMessage={(id, content) =>
+                  void handleCopyMessage(id, content)
+                }
+                onSaveMessageToNote={(id, content) =>
+                  void handleSaveMessageToNote(id, content)
+                }
+              />
+              <AISidebarComposer
+                draftMessage={draftMessage}
+                isSubmitting={isSubmitting}
+                sendHistory={sendHistory}
+                provider={provider}
+                openRouterModel={openRouterModel}
+                isModelsOpen={isModelsOpen}
+                isLoadingModels={isLoadingModels}
+                modelsError={modelsError}
+                availableModels={availableModels}
+                errorMessage={errorMessage}
+                onDraftChange={setDraftMessage}
+                onSend={() => void handleSendMessage()}
+                onToggleSendHistory={() => setSendHistory(!sendHistory)}
+                onToggleModels={() => setIsModelsOpen((c) => !c)}
+                onSelectModel={(model) => {
+                  setOpenRouterModel(model);
+                  setIsModelsOpen(false);
+                }}
+                onClearChat={clearMessages}
+                modelsPopoverRef={modelsPopoverRef}
+              />
             </>
           )}
         </div>
