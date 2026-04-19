@@ -10,6 +10,7 @@ import { useTabClickHistoryStore } from "@/store/tabClickHistoryStore";
 import { useSettingsStore } from "@/store/settingsStore";
 import { useTranslation } from "@/constants/languages";
 import { cn } from "@/lib/utils";
+import { trackVisit } from "@/lib/analyticsClient";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { AddTabDialog } from "./AddTabDialog";
@@ -159,6 +160,12 @@ const SortableShortcutCard = ({
       url: tab.url,
     });
     incrementVisitCount(tab.id);
+    trackVisit({
+      tabId: tab.id,
+      title: tab.title,
+      url: tab.url,
+      source: "shortcut-card",
+    });
   };
 
   return (
@@ -327,9 +334,7 @@ export const TabsList = () => {
       <TooltipProvider delayDuration={150}>
         <DndProvider backend={HTML5Backend}>
           <div className={cn("flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-muted-foreground/30 scrollbar-track-transparent flex flex-col",
-            tabsPosition === "top" ? "justify-start" : 
-            tabsPosition === "bottom" ? "justify-end" : 
-            "justify-center"
+            tabsPosition === "top" ? "justify-start" : "justify-center"
           )}>
             <div 
               className="flex flex-wrap gap-4 justify-center w-full mx-auto"

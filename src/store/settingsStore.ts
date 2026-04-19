@@ -13,7 +13,7 @@ export type ClockPosition = "top-left" | "top-center" | "top-right";
 export type SearchEngine = "google" | "duckduckgo" | "bing" | "brave";
 export type LayoutPreset = "default" | "compact" | "focus";
 export type ClockStyle = "classic" | "modern";
-export type TabsPosition = "top" | "center" | "bottom";
+export type TabsPosition = "top" | "center";
 
 export const DEFAULT_DYNAMIC_WALLPAPERS = [
   "https://homewalpaper.imurad.me/1362858.jpeg",
@@ -26,6 +26,7 @@ interface SettingsState {
   autoOrderTabs: boolean;
   showClock: boolean;
   showRightSidebar: boolean;
+  enableLeftSidebarHover: boolean;
   tabsPosition: TabsPosition;
   cardSize: number;
   cardRadius: number;
@@ -50,6 +51,7 @@ interface SettingsState {
   toggleAutoOrderTabs: () => void;
   toggleShowClock: () => void;
   toggleShowRightSidebar: () => void;
+  toggleLeftSidebarHover: () => void;
   setShowRightSidebar: (show: boolean) => void;
   setCardSize: (size: number) => void;
   setCardRadius: (radius: number) => void;
@@ -83,6 +85,7 @@ export const useSettingsStore = create<SettingsState>()(
       autoOrderTabs: SHARE_SETTINGS_DEFAULTS.autoOrderTabs,
       showClock: SHARE_SETTINGS_DEFAULTS.showClock,
       showRightSidebar: SHARE_SETTINGS_DEFAULTS.showRightSidebar,
+      enableLeftSidebarHover: SHARE_SETTINGS_DEFAULTS.enableLeftSidebarHover,
       tabsPosition: SHARE_SETTINGS_DEFAULTS.tabsPosition,
       cardSize: SHARE_SETTINGS_DEFAULTS.cardSize,
       cardRadius: SHARE_SETTINGS_DEFAULTS.cardRadius,
@@ -109,6 +112,10 @@ export const useSettingsStore = create<SettingsState>()(
       toggleShowClock: () => set((state) => ({ showClock: !state.showClock })),
       toggleShowRightSidebar: () =>
         set((state) => ({ showRightSidebar: !state.showRightSidebar })),
+      toggleLeftSidebarHover: () =>
+        set((state) => ({
+          enableLeftSidebarHover: !state.enableLeftSidebarHover,
+        })),
       setShowRightSidebar: (show) => set({ showRightSidebar: show }),
       setCardSize: (size) => set({ cardSize: size }),
       setCardRadius: (radius) => set({ cardRadius: radius }),
@@ -209,6 +216,7 @@ export const useSettingsStore = create<SettingsState>()(
           autoOrderTabs: state.autoOrderTabs,
           showClock: state.showClock,
           showRightSidebar: state.showRightSidebar,
+          enableLeftSidebarHover: state.enableLeftSidebarHover,
           tabsPosition: state.tabsPosition,
           cardSize: state.cardSize,
           cardRadius: state.cardRadius,
@@ -230,6 +238,7 @@ export const useSettingsStore = create<SettingsState>()(
           autoOrderTabs: settings.autoOrderTabs,
           showClock: settings.showClock,
           showRightSidebar: settings.showRightSidebar,
+          enableLeftSidebarHover: settings.enableLeftSidebarHover,
           tabsPosition: settings.tabsPosition,
           cardSize: settings.cardSize,
           cardRadius: settings.cardRadius,
@@ -253,6 +262,7 @@ export const useSettingsStore = create<SettingsState>()(
           backgroundImage: null,
           showClock: SHARE_SETTINGS_DEFAULTS.showClock,
           showRightSidebar: SHARE_SETTINGS_DEFAULTS.showRightSidebar,
+          enableLeftSidebarHover: SHARE_SETTINGS_DEFAULTS.enableLeftSidebarHover,
           tabsPosition: SHARE_SETTINGS_DEFAULTS.tabsPosition,
           isDynamicWallpaper: SHARE_SETTINGS_DEFAULTS.isDynamicWallpaper,
           clockColor: SHARE_SETTINGS_DEFAULTS.clockColor,
