@@ -117,7 +117,7 @@ export async function GET(request: Request) {
 
     return NextResponse.json({
       success: true,
-      source: "mongodb",
+      source: "homeui",
       data: {
         key,
         tabId: tabId ?? null,
