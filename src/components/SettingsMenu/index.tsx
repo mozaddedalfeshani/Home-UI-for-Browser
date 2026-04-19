@@ -65,6 +65,7 @@ const SettingsMenu = () => {
     autoOrderTabs,
     showRightSidebar,
     enableLeftSidebarHover,
+    enableSearchHoverZone,
     searchEngine,
     layoutPreset,
     tabsPosition,
@@ -81,6 +82,7 @@ const SettingsMenu = () => {
     toggleAutoOrderTabs,
     toggleShowRightSidebar,
     toggleLeftSidebarHover,
+    toggleSearchHoverZone,
     setClockDialogOpen,
     setBackgroundDialogOpen,
     setResizeDialogOpen,
@@ -202,14 +204,15 @@ const SettingsMenu = () => {
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="w-[300px] p-2">
           <div className="flex items-center justify-between px-2 py-1.5">
-            <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">{t("settings")}</span>
+            <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+              {t("settings")}
+            </span>
             <ResetDialog>
               <Button
                 variant="ghost"
                 size="icon-sm"
                 className="h-6 w-6 text-destructive hover:bg-destructive/10"
-                aria-label="Reset settings"
-              >
+                aria-label="Reset settings">
                 <RotateCcw className="h-3 w-3" />
               </Button>
             </ResetDialog>
@@ -219,7 +222,9 @@ const SettingsMenu = () => {
           {/* Theme & Language Row */}
           <div className="grid grid-cols-2 gap-2 p-1">
             <div className="flex flex-col gap-1.5 rounded-lg bg-muted/30 p-2">
-              <span className="text-[10px] font-medium uppercase text-muted-foreground/70">{t("theme")}</span>
+              <span className="text-[10px] font-medium uppercase text-muted-foreground/70">
+                {t("theme")}
+              </span>
               <div className="flex items-center justify-between gap-1">
                 <Button
                   variant={theme === "light" ? "secondary" : "ghost"}
@@ -252,13 +257,17 @@ const SettingsMenu = () => {
             </div>
 
             <div className="flex flex-col gap-1.5 rounded-lg bg-muted/30 p-2">
-              <span className="text-[10px] font-medium uppercase text-muted-foreground/70">{t("language")}</span>
+              <span className="text-[10px] font-medium uppercase text-muted-foreground/70">
+                {t("language")}
+              </span>
               <div className="flex h-8 items-center rounded-md border border-border/50 bg-background/50 p-0.5">
                 <button
                   onClick={() => handleLanguageChange("en")}
                   className={cn(
                     "flex-1 rounded-sm py-1 text-[10px] font-semibold transition-all",
-                    language === "en" ? "bg-primary text-primary-foreground shadow-sm" : "text-muted-foreground hover:bg-accent"
+                    language === "en"
+                      ? "bg-primary text-primary-foreground shadow-sm"
+                      : "text-muted-foreground hover:bg-accent",
                   )}>
                   EN
                 </button>
@@ -266,7 +275,9 @@ const SettingsMenu = () => {
                   onClick={() => handleLanguageChange("bn")}
                   className={cn(
                     "flex-1 rounded-sm py-1 text-[10px] font-semibold transition-all",
-                    language === "bn" ? "bg-primary text-primary-foreground shadow-sm" : "text-muted-foreground hover:bg-accent"
+                    language === "bn"
+                      ? "bg-primary text-primary-foreground shadow-sm"
+                      : "text-muted-foreground hover:bg-accent",
                   )}>
                   BN
                 </button>
@@ -278,7 +289,9 @@ const SettingsMenu = () => {
 
           {/* Search Engine Selection */}
           <div className="px-2 py-2">
-            <span className="mb-2 block text-[10px] font-medium uppercase text-muted-foreground/70">{t("searchEngine")}</span>
+            <span className="mb-2 block text-[10px] font-medium uppercase text-muted-foreground/70">
+              {t("searchEngine")}
+            </span>
             <div className="grid grid-cols-4 gap-1">
               {["google", "duckduckgo", "bing", "brave"].map((engine) => (
                 <Button
@@ -295,7 +308,9 @@ const SettingsMenu = () => {
 
           {/* Layout Selection */}
           <div className="px-2 py-2">
-            <span className="mb-2 block text-[10px] font-medium uppercase text-muted-foreground/70">{t("layoutMode")}</span>
+            <span className="mb-2 block text-[10px] font-medium uppercase text-muted-foreground/70">
+              {t("layoutMode")}
+            </span>
             <div className="flex rounded-md border border-border/50 bg-background/50 p-0.5">
               {["default", "compact", "focus"].map((preset) => (
                 <button
@@ -303,9 +318,13 @@ const SettingsMenu = () => {
                   onClick={() => handleLayoutPresetChange(preset)}
                   className={cn(
                     "flex-1 rounded-sm py-1 text-[10px] font-semibold capitalize transition-all",
-                    layoutPreset === preset ? "bg-primary text-primary-foreground shadow-sm" : "text-muted-foreground hover:bg-accent"
+                    layoutPreset === preset
+                      ? "bg-primary text-primary-foreground shadow-sm"
+                      : "text-muted-foreground hover:bg-accent",
                   )}>
-                  {t(`layout${preset.charAt(0).toUpperCase() + preset.slice(1)}`)}
+                  {t(
+                    `layout${preset.charAt(0).toUpperCase() + preset.slice(1)}`,
+                  )}
                 </button>
               ))}
             </div>
@@ -313,7 +332,9 @@ const SettingsMenu = () => {
 
           {/* Shortcut Position Selection */}
           <div className="px-2 py-2">
-            <span className="mb-2 block text-[10px] font-medium uppercase text-muted-foreground/70">{t("shortcutPosition")}</span>
+            <span className="mb-2 block text-[10px] font-medium uppercase text-muted-foreground/70">
+              {t("shortcutPosition")}
+            </span>
             <div className="flex rounded-md border border-border/50 bg-background/50 p-0.5">
               {["top", "center"].map((pos) => (
                 <button
@@ -321,7 +342,9 @@ const SettingsMenu = () => {
                   onClick={() => setTabsPosition(pos as TabsPosition)}
                   className={cn(
                     "flex-1 rounded-sm py-1 text-[10px] font-semibold capitalize transition-all",
-                    tabsPosition === pos ? "bg-primary text-primary-foreground shadow-sm" : "text-muted-foreground hover:bg-accent"
+                    tabsPosition === pos
+                      ? "bg-primary text-primary-foreground shadow-sm"
+                      : "text-muted-foreground hover:bg-accent",
                   )}>
                   {t(pos)}
                 </button>
@@ -334,23 +357,53 @@ const SettingsMenu = () => {
           {/* Toggles Group */}
           <div className="space-y-1 p-1">
             {[
-              { id: "autoOrderTabs", label: t("autoOrderTabs"), checked: autoOrderTabs, onCheckedChange: toggleAutoOrderTabs },
-              { id: "showRightSidebar", label: t("showRightSidebar"), checked: showRightSidebar, onCheckedChange: toggleShowRightSidebar },
-              { id: "enableLeftSidebarHover", label: t("enableLeftSidebarHover"), checked: enableLeftSidebarHover, onCheckedChange: toggleLeftSidebarHover },
-              { id: "dynamicWallpaper", label: t("dynamicWallpaper"), checked: isDynamicWallpaper, onCheckedChange: () => setDynamicWallpaper(!isDynamicWallpaper) },
+              {
+                id: "autoOrderTabs",
+                label: t("autoOrderTabs"),
+                checked: autoOrderTabs,
+                onCheckedChange: toggleAutoOrderTabs,
+              },
+              {
+                id: "showRightSidebar",
+                label: t("showRightSidebar"),
+                checked: showRightSidebar,
+                onCheckedChange: toggleShowRightSidebar,
+              },
+              {
+                id: "enableLeftSidebarHover",
+                label: t("enableLeftSidebarHover"),
+                checked: enableLeftSidebarHover,
+                onCheckedChange: toggleLeftSidebarHover,
+              },
+              {
+                id: "enableSearchHoverZone",
+                label: t("enableSearchHoverZone"),
+                checked: enableSearchHoverZone,
+                onCheckedChange: toggleSearchHoverZone,
+              },
+              {
+                id: "dynamicWallpaper",
+                label: t("dynamicWallpaper"),
+                checked: isDynamicWallpaper,
+                onCheckedChange: () => setDynamicWallpaper(!isDynamicWallpaper),
+              },
             ].map((item) => (
-              <div key={item.id} className="flex items-center justify-between rounded-md px-2 py-1 hover:bg-accent/50">
+              <div
+                key={item.id}
+                className="flex items-center justify-between rounded-md px-2 py-1 hover:bg-accent/50">
                 <span className="text-[11px] font-medium">{item.label}</span>
                 <button
                   onClick={item.onCheckedChange}
                   className={cn(
                     "relative h-4 w-8 rounded-full transition-colors",
-                    item.checked ? "bg-primary" : "bg-muted"
+                    item.checked ? "bg-primary" : "bg-muted",
                   )}>
-                  <div className={cn(
-                    "absolute top-0.5 h-3 w-3 rounded-full bg-background transition-all",
-                    item.checked ? "translate-x-4" : "translate-x-0.5"
-                  )} />
+                  <div
+                    className={cn(
+                      "absolute top-0.5 h-3 w-3 rounded-full bg-background transition-all",
+                      item.checked ? "translate-x-4" : "translate-x-0.5",
+                    )}
+                  />
                 </button>
               </div>
             ))}
@@ -408,8 +461,7 @@ const SettingsMenu = () => {
                 variant="ghost"
                 size="sm"
                 onClick={handleExportProfile}
-                className="h-9 justify-start gap-2 px-2 text-[11px] font-normal"
-              >
+                className="h-9 justify-start gap-2 px-2 text-[11px] font-normal">
                 <Download className="h-3.5 w-3.5 text-muted-foreground" />
                 {t("exportProfile")}
               </Button>
@@ -417,8 +469,7 @@ const SettingsMenu = () => {
                 variant="ghost"
                 size="sm"
                 onClick={handleImportClick}
-                className="h-9 justify-start gap-2 px-2 text-[11px] font-normal"
-              >
+                className="h-9 justify-start gap-2 px-2 text-[11px] font-normal">
                 <Upload className="h-3.5 w-3.5 text-muted-foreground" />
                 {t("importProfile")}
               </Button>
@@ -462,12 +513,13 @@ const SettingsMenu = () => {
           if (!open) {
             setPendingImportProfile(null);
           }
-        }}
-      >
+        }}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle>{t("importProfileConfirmTitle")}</DialogTitle>
-            <DialogDescription>{t("importProfileConfirmDescription")}</DialogDescription>
+            <DialogDescription>
+              {t("importProfileConfirmDescription")}
+            </DialogDescription>
           </DialogHeader>
           <DialogFooter>
             <Button
@@ -476,8 +528,7 @@ const SettingsMenu = () => {
                 setIsImportConfirmOpen(false);
                 setPendingImportProfile(null);
               }}
-              disabled={isImporting}
-            >
+              disabled={isImporting}>
               {t("cancel")}
             </Button>
             <Button onClick={applyImportedProfile} disabled={isImporting}>

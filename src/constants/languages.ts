@@ -25,6 +25,7 @@ export const TRANSLATIONS = {
     showClock: "Show Clock",
     showRightSidebar: "Show Right Sidebar",
     enableLeftSidebarHover: "Left Hover Open",
+    enableSearchHoverZone: "Search Hover Zone",
     resizeShortcuts: "Resize Shortcuts",
     backgroundImage: "Background Image",
     clockSetting: "Clock Setting",
@@ -68,8 +69,6 @@ export const TRANSLATIONS = {
     profileImportFailed: "Failed to apply shared profile.",
     profileExportFailed: "Failed to export profile file.",
 
-
-
     // Clock
     clock: "Clock",
 
@@ -104,7 +103,8 @@ export const TRANSLATIONS = {
     dismissAlarm: "Dismiss",
     openStickyNote: "Open Sticky Note",
     turnOffAlarm: "Turn Off Alarm",
-    alarmLeaveWarning: "An alarm is currently running. Turn it off before leaving.",
+    alarmLeaveWarning:
+      "An alarm is currently running. Turn it off before leaving.",
     projects: "Projects",
     clear: "Clear",
     writeYourNotesHere: "Write your notes here...",
@@ -197,6 +197,7 @@ export const TRANSLATIONS = {
     showClock: "ঘড়ি দেখান",
     showRightSidebar: "ডান সাইডবার দেখান",
     enableLeftSidebarHover: "বাম হোভার ওপেন",
+    enableSearchHoverZone: "সার্চ হোভার জোন",
     resizeShortcuts: "শর্টকাট রিসাইজ",
     backgroundImage: "ব্যাকগ্রাউন্ড ইমেজ",
     clockSetting: "ঘড়ি সেটিং",
@@ -207,8 +208,7 @@ export const TRANSLATIONS = {
     historyDescription:
       "সাম্প্রতিক সার্চ এবং খোলা শর্টকাট এখানে একসাথে দেখাবে।",
     noHistory: "এখনো কোনো হিস্টোরি নেই",
-    historyEmptyDescription:
-      "আপনার সার্চ এবং খোলা শর্টকাট এখানে দেখা যাবে।",
+    historyEmptyDescription: "আপনার সার্চ এবং খোলা শর্টকাট এখানে দেখা যাবে।",
     searchEntry: "সার্চ",
     shortcutEntry: "শর্টকাট",
     noSearchHistory: "এখনো কোনো সাম্প্রতিক সার্চ নেই",
@@ -239,8 +239,6 @@ export const TRANSLATIONS = {
     profileImportSuccess: "শেয়ার করা প্রোফাইল সফলভাবে ইমপোর্ট হয়েছে।",
     profileImportFailed: "শেয়ার করা প্রোফাইল প্রয়োগ করা যায়নি।",
     profileExportFailed: "প্রোফাইল এক্সপোর্ট করা যায়নি।",
-
-
 
     // Clock
     clock: "ঘড়ি",

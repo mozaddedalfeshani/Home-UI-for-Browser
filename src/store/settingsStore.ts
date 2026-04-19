@@ -27,6 +27,7 @@ interface SettingsState {
   showClock: boolean;
   showRightSidebar: boolean;
   enableLeftSidebarHover: boolean;
+  enableSearchHoverZone: boolean;
   tabsPosition: TabsPosition;
   cardSize: number;
   cardRadius: number;
@@ -52,6 +53,7 @@ interface SettingsState {
   toggleShowClock: () => void;
   toggleShowRightSidebar: () => void;
   toggleLeftSidebarHover: () => void;
+  toggleSearchHoverZone: () => void;
   setShowRightSidebar: (show: boolean) => void;
   setCardSize: (size: number) => void;
   setCardRadius: (radius: number) => void;
@@ -86,6 +88,7 @@ export const useSettingsStore = create<SettingsState>()(
       showClock: SHARE_SETTINGS_DEFAULTS.showClock,
       showRightSidebar: SHARE_SETTINGS_DEFAULTS.showRightSidebar,
       enableLeftSidebarHover: SHARE_SETTINGS_DEFAULTS.enableLeftSidebarHover,
+      enableSearchHoverZone: true,
       tabsPosition: SHARE_SETTINGS_DEFAULTS.tabsPosition,
       cardSize: SHARE_SETTINGS_DEFAULTS.cardSize,
       cardRadius: SHARE_SETTINGS_DEFAULTS.cardRadius,
@@ -115,6 +118,10 @@ export const useSettingsStore = create<SettingsState>()(
       toggleLeftSidebarHover: () =>
         set((state) => ({
           enableLeftSidebarHover: !state.enableLeftSidebarHover,
+        })),
+      toggleSearchHoverZone: () =>
+        set((state) => ({
+          enableSearchHoverZone: !state.enableSearchHoverZone,
         })),
       setShowRightSidebar: (show) => set({ showRightSidebar: show }),
       setCardSize: (size) => set({ cardSize: size }),
@@ -262,7 +269,9 @@ export const useSettingsStore = create<SettingsState>()(
           backgroundImage: null,
           showClock: SHARE_SETTINGS_DEFAULTS.showClock,
           showRightSidebar: SHARE_SETTINGS_DEFAULTS.showRightSidebar,
-          enableLeftSidebarHover: SHARE_SETTINGS_DEFAULTS.enableLeftSidebarHover,
+          enableLeftSidebarHover:
+            SHARE_SETTINGS_DEFAULTS.enableLeftSidebarHover,
+          enableSearchHoverZone: true,
           tabsPosition: SHARE_SETTINGS_DEFAULTS.tabsPosition,
           isDynamicWallpaper: SHARE_SETTINGS_DEFAULTS.isDynamicWallpaper,
           clockColor: SHARE_SETTINGS_DEFAULTS.clockColor,
