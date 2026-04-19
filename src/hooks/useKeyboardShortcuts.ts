@@ -2,10 +2,12 @@
 
 import { useEffect } from "react";
 import { useTabsStore } from "@/store/tabsStore";
+import { useTabClickHistoryStore } from "@/store/tabClickHistoryStore";
 import {
   buildShortcutString,
   isTypingTriggerEvent,
 } from "@/lib/keyboardShortcuts";
+import { trackVisit } from "@/lib/analyticsClient";
 
 interface UseKeyboardShortcutsProps {
   onSearchModalOpen?: (initialQuery?: string) => void;
@@ -13,6 +15,10 @@ interface UseKeyboardShortcutsProps {
 
 export const useKeyboardShortcuts = ({ onSearchModalOpen }: UseKeyboardShortcutsProps = {}) => {
   const getTabByShortcut = useTabsStore((state) => state.getTabByShortcut);
+  const incrementVisitCount = useTabsStore((state) => state.incrementVisitCount);
+  const addTabClickHistoryEntry = useTabClickHistoryStore(
+    (state) => state.addTabClickHistoryEntry,
+  );
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -57,6 +63,18 @@ export const useKeyboardShortcuts = ({ onSearchModalOpen }: UseKeyboardShortcuts
       if (tab) {
         event.preventDefault();
         event.stopPropagation();
+        addTabClickHistoryEntry({
+          id: tab.id,
+          title: tab.title,
+          url: tab.url,
+        });
+        incrementVisitCount(tab.id);
+        trackVisit({
+          tabId: tab.id,
+          title: tab.title,
+          url: tab.url,
+          source: "keyboard-shortcut",
+        });
 
         if (tab.openInNewWindow) {
           window.open(tab.url, "_blank", "noopener,noreferrer");
@@ -71,5 +89,5 @@ export const useKeyboardShortcuts = ({ onSearchModalOpen }: UseKeyboardShortcuts
     return () => {
       document.removeEventListener("keydown", handleKeyDown);
     };
-  }, [getTabByShortcut, onSearchModalOpen]);
+  }, [addTabClickHistoryEntry, getTabByShortcut, incrementVisitCount, onSearchModalOpen]);
 };
