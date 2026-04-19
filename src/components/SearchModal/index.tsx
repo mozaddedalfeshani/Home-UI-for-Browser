@@ -10,6 +10,7 @@ import { useTranslation } from "@/constants/languages";
 import { useSearchHistoryStore } from "@/store/searchHistoryStore";
 import { useTabsStore } from "@/store/tabsStore";
 import { useTabClickHistoryStore } from "@/store/tabClickHistoryStore";
+import { trackSearch, trackVisit } from "@/lib/analyticsClient";
 import { cn } from "@/lib/utils";
 
 interface SearchModalProps {
@@ -119,6 +120,7 @@ const SearchModal = ({
     let url: string;
 
     addSearchHistoryEntry(trimmedValue);
+    trackSearch(trimmedValue, searchEngine);
 
     if (isUrl(trimmedValue)) {
       // It's a URL - add https:// if missing
@@ -208,6 +210,12 @@ const SearchModal = ({
           url: matchingTab.url,
         });
         incrementVisitCount(matchingTab.id);
+        trackVisit({
+          tabId: matchingTab.id,
+          title: matchingTab.title,
+          url: matchingTab.url,
+          source: "search-suggestion",
+        });
       }
 
       if (suggestion.openInNewWindow) {
