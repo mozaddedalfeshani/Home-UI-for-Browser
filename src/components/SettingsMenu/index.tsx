@@ -1,18 +1,17 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useState } from "react";
 import {
   Settings,
   Monitor,
   Sun,
   Moon,
   Maximize2,
-  Download,
-  Upload,
   Image as ImageIcon,
   Clock,
   RotateCcw,
   History,
+  User,
 } from "lucide-react";
 import { useTheme } from "next-themes";
 import { cn } from "@/lib/utils";
@@ -24,14 +23,6 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import {
   LayoutPreset,
   SearchEngine,
   TabsPosition,
@@ -39,25 +30,17 @@ import {
   Theme,
 } from "@/store/settingsStore";
 import { Language, useTranslation } from "@/constants/languages";
-import {
-  importShareProfile,
-  exportShareProfile,
-} from "@/lib/shareProfileStore";
-import { parseShareProfile, type ShareProfileV1 } from "@/lib/shareProfile";
 import { ResizeShortcutsDialog } from "./ResizeShortcutsDialog";
 import { BackgroundImageDialog } from "./BackgroundImageDialog";
 import { ClockColorDialog } from "./ClockColorDialog";
 import { HistoryDialog } from "./HistoryDialog";
 import { ResetDialog } from "./ResetDialog";
+import { ProfileDialog } from "./ProfileDialog";
 
 const SettingsMenu = () => {
   const { setTheme } = useTheme();
-  const [pendingImportProfile, setPendingImportProfile] =
-    useState<ShareProfileV1 | null>(null);
-  const [isImportConfirmOpen, setIsImportConfirmOpen] = useState(false);
-  const [isImporting, setIsImporting] = useState(false);
   const [isHistoryDialogOpen, setIsHistoryDialogOpen] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [isProfileDialogOpen, setIsProfileDialogOpen] = useState(false);
 
   const {
     theme,
@@ -109,86 +92,6 @@ const SettingsMenu = () => {
 
   // Translation function
   const t = useTranslation(language);
-
-  const handleExportProfile = () => {
-    try {
-      const profile = exportShareProfile();
-      const blob = new Blob([JSON.stringify(profile, null, 2)], {
-        type: "application/json",
-      });
-      const url = URL.createObjectURL(blob);
-      const anchor = document.createElement("a");
-      const datePart = new Date().toISOString().slice(0, 10);
-      anchor.href = url;
-      anchor.download = `mclx-home-profile-${datePart}.json`;
-      document.body.appendChild(anchor);
-      anchor.click();
-      anchor.remove();
-      URL.revokeObjectURL(url);
-    } catch {
-      // console.error("Failed to export profile:", error);
-      alert(t("profileExportFailed"));
-    }
-  };
-
-  const handleImportClick = () => {
-    fileInputRef.current?.click();
-  };
-
-  const handleImportFile = async (
-    event: React.ChangeEvent<HTMLInputElement>,
-  ) => {
-    const file = event.target.files?.[0];
-    event.currentTarget.value = "";
-
-    if (!file) {
-      return;
-    }
-
-    try {
-      const raw = await file.text();
-      const parsedJson = JSON.parse(raw) as unknown;
-      const { data, error } = parseShareProfile(parsedJson);
-
-      if (!data) {
-        alert(error ?? t("profileImportInvalid"));
-        return;
-      }
-
-      setPendingImportProfile(data);
-      setIsImportConfirmOpen(true);
-    } catch {
-      // console.error("Failed to import profile file:", error);
-      alert(t("profileImportInvalid"));
-    }
-  };
-
-  const applyImportedProfile = () => {
-    if (!pendingImportProfile) {
-      return;
-    }
-
-    setIsImporting(true);
-
-    try {
-      const result = importShareProfile(pendingImportProfile);
-      if (!result.applied) {
-        alert(result.error ?? t("profileImportFailed"));
-        return;
-      }
-      if (result.theme) {
-        setTheme(result.theme);
-      }
-      setIsImportConfirmOpen(false);
-      setPendingImportProfile(null);
-      alert(t("profileImportSuccess"));
-    } catch {
-      // console.error("Failed to apply imported profile:", error);
-      alert(t("profileImportFailed"));
-    } finally {
-      setIsImporting(false);
-    }
-  };
 
   return (
     <div className="fixed bottom-4 right-4 z-50 flex items-center gap-2">
@@ -416,18 +319,18 @@ const SettingsMenu = () => {
             <Button
               variant="ghost"
               size="sm"
-              onClick={() => setIsHistoryDialogOpen(true)}
-              className="h-9 justify-start gap-2 px-2 text-[11px] font-normal">
-              <History className="h-3.5 w-3.5 text-muted-foreground" />
-              {t("history")}
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
               onClick={() => setResizeDialogOpen(true)}
               className="h-9 justify-start gap-2 px-2 text-[11px] font-normal">
               <Maximize2 className="h-3.5 w-3.5 text-muted-foreground" />
               {t("resizeShortcuts")}
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setIsHistoryDialogOpen(true)}
+              className="h-9 justify-start gap-2 px-2 text-[11px] font-normal">
+              <History className="h-3.5 w-3.5 text-muted-foreground" />
+              {t("history")}
             </Button>
             <Button
               variant="ghost"
@@ -440,51 +343,22 @@ const SettingsMenu = () => {
             <Button
               variant="ghost"
               size="sm"
+              onClick={() => setIsProfileDialogOpen(true)}
+              className="h-9 justify-start gap-2 px-2 text-[11px] font-normal">
+              <User className="h-3.5 w-3.5 text-muted-foreground" />
+              {t("profileShare")}
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
               onClick={() => setClockDialogOpen(true)}
               className="h-9 justify-start gap-2 px-2 text-[11px] font-normal col-span-2">
               <Clock className="h-3.5 w-3.5 text-muted-foreground" />
               Digital Clock Settings
             </Button>
           </div>
-
-          <DropdownMenuSeparator />
-
-          {/* Profile Share */}
-          <div className="space-y-2 p-1">
-            <div className="px-2">
-              <span className="text-[10px] font-medium uppercase text-muted-foreground/70">
-                {t("profileShare")}
-              </span>
-            </div>
-            <div className="grid grid-cols-2 gap-1">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={handleExportProfile}
-                className="h-9 justify-start gap-2 px-2 text-[11px] font-normal">
-                <Download className="h-3.5 w-3.5 text-muted-foreground" />
-                {t("exportProfile")}
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={handleImportClick}
-                className="h-9 justify-start gap-2 px-2 text-[11px] font-normal">
-                <Upload className="h-3.5 w-3.5 text-muted-foreground" />
-                {t("importProfile")}
-              </Button>
-            </div>
-          </div>
         </DropdownMenuContent>
       </DropdownMenu>
-
-      <input
-        ref={fileInputRef}
-        type="file"
-        accept="application/json,.json"
-        className="hidden"
-        onChange={handleImportFile}
-      />
 
       <ResizeShortcutsDialog
         open={isResizeDialogOpen}
@@ -506,37 +380,10 @@ const SettingsMenu = () => {
         onOpenChange={setIsHistoryDialogOpen}
       />
 
-      <Dialog
-        open={isImportConfirmOpen}
-        onOpenChange={(open) => {
-          setIsImportConfirmOpen(open);
-          if (!open) {
-            setPendingImportProfile(null);
-          }
-        }}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>{t("importProfileConfirmTitle")}</DialogTitle>
-            <DialogDescription>
-              {t("importProfileConfirmDescription")}
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => {
-                setIsImportConfirmOpen(false);
-                setPendingImportProfile(null);
-              }}
-              disabled={isImporting}>
-              {t("cancel")}
-            </Button>
-            <Button onClick={applyImportedProfile} disabled={isImporting}>
-              {isImporting ? t("loading") : t("importProfile")}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <ProfileDialog
+        open={isProfileDialogOpen}
+        onOpenChange={setIsProfileDialogOpen}
+      />
     </div>
   );
 };
