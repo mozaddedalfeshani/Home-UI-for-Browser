@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { useNotepadStore } from "@/store/notepadStore";
 import { useAISidebarStore } from "@/store/aiSidebarStore";
+import { useAgentStore } from "@/store/agentStore";
 import { AISidebarHeader } from "./ai-sidebar-header";
 import { AISidebarSetup } from "./ai-sidebar-setup";
 import { AISidebarChat } from "./ai-sidebar-chat";
@@ -35,6 +36,8 @@ const AISidebar = ({ open, onClose }: AISidebarProps) => {
   const [modelsError, setModelsError] = useState<string | null>(null);
   const [isConfigMode, setIsConfigMode] = useState(false);
   const [isAgentCreateMode, setIsAgentCreateMode] = useState(false);
+  const [isAgentEditMode, setIsAgentEditMode] = useState(false);
+  const [editingAgentId, setEditingAgentId] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const scrollRef = useRef<HTMLDivElement | null>(null);
   const modelsPopoverRef = useRef<HTMLDivElement | null>(null);
@@ -46,6 +49,7 @@ const AISidebar = ({ open, onClose }: AISidebarProps) => {
     rules,
     language,
     behavior,
+    activeAgentId,
     activeAgentName,
     sendHistory,
     messages,
@@ -58,16 +62,31 @@ const AISidebar = ({ open, onClose }: AISidebarProps) => {
     setBehavior,
     setSendHistory,
     completeSetup,
+    clearActiveAgent,
+    resetSetup,
     addMessage,
     updateMessageContent,
     clearMessages,
   } = useAISidebarStore();
   const addNote = useNotepadStore((state) => state.addNote);
+  const agents = useAgentStore((state) => state.agents);
 
   const providerMeta = useMemo(
     () => PROVIDERS.find((item) => item.value === provider) ?? PROVIDERS[0],
     [provider],
   );
+
+  // Enhanced label showing model name for OpenRouter
+  const providerLabel = useMemo(() => {
+    if (provider === "openrouter" && openRouterModel) {
+      // Extract just the model name without org prefix for brevity
+      const shortModel = openRouterModel.includes("/")
+        ? openRouterModel.split("/").slice(1).join("/")
+        : openRouterModel;
+      return `OpenRouter · ${shortModel}`;
+    }
+    return providerMeta.label;
+  }, [provider, openRouterModel, providerMeta.label]);
 
   useEffect(() => {
     if (!open) {
@@ -427,7 +446,14 @@ const AISidebar = ({ open, onClose }: AISidebarProps) => {
   };
 
   const showSetup = !isConfigured || isConfigMode;
-  const showSidebarForm = showSetup || isAgentCreateMode;
+  const showSidebarForm = showSetup || isAgentCreateMode || isAgentEditMode;
+
+  const handleEditAgent = (agentId: string) => {
+    setEditingAgentId(agentId);
+    setIsAgentEditMode(true);
+    setIsConfigMode(false);
+    setIsAgentCreateMode(false);
+  };
 
   return (
     <TooltipProvider delayDuration={120}>
@@ -435,33 +461,71 @@ const AISidebar = ({ open, onClose }: AISidebarProps) => {
         <div className="flex h-full flex-col">
           <AISidebarHeader
             activeAgentName={activeAgentName}
-            providerLabel={providerMeta.label}
+            providerLabel={providerLabel}
             showSetup={showSetup}
+            isAgentMode={Boolean(activeAgentId)}
             onSettingsOpen={() => {
               setIsAgentCreateMode(false);
+              setIsAgentEditMode(false);
+              setEditingAgentId(null);
               setErrorMessage(null);
               setIsConfigMode(true);
+            }}
+            onAgentInfoOpen={() => {
+              // Open agent edit/info mode - for predefined agents, this shows info only
+              if (activeAgentId) {
+                setIsConfigMode(false);
+                setIsAgentCreateMode(false);
+                setIsAgentEditMode(true);
+                setEditingAgentId(activeAgentId);
+              }
             }}
             onClose={onClose}
             onAgentCreateRequested={() => {
               setIsConfigMode(false);
+              setIsAgentEditMode(false);
+              setEditingAgentId(null);
               setIsAgentCreateMode(true);
             }}
+            onAgentEditRequested={handleEditAgent}
           />
 
           {showSidebarForm ? (
             <AISidebarSetup
               isConfigured={isConfigured}
               isAgentCreateMode={isAgentCreateMode}
+              isAgentEditMode={isAgentEditMode}
+              agentInfo={
+                isAgentEditMode && editingAgentId
+                  ? (() => {
+                      const agent = agents.find((a) => a.id === editingAgentId);
+                      if (!agent) return null;
+                      return {
+                        id: agent.id,
+                        name: agent.name,
+                        description: agent.description,
+                        type: agent.type,
+                        provider: agent.provider,
+                        apiKey: agent.apiKey,
+                        model: agent.model,
+                        rules: agent.rules,
+                        language: agent.language,
+                        behavior: agent.behavior,
+                      };
+                    })()
+                  : null
+              }
               provider={provider}
               apiKey={apiKey}
               language={language}
               behavior={behavior}
               rules={rules}
-              providerLabel={providerMeta.label}
+              providerLabel={providerLabel}
               onBack={() => {
                 setIsConfigMode(false);
                 setIsAgentCreateMode(false);
+                setIsAgentEditMode(false);
+                setEditingAgentId(null);
               }}
               onSetProvider={setProvider}
               onSetApiKey={setApiKey}
@@ -473,13 +537,41 @@ const AISidebar = ({ open, onClose }: AISidebarProps) => {
                 setIsConfigMode(false);
               }}
               onAgentCreated={() => setIsAgentCreateMode(false)}
+              onAgentSave={(updates) => {
+                if (editingAgentId) {
+                  const updateAgent = useAgentStore.getState().updateAgent;
+                  updateAgent(editingAgentId, updates);
+                  toast.success("Agent updated successfully");
+                  setIsConfigMode(false);
+                  setIsAgentCreateMode(false);
+                  setIsAgentEditMode(false);
+                  setEditingAgentId(null);
+                }
+              }}
+              onResetAI={() => {
+                // Reset all AI settings to defaults
+                setProvider("deepseek");
+                setApiKey("");
+                setOpenRouterModel("openrouter/auto");
+                setRules("");
+                setLanguage("english");
+                setBehavior("balanced");
+                clearMessages();
+                clearActiveAgent();
+                resetSetup();
+                setIsConfigMode(false);
+                setIsAgentCreateMode(false);
+                setIsAgentEditMode(false);
+                setEditingAgentId(null);
+                toast.success("AI settings reset. Please configure again.");
+              }}
             />
           ) : (
             <>
               <AISidebarChat
                 ref={scrollRef}
                 messages={messages}
-                providerLabel={providerMeta.label}
+                providerLabel={providerLabel}
                 savingMessageId={savingMessageId}
                 copyingMessageId={copyingMessageId}
                 onCopyMessage={(id, content) =>
@@ -494,12 +586,14 @@ const AISidebar = ({ open, onClose }: AISidebarProps) => {
                 isSubmitting={isSubmitting}
                 sendHistory={sendHistory}
                 provider={provider}
+                apiKey={apiKey}
                 openRouterModel={openRouterModel}
                 isModelsOpen={isModelsOpen}
                 isLoadingModels={isLoadingModels}
                 modelsError={modelsError}
                 availableModels={availableModels}
                 errorMessage={errorMessage}
+                isAgentMode={Boolean(activeAgentId)}
                 onDraftChange={setDraftMessage}
                 onSend={() => void handleSendMessage()}
                 onToggleSendHistory={() => setSendHistory(!sendHistory)}

@@ -2,6 +2,7 @@
 
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
+import { GRAMMAR_FIXER_AGENT_ID } from "./agentStore";
 
 export type AIProvider = "deepseek" | "openrouter";
 export type AIMessageRole = "user" | "assistant";
@@ -152,18 +153,29 @@ export const useAISidebarStore = create<AISidebarState>()(
         })),
       setSendHistory: (sendHistory) => set({ sendHistory }),
       applyAgentProfile: (profile) =>
-        set({
-          provider: profile.provider,
-          apiKey: profile.apiKey,
-          openRouterModel: profile.provider === "openrouter"
-            ? profile.model
-            : "openrouter/auto",
-          rules: profile.rules,
-          language: profile.language,
-          behavior: profile.behavior,
-          activeAgentId: profile.id,
-          activeAgentName: profile.name,
-          isConfigured: true,
+        set((state) => {
+          // Check if this is a predefined agent that should use global config
+          const isPredefinedAgent = profile.id === GRAMMAR_FIXER_AGENT_ID;
+
+          return {
+            provider: isPredefinedAgent
+              ? state.generalConfig.provider
+              : profile.provider,
+            apiKey: isPredefinedAgent
+              ? state.generalConfig.apiKey
+              : profile.apiKey,
+            openRouterModel: isPredefinedAgent
+              ? state.generalConfig.openRouterModel || "openai/gpt-oss-20b"
+              : profile.provider === "openrouter"
+                ? profile.model
+                : "openrouter/auto",
+            rules: profile.rules,
+            language: profile.language,
+            behavior: profile.behavior,
+            activeAgentId: profile.id,
+            activeAgentName: profile.name,
+            isConfigured: true,
+          };
         }),
       clearActiveAgent: () =>
         set((state) => ({
@@ -238,20 +250,16 @@ export const useAISidebarStore = create<AISidebarState>()(
           return {
             ...legacyState,
             generalConfig: {
-              provider:
-                legacyState.provider ?? DEFAULT_GENERAL_CONFIG.provider,
+              provider: legacyState.provider ?? DEFAULT_GENERAL_CONFIG.provider,
               apiKey: legacyState.apiKey ?? DEFAULT_GENERAL_CONFIG.apiKey,
               openRouterModel:
                 legacyState.openRouterModel ??
                 DEFAULT_GENERAL_CONFIG.openRouterModel,
               rules: legacyState.rules ?? DEFAULT_GENERAL_CONFIG.rules,
-              language:
-                legacyState.language ?? DEFAULT_GENERAL_CONFIG.language,
-              behavior:
-                legacyState.behavior ?? DEFAULT_GENERAL_CONFIG.behavior,
+              language: legacyState.language ?? DEFAULT_GENERAL_CONFIG.language,
+              behavior: legacyState.behavior ?? DEFAULT_GENERAL_CONFIG.behavior,
               isConfigured:
-                legacyState.isConfigured ??
-                DEFAULT_GENERAL_CONFIG.isConfigured,
+                legacyState.isConfigured ?? DEFAULT_GENERAL_CONFIG.isConfigured,
             },
           };
         }

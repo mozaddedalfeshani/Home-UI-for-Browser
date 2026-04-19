@@ -4,12 +4,12 @@
     "site-homepage": {
       "key": "site-homepage",
       "tabId": "site-homepage",
-      "title": "Home UI",
-      "url": "http://localhost:3000",
+      "title": "LaunchTab",
+      "url": null,
       "source": "site-load",
-      "count": 10,
+      "count": 12,
       "createdAt": "2026-04-19T20:52:37.107Z",
-      "updatedAt": "2026-04-19T20:56:18.176Z"
+      "updatedAt": "2026-04-19T23:00:29.913Z"
     }
   }
 }

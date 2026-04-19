@@ -17,12 +17,14 @@ interface AISidebarComposerProps {
   isSubmitting: boolean;
   sendHistory: boolean;
   provider: string;
+  apiKey: string;
   openRouterModel: string;
   isModelsOpen: boolean;
   isLoadingModels: boolean;
   modelsError: string | null;
   availableModels: string[];
   errorMessage: string | null;
+  isAgentMode: boolean;
   onDraftChange: (v: string) => void;
   onSend: () => void;
   onToggleSendHistory: () => void;
@@ -37,12 +39,14 @@ export function AISidebarComposer({
   isSubmitting,
   sendHistory,
   provider,
+  apiKey,
   openRouterModel,
   isModelsOpen,
   isLoadingModels,
   modelsError,
   availableModels,
   errorMessage,
+  isAgentMode,
   onDraftChange,
   onSend,
   onToggleSendHistory,
@@ -51,6 +55,8 @@ export function AISidebarComposer({
   onClearChat,
   modelsPopoverRef,
 }: AISidebarComposerProps) {
+  const hasApiKey = apiKey.trim().length > 0;
+
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
@@ -59,20 +65,44 @@ export function AISidebarComposer({
   };
 
   return (
-    <div className="border-t border-border/50 bg-background/65 p-4">
+    <div
+      className={cn(
+        "border-t bg-background/65 p-4",
+        isAgentMode ? "border-indigo-500/20" : "border-border/50",
+      )}>
       {errorMessage ? (
         <div className="mb-3 rounded-xl border border-destructive/20 bg-destructive/10 px-3 py-2 text-sm text-destructive">
           {errorMessage}
         </div>
       ) : null}
 
-      <div className="rounded-3xl border border-border/60 bg-card/55 p-3 shadow-sm">
+      {!hasApiKey ? (
+        <div className="mb-3 rounded-xl border border-amber-500/30 bg-amber-500/10 px-3 py-3 text-sm text-amber-700 dark:text-amber-400">
+          <p className="font-medium">API Key Required</p>
+          <p className="mt-1 text-xs">
+            Please configure your API key in settings to use this agent.
+          </p>
+        </div>
+      ) : null}
+
+      <div
+        className={cn(
+          "rounded-3xl border p-3 shadow-sm",
+          isAgentMode
+            ? "border-indigo-500/30 bg-indigo-500/5"
+            : "border-border/60 bg-card/55",
+        )}>
         <Textarea
           value={draftMessage}
           onChange={(e) => onDraftChange(e.target.value)}
           onKeyDown={handleKeyDown}
-          placeholder="Say something..."
-          className="h-28 resize-none overflow-y-auto border-0 bg-transparent px-1 py-1 text-sm shadow-none focus-visible:border-transparent focus-visible:ring-0"
+          placeholder={
+            hasApiKey
+              ? "Say something..."
+              : "Configure API key to start chatting..."
+          }
+          disabled={!hasApiKey}
+          className="h-28 resize-none overflow-y-auto border-0 bg-transparent px-1 py-1 text-sm shadow-none focus-visible:border-transparent focus-visible:ring-0 disabled:cursor-not-allowed disabled:opacity-50"
         />
 
         <div className="mt-3 flex items-center justify-between gap-3">
@@ -186,7 +216,7 @@ export function AISidebarComposer({
           <Button
             type="button"
             onClick={onSend}
-            disabled={!draftMessage.trim() || isSubmitting}
+            disabled={!hasApiKey || !draftMessage.trim() || isSubmitting}
             className="h-10 rounded-full px-4">
             {isSubmitting ? (
               <Loader2 className="h-4 w-4 animate-spin" />
