@@ -126,30 +126,24 @@ export const ProfileDialog = ({ open, onOpenChange }: ProfileDialogProps) => {
             </DialogDescription>
           </DialogHeader>
 
-          <div className="space-y-3 py-4">
+          <div className="flex gap-2 py-4">
             <Button
               variant="outline"
               onClick={handleExportProfile}
-              className="w-full justify-start gap-3">
+              className="flex-1 justify-start gap-3 px-5 py-4">
               <Download className="h-4 w-4 text-muted-foreground" />
               <div className="text-left">
                 <div className="font-medium">{t("exportProfile")}</div>
-                <div className="text-xs text-muted-foreground">
-                  {t("exportProfileDescription")}
-                </div>
               </div>
             </Button>
 
             <Button
               variant="outline"
               onClick={handleImportClick}
-              className="w-full justify-start gap-3">
+              className="flex-1 justify-start gap-3 px-5 py-4">
               <Upload className="h-4 w-4 text-muted-foreground" />
               <div className="text-left">
                 <div className="font-medium">{t("importProfile")}</div>
-                <div className="text-xs text-muted-foreground">
-                  {t("importProfileDescription")}
-                </div>
               </div>
             </Button>
           </div>
