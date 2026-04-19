@@ -40,7 +40,7 @@ export const registerSiteVisit = async () => {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         tabId: "site-homepage",
-        title: "Home UI",
+        title: "LaunchTab",
         url: typeof window !== "undefined" ? window.location.origin : null,
         source: "site-load",
       }),

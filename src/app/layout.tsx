@@ -17,8 +17,32 @@ const fredoka = Fredoka({
 });
 
 export const metadata: Metadata = {
-  title: "MCLX Home",
-  description: "Your personal home dashboard",
+  title: "LaunchTab - AI-Powered New Tab Dashboard",
+  description:
+    "A free, open-source browser start page with AI agents, shortcuts, notes, and beautiful customization. Transform your new tab into a productivity powerhouse.",
+  keywords: [
+    "new tab",
+    "browser dashboard",
+    "start page",
+    "AI sidebar",
+    "productivity",
+    "shortcuts",
+    "notes",
+    "open source",
+  ],
+  authors: [{ name: "LaunchTab" }],
+  openGraph: {
+    title: "LaunchTab - AI-Powered New Tab Dashboard",
+    description:
+      "Transform your browser's new tab into a productivity powerhouse with AI agents, shortcuts, and notes.",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "LaunchTab - AI-Powered New Tab Dashboard",
+    description:
+      "Free, open-source browser start page with AI agents and customization.",
+  },
   icons: {
     icon: "/icon.png",
   },
@@ -31,7 +55,10 @@ export default function RootLayout({
 }>) {
   return (
     <>
-      <html lang="en" suppressHydrationWarning className={`${shareTech.variable} ${fredoka.variable}`}>
+      <html
+        lang="en"
+        suppressHydrationWarning
+        className={`${shareTech.variable} ${fredoka.variable}`}>
         <head />
         <body>
           <ThemeProvider

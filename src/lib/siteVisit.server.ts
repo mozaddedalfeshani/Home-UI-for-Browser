@@ -4,7 +4,7 @@ import { incrementLocalVisitCount } from "@/lib/localAnalytics";
 const siteVisitPayload = {
   key: "site-homepage",
   tabId: "site-homepage",
-  title: "Home UI",
+  title: "LaunchTab",
   url: null,
   source: "site-load",
 } as const;

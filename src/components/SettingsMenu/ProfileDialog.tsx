@@ -44,7 +44,7 @@ export const ProfileDialog = ({ open, onOpenChange }: ProfileDialogProps) => {
       const anchor = document.createElement("a");
       const datePart = new Date().toISOString().slice(0, 10);
       anchor.href = url;
-      anchor.download = `mclx-home-profile-${datePart}.json`;
+      anchor.download = `launchtab-profile-${datePart}.json`;
       document.body.appendChild(anchor);
       anchor.click();
       anchor.remove();

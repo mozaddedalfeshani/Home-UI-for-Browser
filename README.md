@@ -1,15 +1,25 @@
-# Home UI for Browser - আপনার ব্যক্তিগত ড্যাশবোর্ড
+# LaunchTab - Your AI-Powered Browser Start Page
 
 Language: English | [বাংলা দেখুন](README.bn.md)
 
-MCLX Home UI for Browser is a personal dashboard for your browser start page. This README is intentionally focused on product features and practical daily value.
+**LaunchTab** is a free, open-source, AI-powered new tab dashboard for your browser. Transform your start page into a productivity powerhouse with shortcuts, AI agents, notes, and beautiful customization.
 
-## What This App Does
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Next.js](https://img.shields.io/badge/Next.js-16-black)](https://nextjs.org/)
+[![React](https://img.shields.io/badge/React-19-blue)](https://react.dev/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue)](https://www.typescriptlang.org/)
 
-- Gives you a clean, customizable home screen
-- Keeps your most-used links and notes in one place
-- Adds an AI sidebar you can configure for different tasks
-- Saves your setup locally so your workflow stays consistent
+## ✨ What Makes LaunchTab Special
+
+LaunchTab replaces your browser's boring new tab page with a fully customizable productivity dashboard:
+
+- 🎯 **Customizable home screen** with drag-drop shortcuts
+- 🤖 **AI sidebar** with configurable agents for different tasks
+- 📝 **Built-in notepad** with sticky reminders
+- 🎨 **Dynamic wallpapers** and themes (light/dark/system)
+- ⚡ **Quick search** with history and multiple engines
+- 💾 **100% local storage** - your data stays private
+- 🔑 **Free & open source** - MIT licensed
 
 ## All Features
 
@@ -108,11 +118,14 @@ These are the features most users end up relying on every day.
 3. Switch by task instead of rewriting instructions
 4. Save useful AI outputs to Notepad
 
-## Documentation
+## 🔗 Links
 
-- English README: [README.md](README.md)
-- Bangla README: [README.bn.md](README.bn.md)
-- Privacy policy: [privacy-policy.md](privacy-policy.md)
+- 🌐 **Live Demo**: Try it as your new tab page
+- 📖 **Documentation**: [README.md](README.md)
+- 🌍 **Bangla README**: [README.bn.md](README.bn.md)
+- 🔒 **Privacy Policy**: [privacy-policy.md](privacy-policy.md)
+- 🐛 **Report Issues**: GitHub Issues
+- 💡 **Feature Requests**: GitHub Discussions
 
 ## Contributing
 
@@ -123,6 +136,10 @@ Contributions are welcome.
 3. Commit your updates clearly
 4. Open a pull request with screenshots for UI changes
 
-## License
+## 📄 License
 
-MIT License.
+MIT License - see [LICENSE](LICENSE) for details.
+
+---
+
+<p align="center">Made with ❤️ for productivity enthusiasts</p>

@@ -1,8 +1,8 @@
-# আপনার ব্যক্তিগত ড্যাশবোর্ড
+# LaunchTab - আপনার AI-পাওয়ার্ড ব্রাউজার স্টার্ট পেজ
 
 ভাষা: বাংলা | [Read in English](README.md)
 
-MCLX Home UI for Browser হলো browser start page-এর জন্য একটি personal dashboard। এই ডকুমেন্টে শুধুমাত্র feature এবং বাস্তব ব্যবহারিক value নিয়ে কথা বলা হয়েছে।
+**LaunchTab** একটি ফ্রি, ওপেন-সোর্স, AI-পাওয়ার্ড browser new tab dashboard। এই ডকুমেন্টে শুধুমাত্র feature এবং বাস্তব ব্যবহারিক value নিয়ে কথা বলা হয়েছে।
 
 ## এই অ্যাপ কী করে
 
