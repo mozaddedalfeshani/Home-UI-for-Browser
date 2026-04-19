@@ -23,6 +23,7 @@ export interface ShareProfileSettings {
   autoOrderTabs: boolean;
   showClock: boolean;
   showRightSidebar: boolean;
+  enableLeftSidebarHover: boolean;
   tabsPosition: TabsPosition;
   cardSize: number;
   cardRadius: number;
@@ -50,6 +51,7 @@ export const SHARE_SETTINGS_DEFAULTS: ShareProfileSettings = {
   autoOrderTabs: false,
   showClock: true,
   showRightSidebar: true,
+  enableLeftSidebarHover: false,
   tabsPosition: "top",
   cardSize: 5,
   cardRadius: 0.5,
@@ -66,7 +68,7 @@ export const SHARE_SETTINGS_DEFAULTS: ShareProfileSettings = {
 
 const THEME_VALUES: Theme[] = ["light", "dark", "system"];
 const LANGUAGE_VALUES: Language[] = ["en", "bn"];
-const TABS_POSITION_VALUES: TabsPosition[] = ["top", "center", "bottom"];
+const TABS_POSITION_VALUES: TabsPosition[] = ["top", "center"];
 const SEARCH_ENGINE_VALUES: SearchEngine[] = [
   "google",
   "duckduckgo",
@@ -219,6 +221,10 @@ export const sanitizeShareSettings = (
     showRightSidebar: toBoolean(
       settings.showRightSidebar,
       SHARE_SETTINGS_DEFAULTS.showRightSidebar,
+    ),
+    enableLeftSidebarHover: toBoolean(
+      settings.enableLeftSidebarHover,
+      SHARE_SETTINGS_DEFAULTS.enableLeftSidebarHover,
     ),
     tabsPosition: toEnumValue(
       settings.tabsPosition,
