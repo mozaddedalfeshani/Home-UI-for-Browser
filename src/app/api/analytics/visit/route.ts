@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
 import { getMongoDb } from "@/lib/mongodb";
 import {
-  getLocalVisitCount,
   incrementLocalVisitCount,
 } from "@/lib/localAnalytics";
 
@@ -40,7 +39,7 @@ export async function POST(request: Request) {
     const db = await getMongoDb();
     const visitsCollection = db.collection("visit_counts");
 
-    await visitsCollection.updateOne(
+    const row = await visitsCollection.findOneAndUpdate(
       { key },
       {
         $inc: { count: 1 },
@@ -56,12 +55,11 @@ export async function POST(request: Request) {
           createdAt: new Date(),
         },
       },
-      { upsert: true },
-    );
-
-    const row = await visitsCollection.findOne(
-      { key },
-      { projection: { _id: 0, key: 1, tabId: 1, count: 1 } },
+      {
+        upsert: true,
+        returnDocument: "after",
+        projection: { _id: 0, key: 1, tabId: 1, count: 1 },
+      },
     );
 
     return NextResponse.json({
@@ -110,9 +108,27 @@ export async function GET(request: Request) {
   try {
     const db = await getMongoDb();
     const visitsCollection = db.collection("visit_counts");
-    const row = await visitsCollection.findOne(
+    const row = await visitsCollection.findOneAndUpdate(
       { key },
-      { projection: { _id: 0, key: 1, tabId: 1, url: 1, count: 1 } },
+      {
+        $inc: { count: 1 },
+        $set: {
+          key,
+          tabId: tabId ?? null,
+          title: null,
+          url: url ?? null,
+          source: "visit-get",
+          updatedAt: new Date(),
+        },
+        $setOnInsert: {
+          createdAt: new Date(),
+        },
+      },
+      {
+        upsert: true,
+        returnDocument: "after",
+        projection: { _id: 0, key: 1, tabId: 1, url: 1, count: 1 },
+      },
     );
 
     return NextResponse.json({
@@ -127,16 +143,22 @@ export async function GET(request: Request) {
     });
   } catch (error) {
     console.error("Failed to fetch visit analytics", error);
-    const fallbackRow = await getLocalVisitCount(key);
+    const fallbackRow = await incrementLocalVisitCount({
+      key,
+      tabId: tabId ?? null,
+      title: null,
+      url: url ?? null,
+      source: "visit-get",
+    });
 
     return NextResponse.json({
       success: true,
       source: "local",
       data: {
         key,
-        tabId: fallbackRow?.tabId ?? tabId ?? null,
-        url: fallbackRow?.url ?? url ?? null,
-        count: fallbackRow?.count ?? 0,
+        tabId: fallbackRow.tabId ?? tabId ?? null,
+        url: fallbackRow.url ?? url ?? null,
+        count: fallbackRow.count ?? 0,
       },
       error: "MongoDB read failed. Read local fallback instead.",
     });

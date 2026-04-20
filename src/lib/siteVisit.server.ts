@@ -14,7 +14,7 @@ export const incrementSiteVisitCount = async () => {
     const db = await getMongoDb();
     const visitsCollection = db.collection("visit_counts");
 
-    await visitsCollection.updateOne(
+    const result = await visitsCollection.findOneAndUpdate(
       { key: siteVisitPayload.key },
       {
         $inc: { count: 1 },
@@ -30,15 +30,14 @@ export const incrementSiteVisitCount = async () => {
           createdAt: new Date(),
         },
       },
-      { upsert: true },
+      {
+        upsert: true,
+        returnDocument: "after",
+        projection: { _id: 0, count: 1 },
+      },
     );
 
-    const row = await visitsCollection.findOne(
-      { key: siteVisitPayload.key },
-      { projection: { _id: 0, count: 1 } },
-    );
-
-    return row?.count ?? 0;
+    return result?.count ?? 0;
   } catch (error) {
     console.error("Failed to increment SSR site visit count", error);
 
