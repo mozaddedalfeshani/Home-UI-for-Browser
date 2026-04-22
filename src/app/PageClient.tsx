@@ -18,7 +18,6 @@ import { cn } from "@/lib/utils";
 import StickyAlarmDialog from "@/components/Notepad/StickyAlarmDialog";
 import { Bot } from "lucide-react";
 import { useAuthStore } from "@/store/authStore";
-import { useTabsStore } from "@/store/tabsStore";
 
 type SearchOpenRequest = {
   id: number;
@@ -175,27 +174,14 @@ export function PageClient() {
     }
   }, [isHydrated, autoFocusSearch]);
 
-  const { initCloudSession, pushSync, isAuthenticated } = useAuthStore();
-  const tabs = useTabsStore((state) => state.tabs);
-  const settings = useSettingsStore();
+  const { initCloudSession } = useAuthStore();
 
-  // Optimized Initial Auth Check and Pull (Combined Request)
+  // Restore cloud data once local stores are hydrated (silent, non-blocking)
   useEffect(() => {
     if (isHydrated) {
       initCloudSession();
     }
   }, [isHydrated, initCloudSession]);
-
-  // Auto-push Sync on changes (Debounced)
-  useEffect(() => {
-    if (!isHydrated || !isAuthenticated) return;
-
-    const timer = setTimeout(() => {
-      pushSync();
-    }, 10000); // 10s debounce for auto-push to minimize impact
-
-    return () => clearTimeout(timer);
-  }, [tabs, settings, isHydrated, isAuthenticated, pushSync]);
 
   return (
     <div className="min-h-screen w-full relative overflow-hidden">
