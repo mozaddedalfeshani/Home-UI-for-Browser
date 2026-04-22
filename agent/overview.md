@@ -1,4 +1,5 @@
 # LaunchTab - AI Crawler Documentation
+
 # https://github.com/mozaddedalfeshani/Launch-Tab
 
 ## Project Overview
@@ -27,11 +28,13 @@ LaunchTab is a free, open-source, AI-powered browser new tab dashboard built wit
 ## Architecture
 
 ### Data Storage Strategy
+
 - User preferences: localStorage (Zustand with persist middleware)
 - Large media files: IndexedDB (`launchtab-media-storage`)
 - Analytics: Optional MongoDB for anonymous visit counting only
 
 ### Key Directories
+
 - `/src/app/` - Next.js App Router pages and API routes
 - `/src/components/` - React components organized by feature
 - `/src/store/` - Zustand state management stores
@@ -41,6 +44,7 @@ LaunchTab is a free, open-source, AI-powered browser new tab dashboard built wit
 - `SYSTEM_PROMPT_ARCHITECTURE.md` - Component structure and organization rules
 
 ### State Management
+
 - `settingsStore.ts` - App settings, theme, layout, clock preferences
 - `aiSidebarStore.ts` - AI provider configs, agent profiles, chat history
 - `notepadStore.ts` - Notes, sticky alarms
@@ -55,6 +59,7 @@ LaunchTab is a free, open-source, AI-powered browser new tab dashboard built wit
 ## AI Integration
 
 AI providers supported via direct browser-to-provider API calls:
+
 - OpenAI (GPT-4, GPT-3.5)
 - DeepSeek
 - Google (Gemini)
@@ -65,6 +70,7 @@ No backend proxy for AI chat - messages go directly from user's browser to provi
 ## Configuration
 
 Users configure via Settings UI:
+
 - AI Provider API keys (stored locally)
 - Theme preferences
 - Clock position/style

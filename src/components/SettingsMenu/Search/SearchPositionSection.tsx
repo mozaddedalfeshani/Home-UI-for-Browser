@@ -6,7 +6,13 @@ import { useSettingsStore, SearchEngine } from "@/store/settingsStore";
 import { useTranslation } from "@/constants/languages";
 
 export const SearchPositionSection = () => {
-  const { language, searchEngine, tabsPosition, setSearchEngine, setTabsPosition } = useSettingsStore();
+  const {
+    language,
+    searchEngine,
+    tabsPosition,
+    setSearchEngine,
+    setTabsPosition,
+  } = useSettingsStore();
   const t = useTranslation(language);
 
   return (
@@ -24,7 +30,8 @@ export const SearchPositionSection = () => {
             const currentIndex = engines.indexOf(searchEngine);
             const nextIndex = (currentIndex + 1) % engines.length;
             setSearchEngine(engines[nextIndex]);
-          }}>
+          }}
+        >
           <Search className="h-3.5 w-3.5" />
           <span className="text-[10px] font-semibold capitalize">
             {searchEngine === "duckduckgo" ? "DDG" : searchEngine}
@@ -40,7 +47,10 @@ export const SearchPositionSection = () => {
           variant="secondary"
           size="sm"
           className="h-8 w-full justify-start gap-1 bg-background/50 px-1.5 hover:bg-accent"
-          onClick={() => setTabsPosition(tabsPosition === "top" ? "center" : "top")}>
+          onClick={() =>
+            setTabsPosition(tabsPosition === "top" ? "center" : "top")
+          }
+        >
           <LayoutTemplate className="h-3.5 w-3.5" />
           <span className="text-[10px] font-semibold capitalize">
             {t(tabsPosition)}

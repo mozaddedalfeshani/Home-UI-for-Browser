@@ -13,9 +13,13 @@ interface UseKeyboardShortcutsProps {
   onSearchModalOpen?: (initialQuery?: string) => void;
 }
 
-export const useKeyboardShortcuts = ({ onSearchModalOpen }: UseKeyboardShortcutsProps = {}) => {
+export const useKeyboardShortcuts = ({
+  onSearchModalOpen,
+}: UseKeyboardShortcutsProps = {}) => {
   const getTabByShortcut = useTabsStore((state) => state.getTabByShortcut);
-  const incrementVisitCount = useTabsStore((state) => state.incrementVisitCount);
+  const incrementVisitCount = useTabsStore(
+    (state) => state.incrementVisitCount,
+  );
   const addTabClickHistoryEntry = useTabClickHistoryStore(
     (state) => state.addTabClickHistoryEntry,
   );
@@ -89,5 +93,10 @@ export const useKeyboardShortcuts = ({ onSearchModalOpen }: UseKeyboardShortcuts
     return () => {
       document.removeEventListener("keydown", handleKeyDown);
     };
-  }, [addTabClickHistoryEntry, getTabByShortcut, incrementVisitCount, onSearchModalOpen]);
+  }, [
+    addTabClickHistoryEntry,
+    getTabByShortcut,
+    incrementVisitCount,
+    onSearchModalOpen,
+  ]);
 };

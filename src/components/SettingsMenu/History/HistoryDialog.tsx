@@ -108,7 +108,9 @@ export const HistoryDialog = ({ open, onOpenChange }: HistoryDialogProps) => {
                       <p className="break-words text-sm font-medium text-foreground">
                         {entry.primaryText}
                       </p>
-                      <span className="text-xs text-muted-foreground/60">•</span>
+                      <span className="text-xs text-muted-foreground/60">
+                        •
+                      </span>
                       <p className="break-words text-xs text-muted-foreground">
                         {entry.secondaryText}
                       </p>
@@ -138,7 +140,9 @@ export const HistoryDialog = ({ open, onOpenChange }: HistoryDialogProps) => {
         ) : (
           <div className="flex min-h-44 flex-col items-center justify-center rounded-2xl border border-dashed border-border/60 bg-muted/20 px-6 text-center">
             <History className="mb-3 h-8 w-8 text-muted-foreground/70" />
-            <p className="text-sm font-medium text-foreground">{t("noHistory")}</p>
+            <p className="text-sm font-medium text-foreground">
+              {t("noHistory")}
+            </p>
             <p className="mt-1 text-xs text-muted-foreground">
               {t("historyEmptyDescription")}
             </p>

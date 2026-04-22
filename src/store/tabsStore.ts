@@ -14,18 +14,59 @@ export interface Tab {
 }
 
 const DEFAULT_TABS: Tab[] = [
-  { id: "1", title: "YouTube", url: "https://www.youtube.com", createdAt: Date.now(), visitCount: 0, shortcut: migrateShortcutToPrimaryModifier("y") },
-  { id: "2", title: "Share Editor", url: "https://paper.imurad.me", createdAt: Date.now(), visitCount: 0, shortcut: migrateShortcutToPrimaryModifier("s") },
-  { id: "3", title: "GitHub", url: "https://github.com", createdAt: Date.now(), visitCount: 0, shortcut: migrateShortcutToPrimaryModifier("h") },
-  { id: "4", title: "Gemini", url: "https://gemini.google.com", createdAt: Date.now(), visitCount: 0, shortcut: migrateShortcutToPrimaryModifier("g") },
-  { id: "5", title: "ChatGPT", url: "https://chatgpt.com", createdAt: Date.now(), visitCount: 0, shortcut: migrateShortcutToPrimaryModifier("c") },
+  {
+    id: "1",
+    title: "YouTube",
+    url: "https://www.youtube.com",
+    createdAt: Date.now(),
+    visitCount: 0,
+    shortcut: migrateShortcutToPrimaryModifier("y"),
+  },
+  {
+    id: "2",
+    title: "Share Editor",
+    url: "https://paper.imurad.me",
+    createdAt: Date.now(),
+    visitCount: 0,
+    shortcut: migrateShortcutToPrimaryModifier("s"),
+  },
+  {
+    id: "3",
+    title: "GitHub",
+    url: "https://github.com",
+    createdAt: Date.now(),
+    visitCount: 0,
+    shortcut: migrateShortcutToPrimaryModifier("h"),
+  },
+  {
+    id: "4",
+    title: "Gemini",
+    url: "https://gemini.google.com",
+    createdAt: Date.now(),
+    visitCount: 0,
+    shortcut: migrateShortcutToPrimaryModifier("g"),
+  },
+  {
+    id: "5",
+    title: "ChatGPT",
+    url: "https://chatgpt.com",
+    createdAt: Date.now(),
+    visitCount: 0,
+    shortcut: migrateShortcutToPrimaryModifier("c"),
+  },
 ];
 
 interface TabsState {
   tabs: Tab[];
   addTab: (title: string, url: string) => void;
-  addMultipleTabs: (tabs: Array<{title: string, url: string}>) => void;
-  updateTab: (id: string, title: string, url: string, shortcut?: string, openInNewWindow?: boolean) => void;
+  addMultipleTabs: (tabs: Array<{ title: string; url: string }>) => void;
+  updateTab: (
+    id: string,
+    title: string,
+    url: string,
+    shortcut?: string,
+    openInNewWindow?: boolean,
+  ) => void;
   removeTab: (id: string) => void;
   moveTab: (fromIndex: number, toIndex: number) => void;
   incrementVisitCount: (id: string) => void;
@@ -65,10 +106,18 @@ export const useTabsStore = create<TabsState>()(
           tabs: [...state.tabs, ...newTabs],
         }));
       },
-      updateTab: (id: string, title: string, url: string, shortcut?: string, openInNewWindow?: boolean) => {
+      updateTab: (
+        id: string,
+        title: string,
+        url: string,
+        shortcut?: string,
+        openInNewWindow?: boolean,
+      ) => {
         set((state) => ({
           tabs: state.tabs.map((tab) =>
-            tab.id === id ? { ...tab, title, url, shortcut, openInNewWindow } : tab
+            tab.id === id
+              ? { ...tab, title, url, shortcut, openInNewWindow }
+              : tab,
           ),
         }));
       },
@@ -99,7 +148,7 @@ export const useTabsStore = create<TabsState>()(
       incrementVisitCount: (id: string) => {
         set((state) => ({
           tabs: state.tabs.map((tab) =>
-            tab.id === id ? { ...tab, visitCount: tab.visitCount + 1 } : tab
+            tab.id === id ? { ...tab, visitCount: tab.visitCount + 1 } : tab,
           ),
         }));
       },
@@ -107,7 +156,7 @@ export const useTabsStore = create<TabsState>()(
       updateTabShortcut: (id: string, shortcut: string | undefined) => {
         set((state) => ({
           tabs: state.tabs.map((tab) =>
-            tab.id === id ? { ...tab, shortcut } : tab
+            tab.id === id ? { ...tab, shortcut } : tab,
           ),
         }));
       },
@@ -158,6 +207,6 @@ export const useTabsStore = create<TabsState>()(
           })),
         };
       },
-    }
-  )
+    },
+  ),
 );

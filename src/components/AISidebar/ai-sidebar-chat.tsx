@@ -21,7 +21,14 @@ interface AISidebarChatProps {
 
 export const AISidebarChat = forwardRef<HTMLDivElement, AISidebarChatProps>(
   function AISidebarChat(
-    { messages, providerLabel, savingMessageId, copyingMessageId, onCopyMessage, onSaveMessageToNote },
+    {
+      messages,
+      providerLabel,
+      savingMessageId,
+      copyingMessageId,
+      onCopyMessage,
+      onSaveMessageToNote,
+    },
     ref,
   ) {
     return (
@@ -37,25 +44,49 @@ export const AISidebarChat = forwardRef<HTMLDivElement, AISidebarChatProps>(
                 key={message.id}
                 className={cn(
                   "max-w-[90%] rounded-2xl px-4 py-3 text-sm leading-6 shadow-sm",
-                  isUser ? "ml-auto bg-card text-card-foreground" : "bg-primary/15 text-foreground",
-                )}>
+                  isUser
+                    ? "ml-auto bg-card text-card-foreground"
+                    : "bg-primary/15 text-foreground",
+                )}
+              >
                 <p className="mb-1 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
                   {isUser ? "You" : providerLabel}
                 </p>
                 {isUser ? (
-                  <p className="whitespace-pre-wrap break-words">{message.content}</p>
+                  <p className="whitespace-pre-wrap break-words">
+                    {message.content}
+                  </p>
                 ) : (
                   <div className="ai-markdown break-words text-sm leading-6">
                     <ReactMarkdown
                       remarkPlugins={[remarkGfm]}
                       components={{
-                        p: ({ children }) => <p className="mb-3 last:mb-0">{children}</p>,
-                        ul: ({ children }) => <ul className="mb-3 list-disc space-y-1 pl-5 last:mb-0">{children}</ul>,
-                        ol: ({ children }) => <ol className="mb-3 list-decimal space-y-1 pl-5 last:mb-0">{children}</ol>,
+                        p: ({ children }) => (
+                          <p className="mb-3 last:mb-0">{children}</p>
+                        ),
+                        ul: ({ children }) => (
+                          <ul className="mb-3 list-disc space-y-1 pl-5 last:mb-0">
+                            {children}
+                          </ul>
+                        ),
+                        ol: ({ children }) => (
+                          <ol className="mb-3 list-decimal space-y-1 pl-5 last:mb-0">
+                            {children}
+                          </ol>
+                        ),
                         li: ({ children }) => <li>{children}</li>,
-                        strong: ({ children }) => <strong className="font-semibold text-foreground">{children}</strong>,
+                        strong: ({ children }) => (
+                          <strong className="font-semibold text-foreground">
+                            {children}
+                          </strong>
+                        ),
                         a: ({ children, href }) => (
-                          <a href={href} target="_blank" rel="noreferrer" className="text-primary underline underline-offset-4">
+                          <a
+                            href={href}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="text-primary underline underline-offset-4"
+                          >
                             {children}
                           </a>
                         ),
@@ -75,14 +106,17 @@ export const AISidebarChat = forwardRef<HTMLDivElement, AISidebarChatProps>(
                           );
                         },
                         pre: ({ children }) => (
-                          <pre className="mb-3 overflow-x-auto rounded-xl bg-background/70 p-3 last:mb-0">{children}</pre>
+                          <pre className="mb-3 overflow-x-auto rounded-xl bg-background/70 p-3 last:mb-0">
+                            {children}
+                          </pre>
                         ),
                         blockquote: ({ children }) => (
                           <blockquote className="mb-3 border-l-2 border-primary/40 pl-4 italic text-muted-foreground last:mb-0">
                             {children}
                           </blockquote>
                         ),
-                      }}>
+                      }}
+                    >
                       {message.content}
                     </ReactMarkdown>
                   </div>
@@ -95,21 +129,33 @@ export const AISidebarChat = forwardRef<HTMLDivElement, AISidebarChatProps>(
                       size="sm"
                       onClick={() => onCopyMessage(message.id, message.content)}
                       disabled={isCopyingThisMessage || !message.content.trim()}
-                      className="h-8 rounded-full px-3 text-xs text-muted-foreground hover:bg-background/60 hover:text-foreground">
-                      {isCopyingThisMessage ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Copy className="h-3.5 w-3.5" />}
+                      className="h-8 rounded-full px-3 text-xs text-muted-foreground hover:bg-background/60 hover:text-foreground"
+                    >
+                      {isCopyingThisMessage ? (
+                        <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                      ) : (
+                        <Copy className="h-3.5 w-3.5" />
+                      )}
                       <span>Copy</span>
                     </Button>
                     <Button
                       type="button"
                       variant="ghost"
                       size="sm"
-                      onClick={() => onSaveMessageToNote(message.id, message.content)}
+                      onClick={() =>
+                        onSaveMessageToNote(message.id, message.content)
+                      }
                       disabled={isSavingThisMessage || !message.content.trim()}
-                      className="h-8 rounded-full px-3 text-xs text-muted-foreground hover:bg-background/60 hover:text-foreground">
+                      className="h-8 rounded-full px-3 text-xs text-muted-foreground hover:bg-background/60 hover:text-foreground"
+                    >
                       {isSavingThisMessage ? (
                         <Loader2 className="h-3.5 w-3.5 animate-spin" />
                       ) : (
-                        <HugeiconsIcon icon={MoveIcon} size={16} strokeWidth={2} />
+                        <HugeiconsIcon
+                          icon={MoveIcon}
+                          size={16}
+                          strokeWidth={2}
+                        />
                       )}
                       <span>Save to note</span>
                     </Button>
@@ -120,10 +166,18 @@ export const AISidebarChat = forwardRef<HTMLDivElement, AISidebarChatProps>(
           })
         ) : (
           <div className="flex h-full min-h-[320px] flex-col items-center justify-center rounded-3xl border border-dashed border-border/60 bg-muted/20 px-6 text-center">
-            <HugeiconsIcon icon={AiChat01Icon} size={42} strokeWidth={1.8} className="mb-3 text-primary/80" />
-            <p className="text-base font-semibold text-foreground">Start a conversation</p>
+            <HugeiconsIcon
+              icon={AiChat01Icon}
+              size={42}
+              strokeWidth={1.8}
+              className="mb-3 text-primary/80"
+            />
+            <p className="text-base font-semibold text-foreground">
+              Start a conversation
+            </p>
             <p className="mt-2 max-w-xs text-sm leading-6 text-muted-foreground">
-              Send a prompt and the assistant will answer here. History is only included in the API request when you enable the footer toggle.
+              Send a prompt and the assistant will answer here. History is only
+              included in the API request when you enable the footer toggle.
             </p>
           </div>
         )}

@@ -15,7 +15,12 @@ export const exportShareProfile = (): ShareProfileV1 => {
 
 export const importShareProfile = (
   payload: unknown,
-): { applied: boolean; theme?: Theme; error?: string; data?: ShareProfileV1 } => {
+): {
+  applied: boolean;
+  theme?: Theme;
+  error?: string;
+  data?: ShareProfileV1;
+} => {
   const { data, error } = parseShareProfile(payload);
   if (!data) {
     return { applied: false, error };

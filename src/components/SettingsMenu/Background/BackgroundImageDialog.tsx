@@ -95,7 +95,8 @@ export function BackgroundImageDialog({
             <Button
               variant="outline"
               onClick={() => fileInputRef.current?.click()}
-              className="w-full h-12">
+              className="w-full h-12"
+            >
               <Upload className="mr-2 h-4 w-4" />
               {tempBackgroundImage ? "Change Image" : "Upload Image"}
             </Button>
@@ -104,7 +105,8 @@ export function BackgroundImageDialog({
               <Button
                 variant="outline"
                 onClick={handleRemoveImage}
-                className="w-full">
+                className="w-full"
+              >
                 <X className="mr-2 h-4 w-4" />
                 Remove Image
               </Button>
@@ -122,7 +124,8 @@ export function BackgroundImageDialog({
               <button
                 type="button"
                 onClick={() => setDynamicWallpaper(!isDynamicWallpaper)}
-                className={`relative h-5 w-10 rounded-full transition-colors ${isDynamicWallpaper ? "bg-primary" : "bg-muted"}`}>
+                className={`relative h-5 w-10 rounded-full transition-colors ${isDynamicWallpaper ? "bg-primary" : "bg-muted"}`}
+              >
                 <div
                   className={`absolute top-0.5 h-4 w-4 rounded-full bg-background transition-all ${isDynamicWallpaper ? "translate-x-5" : "translate-x-0.5"}`}
                 />

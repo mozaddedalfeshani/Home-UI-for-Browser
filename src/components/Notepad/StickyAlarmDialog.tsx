@@ -137,11 +137,9 @@ export default function StickyAlarmDialog() {
 
       const isReloadKey = event.key === "F5";
       const isMetaReload =
-        (event.ctrlKey || event.metaKey) &&
-        event.key.toLowerCase() === "r";
+        (event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "r";
       const isMetaClose =
-        (event.ctrlKey || event.metaKey) &&
-        event.key.toLowerCase() === "w";
+        (event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "w";
       if (isReloadKey || isMetaReload || isMetaClose) {
         event.preventDefault();
       }
@@ -156,17 +154,29 @@ export default function StickyAlarmDialog() {
     if (bodyWithBeforeUnload) {
       bodyWithBeforeUnload.onbeforeunload = handleBeforeUnloadProperty;
     }
-    window.addEventListener("beforeunload", handleBeforeUnload, { capture: true });
-    window.addEventListener("keydown", handleRefreshShortcuts, { capture: true });
-    document.addEventListener("keydown", handleRefreshShortcuts, { capture: true });
+    window.addEventListener("beforeunload", handleBeforeUnload, {
+      capture: true,
+    });
+    window.addEventListener("keydown", handleRefreshShortcuts, {
+      capture: true,
+    });
+    document.addEventListener("keydown", handleRefreshShortcuts, {
+      capture: true,
+    });
     return () => {
       window.onbeforeunload = null;
       if (bodyWithBeforeUnload) {
         bodyWithBeforeUnload.onbeforeunload = null;
       }
-      window.removeEventListener("beforeunload", handleBeforeUnload, { capture: true });
-      window.removeEventListener("keydown", handleRefreshShortcuts, { capture: true });
-      document.removeEventListener("keydown", handleRefreshShortcuts, { capture: true });
+      window.removeEventListener("beforeunload", handleBeforeUnload, {
+        capture: true,
+      });
+      window.removeEventListener("keydown", handleRefreshShortcuts, {
+        capture: true,
+      });
+      document.removeEventListener("keydown", handleRefreshShortcuts, {
+        capture: true,
+      });
     };
   }, []);
 

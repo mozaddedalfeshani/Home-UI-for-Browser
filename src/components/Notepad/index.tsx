@@ -25,8 +25,8 @@ const formatRelativeTime = (dateString: string) => {
   const date = new Date(dateString);
   const now = new Date();
   const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
-  
-  if (diffInSeconds < 60) return 'Just now';
+
+  if (diffInSeconds < 60) return "Just now";
   if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)}m ago`;
   if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)}h ago`;
   return date.toLocaleDateString();
@@ -51,7 +51,7 @@ const Notepad = () => {
   const [alarmError, setAlarmError] = useState<string | null>(null);
   const t = useTranslation(language);
 
-  const selectedNote = notes.find(n => n.id === selectedNoteId);
+  const selectedNote = notes.find((n) => n.id === selectedNoteId);
 
   const handleCopy = (text: string) => {
     navigator.clipboard.writeText(text);
@@ -59,13 +59,16 @@ const Notepad = () => {
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const filteredNotes = notes.filter(n => 
-    n.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
-    n.content.toLowerCase().includes(searchQuery.toLowerCase())
+  const filteredNotes = notes.filter(
+    (n) =>
+      n.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      n.content.toLowerCase().includes(searchQuery.toLowerCase()),
   );
 
   const charCount = selectedNote?.content.length || 0;
-  const wordCount = selectedNote?.content.trim() ? selectedNote.content.trim().split(/\s+/).length : 0;
+  const wordCount = selectedNote?.content.trim()
+    ? selectedNote.content.trim().split(/\s+/).length
+    : 0;
 
   const requestNotificationAccess = async () => {
     if (typeof window === "undefined" || !("Notification" in window)) {
@@ -112,14 +115,19 @@ const Notepad = () => {
   };
 
   useEffect(() => {
-    if (!selectedNote || selectedNote.alarmStatus !== "scheduled" || !selectedNote.alarmDueAt) {
+    if (
+      !selectedNote ||
+      selectedNote.alarmStatus !== "scheduled" ||
+      !selectedNote.alarmDueAt
+    ) {
       setAlarmHours("0");
       setAlarmMinutes("30");
       setAlarmError(null);
       return;
     }
 
-    const remainingMs = new Date(selectedNote.alarmDueAt).getTime() - Date.now();
+    const remainingMs =
+      new Date(selectedNote.alarmDueAt).getTime() - Date.now();
     const remainingMinutes = Math.max(1, Math.ceil(remainingMs / 60000));
     const nextHours = Math.floor(remainingMinutes / 60);
     const nextMinutes = remainingMinutes % 60;
@@ -136,7 +144,12 @@ const Notepad = () => {
     const hoursValue = Number(alarmHours || "0");
     const minutesValue = Number(alarmMinutes || "0");
 
-    if (!Number.isFinite(hoursValue) || !Number.isFinite(minutesValue) || hoursValue < 0 || minutesValue < 0) {
+    if (
+      !Number.isFinite(hoursValue) ||
+      !Number.isFinite(minutesValue) ||
+      hoursValue < 0 ||
+      minutesValue < 0
+    ) {
       setAlarmError(t("reminderInvalidNumbers"));
       return;
     }
@@ -166,15 +179,19 @@ const Notepad = () => {
             <div className="rounded-md border border-primary/15 bg-primary/10 p-1.5">
               <FileText className="h-4 w-4 text-primary" />
             </div>
-            <h1 className="text-sm font-bold uppercase tracking-tight text-foreground/90">{t("stickyNotes")}</h1>
+            <h1 className="text-sm font-bold uppercase tracking-tight text-foreground/90">
+              {t("stickyNotes")}
+            </h1>
           </div>
           <div className="flex items-center gap-2 rounded-full border border-border/60 bg-card/70 px-2 py-0.5 shadow-sm">
             <div className="h-1.5 w-1.5 rounded-full bg-green-500 animate-pulse" />
-            <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-widest">{t("savedStatus")}</span>
+            <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-widest">
+              {t("savedStatus")}
+            </span>
           </div>
         </div>
       </div>
-      
+
       {/* Scrollable Content Area */}
       <div className="flex-1 overflow-y-auto overflow-x-hidden scrollbar-thin scrollbar-thumb-muted-foreground/20 scrollbar-track-transparent">
         <div className="h-full flex flex-col min-h-0">
@@ -199,7 +216,11 @@ const Notepad = () => {
                     className="h-8 w-8 p-0 hover:bg-primary/10 hover:text-primary transition-colors"
                     aria-label={copied ? "Copied" : "Copy note"}
                   >
-                    {copied ? <CheckCircle2 className="h-4 w-4 text-green-500" /> : <Copy className="h-3.5 w-3.5" />}
+                    {copied ? (
+                      <CheckCircle2 className="h-4 w-4 text-green-500" />
+                    ) : (
+                      <Copy className="h-3.5 w-3.5" />
+                    )}
                   </Button>
                   <DeleteConfirmDialog
                     title={t("deleteStickyNoteTitle")}
@@ -221,13 +242,17 @@ const Notepad = () => {
               <div className="space-y-4">
                 <Input
                   value={selectedNote.title}
-                  onChange={(e) => updateNote(selectedNote.id, { title: e.target.value })}
+                  onChange={(e) =>
+                    updateNote(selectedNote.id, { title: e.target.value })
+                  }
                   placeholder={t("stickyNoteTitle")}
                   className="border-0 bg-transparent p-1 text-2xl font-bold shadow-none focus-visible:border-transparent focus-visible:ring-0 placeholder:text-muted-foreground/35"
                 />
                 <Textarea
                   value={selectedNote.content}
-                  onChange={(e) => updateNote(selectedNote.id, { content: e.target.value })}
+                  onChange={(e) =>
+                    updateNote(selectedNote.id, { content: e.target.value })
+                  }
                   placeholder={t("writeYourNotesHere")}
                   className="h-[360px] resize-none overflow-y-auto border-0 bg-transparent p-1 text-sm leading-6 text-foreground shadow-none placeholder:text-muted-foreground/40 focus-visible:border-transparent focus-visible:ring-0 selection:bg-primary/20"
                   style={{ letterSpacing: "-0.01em" }}
@@ -243,7 +268,8 @@ const Notepad = () => {
                   {selectedNote.alarmStatus === "scheduled" && (
                     <span className="inline-flex items-center gap-1 rounded-full border border-primary/30 bg-primary/10 px-2 py-0.5 text-[10px] font-semibold text-primary">
                       <BellRing className="h-3 w-3" />
-                      {t("scheduled")}: {formatAlarmCountdown(selectedNote.alarmDueAt)}
+                      {t("scheduled")}:{" "}
+                      {formatAlarmCountdown(selectedNote.alarmDueAt)}
                     </span>
                   )}
                   {selectedNote.alarmStatus === "overdue" && (
@@ -256,7 +282,9 @@ const Notepad = () => {
 
                 <div className="grid grid-cols-2 gap-2">
                   <div className="space-y-1">
-                    <label className="text-[11px] font-medium text-muted-foreground">{t("hours")}</label>
+                    <label className="text-[11px] font-medium text-muted-foreground">
+                      {t("hours")}
+                    </label>
                     <Input
                       type="number"
                       min={0}
@@ -267,7 +295,9 @@ const Notepad = () => {
                     />
                   </div>
                   <div className="space-y-1">
-                    <label className="text-[11px] font-medium text-muted-foreground">{t("minutes")}</label>
+                    <label className="text-[11px] font-medium text-muted-foreground">
+                      {t("minutes")}
+                    </label>
                     <Input
                       type="number"
                       min={0}
@@ -283,10 +313,17 @@ const Notepad = () => {
                   <p className="text-xs text-destructive">{alarmError}</p>
                 )}
 
-                <p className="text-[11px] text-muted-foreground">{t("reminderMax24h")}</p>
+                <p className="text-[11px] text-muted-foreground">
+                  {t("reminderMax24h")}
+                </p>
 
                 <div className="flex gap-2">
-                  <Button type="button" size="sm" className="h-8" onClick={handleSetReminder}>
+                  <Button
+                    type="button"
+                    size="sm"
+                    className="h-8"
+                    onClick={handleSetReminder}
+                  >
                     <Bell className="h-3.5 w-3.5" />
                     {t("setReminder")}
                   </Button>
@@ -319,10 +356,12 @@ const Notepad = () => {
             /* List View */
             <div className="p-6 space-y-6 animate-in fade-in slide-in-from-left-4 duration-300">
               <div className="flex items-center justify-between">
-                <h2 className="text-2xl font-extrabold tracking-tight text-foreground">{t("stickyNotes")}</h2>
-                <Button 
-                  onClick={() => addNote()} 
-                  size="sm" 
+                <h2 className="text-2xl font-extrabold tracking-tight text-foreground">
+                  {t("stickyNotes")}
+                </h2>
+                <Button
+                  onClick={() => addNote()}
+                  size="sm"
                   className="h-8 w-8 rounded-full border border-primary/15 bg-primary/10 p-0 text-primary hover:bg-primary/20"
                   aria-label="Create new note"
                 >
@@ -332,7 +371,7 @@ const Notepad = () => {
 
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground/50" />
-                <Input 
+                <Input
                   placeholder={t("searchStickyNotes")}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}

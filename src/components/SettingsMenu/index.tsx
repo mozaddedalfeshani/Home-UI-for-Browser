@@ -52,7 +52,8 @@ const SettingsMenu = () => {
             variant="outline"
             size="icon"
             className="h-10 w-10 rounded-full bg-background/80 backdrop-blur-sm border-border/60 shadow-lg hover:bg-accent/80 transition-colors"
-            aria-label="Settings">
+            aria-label="Settings"
+          >
             <Settings className="h-4 w-4" />
           </Button>
         </DropdownMenuTrigger>
@@ -66,26 +67,27 @@ const SettingsMenu = () => {
                 variant="ghost"
                 size="icon-sm"
                 className="h-6 w-6 text-destructive hover:bg-destructive/10"
-                aria-label="Reset settings">
+                aria-label="Reset settings"
+              >
                 <RotateCcw className="h-3 w-3" />
               </Button>
             </ResetDialog>
           </div>
-          
+
           <DropdownMenuSeparator />
-          
+
           <ThemeLanguageSection />
-          
+
           <DropdownMenuSeparator />
-          
+
           <SearchPositionSection />
-          
+
           <DropdownMenuSeparator />
-          
+
           <TogglesSection showMore={showMore} setShowMore={setShowMore} />
-          
+
           <DropdownMenuSeparator />
-          
+
           <BackgroundSection />
 
           {showMore && (

@@ -195,7 +195,8 @@ export function PageClient() {
           {/* Clock positioned within left side only */}
           {showClock && (
             <div
-              className={`flex justify-${clockPosition === "top-left" ? "start" : clockPosition === "top-center" ? "center" : "end"} ${clockPaddingClass}`}>
+              className={`flex justify-${clockPosition === "top-left" ? "start" : clockPosition === "top-center" ? "center" : "end"} ${clockPaddingClass}`}
+            >
               <DigitalClock />
             </div>
           )}
@@ -209,7 +210,8 @@ export function PageClient() {
             type="button"
             onClick={() => setIsAISidebarVisible(true)}
             className="flex h-12 w-12 items-center justify-center rounded-full border border-border/60 bg-background/85 text-foreground shadow-xl backdrop-blur-xl transition-colors hover:bg-accent/90"
-            aria-label="Open AI sidebar">
+            aria-label="Open AI sidebar"
+          >
             <Bot className="h-5 w-5" />
           </button>
         ) : null}
@@ -226,7 +228,8 @@ export function PageClient() {
         className={cn(
           "fixed left-0 top-0 bottom-0 z-80 w-[min(94vw,26rem)] transform transition-all duration-500 ease-out md:w-md",
           isAISidebarVisible ? "translate-x-0" : "-translate-x-full",
-        )}>
+        )}
+      >
         <AISidebar
           open={isAISidebarVisible}
           onClose={() => setIsAISidebarVisible(false)}
@@ -248,7 +251,8 @@ export function PageClient() {
             "fixed right-0 top-0 bottom-0 w-80 md:w-96 z-50 transform transition-all duration-500 ease-out",
             isSidebarVisible ? "translate-x-0" : "translate-x-full",
           )}
-          onMouseLeave={() => setIsSidebarVisible(false)}>
+          onMouseLeave={() => setIsSidebarVisible(false)}
+        >
           <Notepad />
         </div>
       )}

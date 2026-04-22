@@ -14,7 +14,7 @@ export const useMediaUrl = (mediaRef: string | null) => {
     }
 
     // If it's already a data URL, use it directly
-    if (mediaRef.startsWith('data:')) {
+    if (mediaRef.startsWith("data:")) {
       setUrl(mediaRef);
       return;
     }
@@ -23,8 +23,9 @@ export const useMediaUrl = (mediaRef: string | null) => {
     if (mediaStorage.isMediaReference(mediaRef)) {
       setLoading(true);
       const id = mediaStorage.extractId(mediaRef);
-      
-      mediaStorage.getMedia(id)
+
+      mediaStorage
+        .getMedia(id)
         .then((data) => {
           setUrl(data);
           setLoading(false);

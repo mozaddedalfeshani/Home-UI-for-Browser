@@ -69,7 +69,8 @@ export function AISidebarComposer({
       className={cn(
         "border-t bg-background/65 p-4",
         isAgentMode ? "border-indigo-500/20" : "border-border/50",
-      )}>
+      )}
+    >
       {errorMessage ? (
         <div className="mb-3 rounded-xl border border-destructive/20 bg-destructive/10 px-3 py-2 text-sm text-destructive">
           {errorMessage}
@@ -91,7 +92,8 @@ export function AISidebarComposer({
           isAgentMode
             ? "border-indigo-500/30 bg-indigo-500/5"
             : "border-border/60 bg-card/55",
-        )}>
+        )}
+      >
         <Textarea
           value={draftMessage}
           onChange={(e) => onDraftChange(e.target.value)}
@@ -119,7 +121,8 @@ export function AISidebarComposer({
                       : "border-border/60 bg-muted/60",
                   )}
                   aria-pressed={sendHistory}
-                  aria-label="Toggle sending chat history">
+                  aria-label="Toggle sending chat history"
+                >
                   <span
                     className={cn(
                       "inline-block h-5 w-5 rounded-full bg-white shadow-md transition-transform duration-200",
@@ -142,7 +145,8 @@ export function AISidebarComposer({
                   variant="ghost"
                   size="sm"
                   onClick={onToggleModels}
-                  className="h-9 rounded-full px-3 text-xs text-muted-foreground">
+                  className="h-9 rounded-full px-3 text-xs text-muted-foreground"
+                >
                   Models
                 </Button>
 
@@ -166,7 +170,8 @@ export function AISidebarComposer({
                           openRouterModel === "openrouter/auto"
                             ? "bg-primary/12 text-primary"
                             : "hover:bg-muted/70",
-                        )}>
+                        )}
+                      >
                         openrouter/auto
                       </button>
 
@@ -192,7 +197,8 @@ export function AISidebarComposer({
                                 openRouterModel === model
                                   ? "bg-primary/12 text-primary"
                                   : "hover:bg-muted/70",
-                              )}>
+                              )}
+                            >
                               {model}
                             </button>
                           ))
@@ -208,7 +214,8 @@ export function AISidebarComposer({
               variant="ghost"
               size="sm"
               onClick={onClearChat}
-              className="h-9 rounded-full px-3 text-xs text-muted-foreground">
+              className="h-9 rounded-full px-3 text-xs text-muted-foreground"
+            >
               Clear chat
             </Button>
           </div>
@@ -217,7 +224,8 @@ export function AISidebarComposer({
             type="button"
             onClick={onSend}
             disabled={!hasApiKey || !draftMessage.trim() || isSubmitting}
-            className="h-10 rounded-full px-4">
+            className="h-10 rounded-full px-4"
+          >
             {isSubmitting ? (
               <Loader2 className="h-4 w-4 animate-spin" />
             ) : (

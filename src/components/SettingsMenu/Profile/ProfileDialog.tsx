@@ -130,7 +130,8 @@ export const ProfileDialog = ({ open, onOpenChange }: ProfileDialogProps) => {
             <Button
               variant="outline"
               onClick={handleExportProfile}
-              className="flex-1 justify-start gap-3 px-5 py-4">
+              className="flex-1 justify-start gap-3 px-5 py-4"
+            >
               <Download className="h-4 w-4 text-muted-foreground" />
               <div className="text-left">
                 <div className="font-medium">{t("exportProfile")}</div>
@@ -140,7 +141,8 @@ export const ProfileDialog = ({ open, onOpenChange }: ProfileDialogProps) => {
             <Button
               variant="outline"
               onClick={handleImportClick}
-              className="flex-1 justify-start gap-3 px-5 py-4">
+              className="flex-1 justify-start gap-3 px-5 py-4"
+            >
               <Upload className="h-4 w-4 text-muted-foreground" />
               <div className="text-left">
                 <div className="font-medium">{t("importProfile")}</div>
@@ -165,7 +167,8 @@ export const ProfileDialog = ({ open, onOpenChange }: ProfileDialogProps) => {
           if (!open) {
             setPendingImportProfile(null);
           }
-        }}>
+        }}
+      >
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle>{t("importProfileConfirmTitle")}</DialogTitle>
@@ -180,7 +183,8 @@ export const ProfileDialog = ({ open, onOpenChange }: ProfileDialogProps) => {
                 setIsImportConfirmOpen(false);
                 setPendingImportProfile(null);
               }}
-              disabled={isImporting}>
+              disabled={isImporting}
+            >
               {t("cancel")}
             </Button>
             <Button onClick={applyImportedProfile} disabled={isImporting}>

@@ -94,14 +94,16 @@ export default function AgentMenu({
             variant="outline"
             size="icon"
             className="h-8 w-8 rounded-full border-border/60 bg-background/40 shadow-sm backdrop-blur-sm transition-colors hover:bg-accent/80"
-            aria-label="Open agents menu">
+            aria-label="Open agents menu"
+          >
             <HugeiconsIcon icon={BotIcon} size={16} strokeWidth={2} />
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent
           align="start"
           side="bottom"
-          className="z-[130] w-[min(22rem,calc(100vw-2rem))] rounded-2xl border-border/60 bg-background/95 p-2 shadow-2xl backdrop-blur-xl">
+          className="z-[130] w-[min(22rem,calc(100vw-2rem))] rounded-2xl border-border/60 bg-background/95 p-2 shadow-2xl backdrop-blur-xl"
+        >
           <DropdownMenuLabel className="px-2 pb-1 pt-0 text-xs uppercase tracking-[0.18em] text-muted-foreground">
             Agents
           </DropdownMenuLabel>
@@ -116,10 +118,12 @@ export default function AgentMenu({
                     activeAgentId === agent.id
                       ? "border-primary/40 bg-primary/10"
                       : "border-border/50 bg-muted/30",
-                  )}>
+                  )}
+                >
                   <DropdownMenuItem
                     onSelect={() => handleAgentSwitch(agent.id)}
-                    className="cursor-pointer rounded-lg p-0 focus:bg-transparent">
+                    className="cursor-pointer rounded-lg p-0 focus:bg-transparent"
+                  >
                     <div className="flex items-start gap-2">
                       <div className="mt-0.5 rounded-lg bg-primary/10 p-1.5 text-primary">
                         <HugeiconsIcon
@@ -168,7 +172,8 @@ export default function AgentMenu({
                         onEditRequested?.(agent.id);
                       }}
                       className="absolute right-2 top-2 rounded-md p-1.5 text-muted-foreground opacity-0 transition-opacity hover:bg-muted hover:text-foreground group-hover:opacity-100"
-                      aria-label={`Edit ${agent.name}`}>
+                      aria-label={`Edit ${agent.name}`}
+                    >
                       <HugeiconsIcon
                         icon={PencilEdit01Icon}
                         size={14}
@@ -196,7 +201,8 @@ export default function AgentMenu({
             <>
               <DropdownMenuItem
                 onSelect={handleLeaveAgentMode}
-                className="rounded-xl px-3 py-2.5 text-amber-600 focus:text-amber-700 dark:text-amber-400 dark:focus:text-amber-300">
+                className="rounded-xl px-3 py-2.5 text-amber-600 focus:text-amber-700 dark:text-amber-400 dark:focus:text-amber-300"
+              >
                 <HugeiconsIcon icon={Cancel01Icon} size={16} strokeWidth={2} />
                 <span>
                   Leave agent mode
@@ -209,13 +215,15 @@ export default function AgentMenu({
 
           <DropdownMenuItem
             onSelect={() => onCreateRequested?.()}
-            className="rounded-xl px-3 py-2.5">
+            className="rounded-xl px-3 py-2.5"
+          >
             <HugeiconsIcon icon={Add01Icon} size={16} strokeWidth={2} />
             <span>Create Agent</span>
           </DropdownMenuItem>
           <DropdownMenuItem
             disabled
-            className="rounded-xl px-3 py-2 text-xs text-muted-foreground">
+            className="rounded-xl px-3 py-2 text-xs text-muted-foreground"
+          >
             <HugeiconsIcon
               icon={CheckmarkCircle02Icon}
               size={14}

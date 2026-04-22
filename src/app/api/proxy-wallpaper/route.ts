@@ -15,12 +15,15 @@ export async function GET(request: NextRequest) {
     const response = await fetch(imageUrl, {
       method: "GET",
       headers: {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+        "User-Agent":
+          "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
       },
     });
 
     if (!response.ok) {
-      return new NextResponse(`Failed to fetch image: ${response.statusText}`, { status: response.status });
+      return new NextResponse(`Failed to fetch image: ${response.statusText}`, {
+        status: response.status,
+      });
     }
 
     const contentType = response.headers.get("content-type") || "image/png";

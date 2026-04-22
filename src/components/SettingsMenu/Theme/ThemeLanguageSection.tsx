@@ -8,7 +8,12 @@ import { Language, useTranslation } from "@/constants/languages";
 
 export const ThemeLanguageSection = () => {
   const { setTheme } = useTheme();
-  const { theme, language, setTheme: setSettingsTheme, setLanguage } = useSettingsStore();
+  const {
+    theme,
+    language,
+    setTheme: setSettingsTheme,
+    setLanguage,
+  } = useSettingsStore();
   const t = useTranslation(language);
 
   const handleThemeChange = (newTheme: Theme) => {
@@ -35,7 +40,8 @@ export const ThemeLanguageSection = () => {
             const currentIndex = themes.indexOf(theme);
             const nextIndex = (currentIndex + 1) % themes.length;
             handleThemeChange(themes[nextIndex]);
-          }}>
+          }}
+        >
           {theme === "light" ? (
             <Sun className="h-4 w-4" />
           ) : theme === "dark" ? (
@@ -57,7 +63,8 @@ export const ThemeLanguageSection = () => {
           variant="secondary"
           size="sm"
           className="h-8 w-full justify-start gap-2 bg-background/50 hover:bg-accent"
-          onClick={() => handleLanguageChange(language === "en" ? "bn" : "en")}>
+          onClick={() => handleLanguageChange(language === "en" ? "bn" : "en")}
+        >
           <Languages className="h-4 w-4" />
           <span className="text-[10px] font-semibold uppercase">
             {language === "en" ? "EN (English)" : "BN (বাংলা)"}

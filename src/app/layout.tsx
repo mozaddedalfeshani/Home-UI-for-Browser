@@ -58,14 +58,16 @@ export default function RootLayout({
       <html
         lang="en"
         suppressHydrationWarning
-        className={`${shareTech.variable} ${fredoka.variable}`}>
+        className={`${shareTech.variable} ${fredoka.variable}`}
+      >
         <head />
         <body>
           <ThemeProvider
             attribute="class"
             defaultTheme="system"
             enableSystem
-            disableTransitionOnChange>
+            disableTransitionOnChange
+          >
             {children}
             <Toaster />
           </ThemeProvider>

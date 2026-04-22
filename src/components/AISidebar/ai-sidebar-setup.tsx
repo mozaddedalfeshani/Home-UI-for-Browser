@@ -128,7 +128,8 @@ export function AISidebarSetup({
           variant="ghost"
           size="sm"
           onClick={onBack}
-          className="-ml-2 mb-4 h-8 w-fit gap-2 text-muted-foreground hover:text-foreground">
+          className="-ml-2 mb-4 h-8 w-fit gap-2 text-muted-foreground hover:text-foreground"
+        >
           <HugeiconsIcon icon={ArrowLeft01Icon} size={18} strokeWidth={2} />
           Back to chat
         </Button>
@@ -187,7 +188,8 @@ export function AISidebarSetup({
                       editAgentLanguage === item.value
                         ? "border-primary/50 bg-primary/10 text-primary"
                         : "border-border/60 bg-card/30 text-muted-foreground hover:border-primary/30 hover:text-foreground",
-                    )}>
+                    )}
+                  >
                     {item.label}
                   </button>
                 ))}
@@ -209,7 +211,8 @@ export function AISidebarSetup({
                       editAgentBehavior === item.value
                         ? "border-primary/50 bg-primary/10 text-primary"
                         : "border-border/60 bg-card/30 text-muted-foreground hover:border-primary/30 hover:text-foreground",
-                    )}>
+                    )}
+                  >
                     {item.label}
                   </button>
                 ))}
@@ -240,7 +243,8 @@ export function AISidebarSetup({
                   });
                 }
               }}
-              className="h-11 w-full rounded-xl gap-2">
+              className="h-11 w-full rounded-xl gap-2"
+            >
               Save Changes
             </Button>
           </div>
@@ -274,7 +278,8 @@ export function AISidebarSetup({
                         : setupStep > s
                           ? "bg-primary/20 text-primary"
                           : "bg-muted text-muted-foreground",
-                    )}>
+                    )}
+                  >
                     {s}
                   </div>
                   {s < 3 && (
@@ -318,14 +323,16 @@ export function AISidebarSetup({
                       provider === item.value
                         ? "border-primary/50 bg-primary/10 ring-1 ring-primary/20"
                         : "border-border/60 bg-card/30 hover:border-primary/30 hover:bg-primary/5",
-                    )}>
+                    )}
+                  >
                     <div
                       className={cn(
                         "flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border text-sm font-bold transition-colors",
                         provider === item.value
                           ? "border-primary/30 bg-primary/15 text-primary"
                           : "border-border/50 bg-muted/50 text-muted-foreground",
-                      )}>
+                      )}
+                    >
                       {item.label[0]}
                     </div>
                     <div className="min-w-0 flex-1">
@@ -350,7 +357,8 @@ export function AISidebarSetup({
               <Button
                 type="button"
                 onClick={() => setSetupStep(2)}
-                className="h-11 w-full rounded-xl">
+                className="h-11 w-full rounded-xl"
+              >
                 Continue
               </Button>
             </div>
@@ -392,7 +400,8 @@ export function AISidebarSetup({
                     size="icon-sm"
                     onClick={() => setShowApiKey((c) => !c)}
                     className="absolute right-2 top-1/2 h-8 w-8 -translate-y-1/2 rounded-full"
-                    aria-label={showApiKey ? "Hide API key" : "Show API key"}>
+                    aria-label={showApiKey ? "Hide API key" : "Show API key"}
+                  >
                     <HugeiconsIcon icon={Key02Icon} size={18} strokeWidth={2} />
                   </Button>
                 </div>
@@ -410,7 +419,8 @@ export function AISidebarSetup({
                     setErrorMessage(null);
                     setSetupStep(1);
                   }}
-                  className="h-11 flex-1 rounded-xl">
+                  className="h-11 flex-1 rounded-xl"
+                >
                   Back
                 </Button>
                 <Button
@@ -423,7 +433,8 @@ export function AISidebarSetup({
                     setErrorMessage(null);
                     setSetupStep(3);
                   }}
-                  className="h-11 flex-1 rounded-xl">
+                  className="h-11 flex-1 rounded-xl"
+                >
                   Continue
                 </Button>
               </div>
@@ -456,7 +467,8 @@ export function AISidebarSetup({
                         language === item.value
                           ? "border-primary/50 bg-primary/10 text-primary"
                           : "border-border/60 bg-card/30 text-muted-foreground hover:border-primary/30 hover:text-foreground",
-                      )}>
+                      )}
+                    >
                       {item.label}
                     </button>
                   ))}
@@ -477,7 +489,8 @@ export function AISidebarSetup({
                         behavior === item.value
                           ? "border-primary/50 bg-primary/10 text-primary"
                           : "border-border/60 bg-card/30 text-muted-foreground hover:border-primary/30 hover:text-foreground",
-                      )}>
+                      )}
+                    >
                       {item.label}
                     </button>
                   ))}
@@ -502,13 +515,15 @@ export function AISidebarSetup({
                   type="button"
                   variant="outline"
                   onClick={() => setSetupStep(2)}
-                  className="h-11 flex-1 rounded-xl">
+                  className="h-11 flex-1 rounded-xl"
+                >
                   Back
                 </Button>
                 <Button
                   type="button"
                   onClick={handleSetupSubmit}
-                  className="h-11 flex-1 rounded-xl">
+                  className="h-11 flex-1 rounded-xl"
+                >
                   Start chatting
                 </Button>
               </div>
@@ -519,7 +534,8 @@ export function AISidebarSetup({
                   <button
                     type="button"
                     onClick={onResetAI}
-                    className="flex w-full items-center justify-center gap-2 rounded-xl border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm font-medium text-destructive transition-colors hover:bg-destructive/10">
+                    className="flex w-full items-center justify-center gap-2 rounded-xl border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm font-medium text-destructive transition-colors hover:bg-destructive/10"
+                  >
                     <HugeiconsIcon
                       icon={Delete02Icon}
                       size={16}

@@ -58,7 +58,9 @@ export function AgentForm({ onCreated }: AgentFormProps) {
   const [isModelsOpen, setIsModelsOpen] = useState(false);
   const [isLoadingModels, setIsLoadingModels] = useState(false);
   const [modelsError, setModelsError] = useState<string | null>(null);
-  const [availableModels, setAvailableModels] = useState<OpenRouterModelOption[]>([]);
+  const [availableModels, setAvailableModels] = useState<
+    OpenRouterModelOption[]
+  >([]);
   const [fieldError, setFieldError] = useState<string | null>(null);
   const popoverRef = useRef<HTMLDivElement | null>(null);
   const addAgent = useAgentStore((state) => state.addAgent);
@@ -145,7 +147,8 @@ export function AgentForm({ onCreated }: AgentFormProps) {
             return {
               id,
               name: item.name?.trim() || id,
-              description: item.description?.trim() || "No description available.",
+              description:
+                item.description?.trim() || "No description available.",
               contextLength:
                 typeof item.context_length === "number"
                   ? item.context_length
@@ -285,7 +288,9 @@ export function AgentForm({ onCreated }: AgentFormProps) {
         </div>
 
         <div className="space-y-2">
-          <label className="text-sm font-semibold text-foreground">API Key</label>
+          <label className="text-sm font-semibold text-foreground">
+            API Key
+          </label>
           <Input
             type="password"
             value={apiKey}

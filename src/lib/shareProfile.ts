@@ -93,7 +93,10 @@ const toEnumValue = <T extends string>(
   value: unknown,
   allowed: readonly T[],
   fallback: T,
-): T => (typeof value === "string" && allowed.includes(value as T) ? (value as T) : fallback);
+): T =>
+  typeof value === "string" && allowed.includes(value as T)
+    ? (value as T)
+    : fallback;
 
 const toBoolean = (value: unknown, fallback: boolean): boolean =>
   typeof value === "boolean" ? value : fallback;
@@ -176,12 +179,16 @@ export const sanitizeShareTabs = (tabs: unknown): ShareProfileTab[] => {
       return accumulator;
     }
 
-    const rawTitle = typeof candidate.title === "string" ? candidate.title.trim() : "";
-    const title = rawTitle || new URL(url).hostname.replace(/^www\./, "") || "Shortcut";
+    const rawTitle =
+      typeof candidate.title === "string" ? candidate.title.trim() : "";
+    const title =
+      rawTitle || new URL(url).hostname.replace(/^www\./, "") || "Shortcut";
 
     const shortcut = sanitizeShortcut(candidate.shortcut);
     const uniqueShortcut =
-      shortcut && !usedShortcuts.has(shortcut.toLowerCase()) ? shortcut : undefined;
+      shortcut && !usedShortcuts.has(shortcut.toLowerCase())
+        ? shortcut
+        : undefined;
 
     if (uniqueShortcut) {
       usedShortcuts.add(uniqueShortcut.toLowerCase());
@@ -209,7 +216,11 @@ export const sanitizeShareSettings = (
   }
 
   return {
-    theme: toEnumValue(settings.theme, THEME_VALUES, SHARE_SETTINGS_DEFAULTS.theme),
+    theme: toEnumValue(
+      settings.theme,
+      THEME_VALUES,
+      SHARE_SETTINGS_DEFAULTS.theme,
+    ),
     language: toEnumValue(
       settings.language,
       LANGUAGE_VALUES,
@@ -233,7 +244,12 @@ export const sanitizeShareSettings = (
       TABS_POSITION_VALUES,
       SHARE_SETTINGS_DEFAULTS.tabsPosition,
     ),
-    cardSize: toNumber(settings.cardSize, SHARE_SETTINGS_DEFAULTS.cardSize, 5, 10),
+    cardSize: toNumber(
+      settings.cardSize,
+      SHARE_SETTINGS_DEFAULTS.cardSize,
+      5,
+      10,
+    ),
     cardRadius: toNumber(
       settings.cardRadius,
       SHARE_SETTINGS_DEFAULTS.cardRadius,
@@ -250,7 +266,10 @@ export const sanitizeShareSettings = (
       CLOCK_FORMAT_VALUES,
       SHARE_SETTINGS_DEFAULTS.clockFormat,
     ),
-    showSeconds: toBoolean(settings.showSeconds, SHARE_SETTINGS_DEFAULTS.showSeconds),
+    showSeconds: toBoolean(
+      settings.showSeconds,
+      SHARE_SETTINGS_DEFAULTS.showSeconds,
+    ),
     searchEngine: toEnumValue(
       settings.searchEngine,
       SEARCH_ENGINE_VALUES,

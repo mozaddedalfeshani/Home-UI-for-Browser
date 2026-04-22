@@ -1,11 +1,13 @@
 # Language Implementation System Prompt
 
 ## Overview
+
 This document provides a systematic approach for implementing multi-language support in this Next.js application using the constants-based translation system.
 
 ## Translation System Architecture
 
 ### 1. Constants Structure
+
 - **File**: `/src/constants/languages.ts`
 - **Types**: `Language = "en" | "bn"`
 - **Constants**: `LANGUAGES.EN`, `LANGUAGES.BN`
@@ -13,6 +15,7 @@ This document provides a systematic approach for implementing multi-language sup
 - **Functions**: `getTranslation()`, `useTranslation()`
 
 ### 2. Store Integration
+
 - **File**: `/src/store/settingsStore.ts`
 - **State**: `language: Language`
 - **Default**: `"bn"` (Bangla)
@@ -23,32 +26,42 @@ This document provides a systematic approach for implementing multi-language sup
 ### For Any New Component:
 
 1. **Import Dependencies**:
+
 ```typescript
 import { useSettingsStore } from "@/store/settingsStore";
 import { useTranslation } from "@/constants/languages";
 ```
 
 2. **Get Language State**:
+
 ```typescript
 const { language } = useSettingsStore();
 const t = useTranslation(language);
 ```
 
 3. **Use Translations**:
+
 ```typescript
 // Instead of: "Settings"
-{t("settings")}
+{
+  t("settings");
+}
 
 // Instead of: "Add Project"
-{t("addProject")}
+{
+  t("addProject");
+}
 
 // Instead of: "Are you sure?"
-{t("areYouSure")}
+{
+  t("areYouSure");
+}
 ```
 
 ### For New Translation Keys:
 
 1. **Add to Constants**:
+
 ```typescript
 // In /src/constants/languages.ts
 export const TRANSLATIONS = {
@@ -64,29 +77,36 @@ export const TRANSLATIONS = {
 ```
 
 2. **Use in Component**:
+
 ```typescript
-{t("newKey")}
+{
+  t("newKey");
+}
 ```
 
 ## Translation Categories
 
 ### UI Elements
+
 - Buttons: `add`, `save`, `cancel`, `delete`, `edit`
 - Labels: `title`, `description`, `name`, `email`
 - Placeholders: `enterTitle`, `writeHere`, `searchPlaceholder`
 - Messages: `success`, `error`, `loading`, `noData`
 
 ### Navigation
+
 - Menu items: `home`, `settings`, `profile`, `dashboard`
 - Breadcrumbs: `back`, `next`, `previous`
 - Tabs: `overview`, `details`, `settings`
 
 ### Forms
+
 - Validation: `required`, `invalidEmail`, `passwordTooShort`
 - Actions: `submit`, `reset`, `clear`
 - Status: `saving`, `saved`, `failed`
 
 ### Notifications
+
 - Success: `itemCreated`, `itemUpdated`, `itemDeleted`
 - Errors: `somethingWentWrong`, `tryAgain`, `contactSupport`
 - Warnings: `unsavedChanges`, `confirmAction`
@@ -94,21 +114,24 @@ export const TRANSLATIONS = {
 ## Best Practices
 
 ### 1. Key Naming Convention
+
 - Use camelCase: `addProject`, `editUser`, `deleteItem`
 - Be descriptive: `areYouSureDeleteProject` not `confirm`
 - Group related keys: `projectTitle`, `projectDescription`
 
 ### 2. Translation Quality
+
 - **English**: Clear, concise, professional
 - **Bangla**: Natural, culturally appropriate, readable
 - **Consistency**: Same term for same concept across app
 
 ### 3. Component Structure
+
 ```typescript
 const MyComponent = () => {
   const { language } = useSettingsStore();
   const t = useTranslation(language);
-  
+
   return (
     <div>
       <h1>{t("pageTitle")}</h1>
@@ -119,6 +142,7 @@ const MyComponent = () => {
 ```
 
 ### 4. Dynamic Content
+
 ```typescript
 // For dynamic content with variables
 const message = t("welcomeMessage").replace("{name}", userName);
@@ -130,6 +154,7 @@ const message = `${t("welcome")} ${userName}!`;
 ## Common Translation Keys
 
 ### Basic Actions
+
 - `add` / `যোগ`
 - `edit` / `সম্পাদনা`
 - `delete` / `মুছুন`
@@ -141,6 +166,7 @@ const message = `${t("welcome")} ${userName}!`;
 - `no` / `না`
 
 ### Status Messages
+
 - `loading` / `লোড হচ্ছে...`
 - `success` / `সফল`
 - `error` / `ত্রুটি`
@@ -149,6 +175,7 @@ const message = `${t("welcome")} ${userName}!`;
 - `failed` / `ব্যর্থ`
 
 ### Form Labels
+
 - `title` / `শিরোনাম`
 - `description` / `বিবরণ`
 - `name` / `নাম`
@@ -182,11 +209,13 @@ When adding language support to a new component:
 To add more languages:
 
 1. **Update Language Type**:
+
 ```typescript
 export type Language = "en" | "bn" | "ar" | "hi";
 ```
 
 2. **Add Language Constants**:
+
 ```typescript
 export const LANGUAGES = {
   EN: "en" as const,
@@ -197,6 +226,7 @@ export const LANGUAGES = {
 ```
 
 3. **Add Translations**:
+
 ```typescript
 export const TRANSLATIONS = {
   // ... existing languages

@@ -1,42 +1,51 @@
-@import url('https://fonts.googleapis.com/css2?family=Exo+2:wght@400;600;700&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Exo+2:wght@400;600;700&display=swap");
 
 @keyframes glow {
-    0% {
-        text-shadow: 0 0 10px var(--glow-color, #eab308), 0 0 20px var(--glow-color, #eab308);
-    }
+  0% {
+    text-shadow:
+      0 0 10px var(--glow-color, #eab308),
+      0 0 20px var(--glow-color, #eab308);
+  }
 
-    50% {
-        text-shadow: 0 0 20px var(--glow-color, #eab308), 0 0 40px var(--glow-color, #eab308);
-    }
+  50% {
+    text-shadow:
+      0 0 20px var(--glow-color, #eab308),
+      0 0 40px var(--glow-color, #eab308);
+  }
 
-    100% {
-        text-shadow: 0 0 10px var(--glow-color, #eab308), 0 0 20px var(--glow-color, #eab308);
-    }
+  100% {
+    text-shadow:
+      0 0 10px var(--glow-color, #eab308),
+      0 0 20px var(--glow-color, #eab308);
+  }
 }
 
 .glow {
-    animation: glow 2s ease-in-out infinite alternate;
+  animation: glow 2s ease-in-out infinite alternate;
 }
 
 .clock-style {
-    --clock-color: #eab308;
-    --glow-color: var(--clock-color);
-    --clock-glow-strength: 1;
-    color: var(--clock-color);
-    background: transparent;
-    border: none;
-    box-shadow: none;
-    font-weight: 700;
-    transition: color 220ms ease, text-shadow 220ms ease, box-shadow 260ms ease;
+  --clock-color: #eab308;
+  --glow-color: var(--clock-color);
+  --clock-glow-strength: 1;
+  color: var(--clock-color);
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  font-weight: 700;
+  transition:
+    color 220ms ease,
+    text-shadow 220ms ease,
+    box-shadow 260ms ease;
 }
 
 .clock-style--classic {
-    font-family: inherit;
-    text-transform: uppercase;
+  font-family: inherit;
+  text-transform: uppercase;
 }
 
 .clock-style--modern {
-    font-weight: 700;
-    line-height: 1;
-    letter-spacing: -0.1em;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: -0.1em;
 }

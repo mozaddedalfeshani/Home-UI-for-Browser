@@ -1,4 +1,8 @@
-import type { AIBehaviorPreset, AILanguagePreset, AIProvider } from "@/store/aiSidebarStore";
+import type {
+  AIBehaviorPreset,
+  AILanguagePreset,
+  AIProvider,
+} from "@/store/aiSidebarStore";
 
 export const PROVIDERS: Array<{
   value: AIProvider;

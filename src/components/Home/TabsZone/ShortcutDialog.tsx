@@ -111,21 +111,23 @@ export const ShortcutDialog = ({ tab, children }: ShortcutDialogProps) => {
 
   const handleSave = () => {
     // Update the tab with the new shortcut and window preference
-    updateTab(tab.id, tab.title, tab.url, shortcut || undefined, openInNewWindow);
+    updateTab(
+      tab.id,
+      tab.title,
+      tab.url,
+      shortcut || undefined,
+      openInNewWindow,
+    );
     setOpen(false);
   };
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogTrigger asChild>
-        {children}
-      </DialogTrigger>
+      <DialogTrigger asChild>{children}</DialogTrigger>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>{t("keyboardShortcut")}</DialogTitle>
-          <DialogDescription>
-            {t("setShortcutDescription")}
-          </DialogDescription>
+          <DialogDescription>{t("setShortcutDescription")}</DialogDescription>
         </DialogHeader>
         <div className="grid gap-6">
           <div className="grid gap-2">
@@ -145,30 +147,31 @@ export const ShortcutDialog = ({ tab, children }: ShortcutDialogProps) => {
               <Button
                 type="button"
                 variant={isRecording ? "destructive" : "outline"}
-                onClick={isRecording ? () => setIsRecording(false) : startRecording}
+                onClick={
+                  isRecording ? () => setIsRecording(false) : startRecording
+                }
                 disabled={isRecording}
               >
                 {isRecording ? t("cancel") : t("recordShortcut")}
               </Button>
               {shortcut && (
-                <Button
-                  type="button"
-                  variant="ghost"
-                  onClick={clearShortcut}
-                >
+                <Button type="button" variant="ghost" onClick={clearShortcut}>
                   {t("clearShortcut")}
                 </Button>
               )}
             </div>
             <p className="text-xs text-muted-foreground">
-              Use {primaryModifierLabel}+key so normal typing can open search without triggering shortcuts.
+              Use {primaryModifierLabel}+key so normal typing can open search
+              without triggering shortcuts.
             </p>
           </div>
           <div className="flex items-center space-x-2">
             <Checkbox
               id="open-in-new-window"
               checked={openInNewWindow}
-              onCheckedChange={(checked) => setOpenInNewWindow(checked as boolean)}
+              onCheckedChange={(checked) =>
+                setOpenInNewWindow(checked as boolean)
+              }
             />
             <Label htmlFor="open-in-new-window" className="text-sm font-normal">
               {t("openInNewWindow")}
@@ -185,9 +188,7 @@ export const ShortcutDialog = ({ tab, children }: ShortcutDialogProps) => {
                 {t("cancel")}
               </Button>
             </DialogClose>
-            <Button onClick={handleSave}>
-              {t("save")}
-            </Button>
+            <Button onClick={handleSave}>{t("save")}</Button>
           </DialogFooter>
         </div>
       </DialogContent>

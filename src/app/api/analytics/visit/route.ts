@@ -1,8 +1,6 @@
 import { NextResponse } from "next/server";
 import { getMongoDb } from "@/lib/mongodb";
-import {
-  incrementLocalVisitCount,
-} from "@/lib/localAnalytics";
+import { incrementLocalVisitCount } from "@/lib/localAnalytics";
 
 export const runtime = "nodejs";
 

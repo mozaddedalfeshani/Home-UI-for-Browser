@@ -26,10 +26,10 @@ interface ResetDialogProps {
 export const ResetDialog = ({ children }: ResetDialogProps) => {
   const [open, setOpen] = useState(false);
   const [isResetting, setIsResetting] = useState(false);
-  
+
   const language = useSettingsStore((state) => state.language);
   const t = useTranslation(language);
-  
+
   // Get store actions
   const resetSettings = useSettingsStore((state) => state.resetSettings);
   const resetTabs = useTabsStore((state) => state.resetTabs);
@@ -40,17 +40,17 @@ export const ResetDialog = ({ children }: ResetDialogProps) => {
 
   const handleReset = async () => {
     setIsResetting(true);
-    
+
     try {
       // Reset all stores
       resetSettings();
       resetTabs();
       resetNotepad();
       clearSearchHistory();
-      
+
       // Close dialog
       setOpen(false);
-      
+
       // Reload the page to reflect changes
       window.location.reload();
     } catch {
@@ -62,20 +62,16 @@ export const ResetDialog = ({ children }: ResetDialogProps) => {
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        {children}
-      </DialogTrigger>
+      <DialogTrigger asChild>{children}</DialogTrigger>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-destructive">
             <AlertTriangle className="h-5 w-5" />
             {t("resetEverything")}
           </DialogTitle>
-          <DialogDescription>
-            {t("resetWarning")}
-          </DialogDescription>
+          <DialogDescription>{t("resetWarning")}</DialogDescription>
         </DialogHeader>
-        
+
         <div className="py-4">
           <div className="rounded-lg border border-destructive/20 bg-destructive/5 p-4">
             <h4 className="font-medium text-destructive mb-2">
@@ -93,8 +89,8 @@ export const ResetDialog = ({ children }: ResetDialogProps) => {
               {t("cancel")}
             </Button>
           </DialogClose>
-          <Button 
-            variant="destructive" 
+          <Button
+            variant="destructive"
             onClick={handleReset}
             disabled={isResetting}
           >

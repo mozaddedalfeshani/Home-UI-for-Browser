@@ -27,7 +27,8 @@ export const ActionGrid = ({
         variant="ghost"
         size="sm"
         onClick={onResizeClick}
-        className="h-9 justify-start gap-2 px-2 text-[11px] font-normal">
+        className="h-9 justify-start gap-2 px-2 text-[11px] font-normal"
+      >
         <Maximize2 className="h-3.5 w-3.5 text-muted-foreground" />
         {t("resizeShortcuts")}
       </Button>
@@ -35,7 +36,8 @@ export const ActionGrid = ({
         variant="ghost"
         size="sm"
         onClick={onHistoryClick}
-        className="h-9 justify-start gap-2 px-2 text-[11px] font-normal">
+        className="h-9 justify-start gap-2 px-2 text-[11px] font-normal"
+      >
         <History className="h-3.5 w-3.5 text-muted-foreground" />
         {t("history")}
       </Button>
@@ -43,7 +45,8 @@ export const ActionGrid = ({
         variant="ghost"
         size="sm"
         onClick={onClockClick}
-        className="h-9 justify-start gap-2 px-2 text-[11px] font-normal">
+        className="h-9 justify-start gap-2 px-2 text-[11px] font-normal"
+      >
         <Clock className="h-3.5 w-3.5 text-muted-foreground" />
         {t("clockSettings")}
       </Button>
@@ -51,7 +54,8 @@ export const ActionGrid = ({
         variant="ghost"
         size="sm"
         onClick={onProfileClick}
-        className="h-9 justify-start gap-2 px-2 text-[11px] font-normal">
+        className="h-9 justify-start gap-2 px-2 text-[11px] font-normal"
+      >
         <User className="h-3.5 w-3.5 text-muted-foreground" />
         {t("profileShare")}
       </Button>

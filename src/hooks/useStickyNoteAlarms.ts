@@ -33,7 +33,9 @@ const notifyStickyNoteReminder = async (title: string, body: string) => {
 
 export const useStickyNoteAlarms = () => {
   const notes = useNotepadStore((state) => state.notes);
-  const markNoteAlarmOverdue = useNotepadStore((state) => state.markNoteAlarmOverdue);
+  const markNoteAlarmOverdue = useNotepadStore(
+    (state) => state.markNoteAlarmOverdue,
+  );
 
   const timersRef = useRef<Map<string, TimerEntry>>(new Map());
 
@@ -79,7 +81,8 @@ export const useStickyNoteAlarms = () => {
 
       const timeoutId = window.setTimeout(() => {
         const alarmTitle = note.title || "Sticky Note Reminder";
-        const alarmMessage = note.alarmMessage || note.title || "Reminder due now";
+        const alarmMessage =
+          note.alarmMessage || note.title || "Reminder due now";
 
         publishStickyAlarmEvent({
           noteId: note.id,
@@ -88,10 +91,7 @@ export const useStickyNoteAlarms = () => {
           dueAt: note.alarmDueAt || new Date().toISOString(),
         });
 
-        notifyStickyNoteReminder(
-          "Sticky Note Reminder",
-          alarmMessage,
-        );
+        notifyStickyNoteReminder("Sticky Note Reminder", alarmMessage);
         markNoteAlarmOverdue(note.id);
         timersRef.current.delete(note.id);
       }, delayMs);

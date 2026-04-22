@@ -23,7 +23,10 @@ export async function POST(request: Request) {
     searchEngine = body.searchEngine ?? null;
 
     if (!query) {
-      return NextResponse.json({ error: "Query is required." }, { status: 400 });
+      return NextResponse.json(
+        { error: "Query is required." },
+        { status: 400 },
+      );
     }
 
     normalizedQuery = query.toLowerCase();

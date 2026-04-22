@@ -60,8 +60,10 @@ const normalizeLegacyNote = (value: unknown): Note | null => {
       ? value.updatedAt
       : new Date().toISOString();
 
-  const alarmSetAt = typeof value.alarmSetAt === "string" ? value.alarmSetAt : null;
-  const alarmDueAt = typeof value.alarmDueAt === "string" ? value.alarmDueAt : null;
+  const alarmSetAt =
+    typeof value.alarmSetAt === "string" ? value.alarmSetAt : null;
+  const alarmDueAt =
+    typeof value.alarmDueAt === "string" ? value.alarmDueAt : null;
   const alarmStatus =
     value.alarmStatus === "scheduled" || value.alarmStatus === "overdue"
       ? value.alarmStatus
@@ -107,7 +109,9 @@ export const useNotepadStore = create<NotepadState>()(
       updateNote: (id, updates) => {
         set((state) => ({
           notes: state.notes.map((note) =>
-            note.id === id ? { ...note, ...updates, updatedAt: new Date().toISOString() } : note
+            note.id === id
+              ? { ...note, ...updates, updatedAt: new Date().toISOString() }
+              : note,
           ),
         }));
       },
@@ -115,14 +119,19 @@ export const useNotepadStore = create<NotepadState>()(
       deleteNote: (id) => {
         set((state) => ({
           notes: state.notes.filter((n) => n.id !== id),
-          selectedNoteId: get().selectedNoteId === id ? null : get().selectedNoteId,
+          selectedNoteId:
+            get().selectedNoteId === id ? null : get().selectedNoteId,
         }));
       },
 
       selectNote: (id) => set({ selectedNoteId: id }),
 
       setNoteAlarm: (id, delayMinutes) => {
-        if (!Number.isFinite(delayMinutes) || delayMinutes < 1 || delayMinutes > 1440) {
+        if (
+          !Number.isFinite(delayMinutes) ||
+          delayMinutes < 1 ||
+          delayMinutes > 1440
+        ) {
           return false;
         }
 
@@ -132,7 +141,9 @@ export const useNotepadStore = create<NotepadState>()(
         }
 
         const now = new Date();
-        const dueAt = new Date(now.getTime() + delayMinutes * 60_000).toISOString();
+        const dueAt = new Date(
+          now.getTime() + delayMinutes * 60_000,
+        ).toISOString();
         const setAt = now.toISOString();
 
         set((state) => ({
@@ -198,23 +209,28 @@ export const useNotepadStore = create<NotepadState>()(
             typeof persistedState === "object" &&
             persistedState !== null &&
             "content" in persistedState &&
-            typeof (persistedState as { content?: unknown }).content === "string"
+            typeof (persistedState as { content?: unknown }).content ===
+              "string"
               ? (persistedState as { content: string }).content
               : "";
           return {
             ...(typeof persistedState === "object" && persistedState !== null
               ? persistedState
               : {}),
-            notes: oldContent ? [{
-              id: "legacy",
-              title: "My First Note",
-              content: oldContent,
-              updatedAt: new Date().toISOString(),
-              alarmSetAt: null,
-              alarmDueAt: null,
-              alarmStatus: "none",
-              alarmMessage: null,
-            }] : [],
+            notes: oldContent
+              ? [
+                  {
+                    id: "legacy",
+                    title: "My First Note",
+                    content: oldContent,
+                    updatedAt: new Date().toISOString(),
+                    alarmSetAt: null,
+                    alarmDueAt: null,
+                    alarmStatus: "none",
+                    alarmMessage: null,
+                  },
+                ]
+              : [],
             selectedNoteId: oldContent ? "legacy" : null,
           };
         }
@@ -254,6 +270,6 @@ export const useNotepadStore = create<NotepadState>()(
 
         return persistedState;
       },
-    }
-  )
+    },
+  ),
 );

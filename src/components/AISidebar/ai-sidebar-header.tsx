@@ -42,7 +42,8 @@ export function AISidebarHeader({
         isAgentMode
           ? "border-indigo-500/30 bg-gradient-to-r from-indigo-500/10 via-purple-500/5 to-transparent"
           : "border-border/50 bg-background/70",
-      )}>
+      )}
+    >
       <div className="flex items-center gap-2">
         <div
           className={cn(
@@ -50,7 +51,8 @@ export function AISidebarHeader({
             isAgentMode
               ? "border-indigo-400/30 bg-indigo-500/15"
               : "border-primary/15 bg-primary/10",
-          )}>
+          )}
+        >
           <HugeiconsIcon
             icon={isAgentMode ? SparklesIcon : BotIcon}
             size={18}
@@ -93,7 +95,8 @@ export function AISidebarHeader({
             size="icon-sm"
             onClick={isAgentMode ? onAgentInfoOpen : onSettingsOpen}
             className="h-8 w-8 rounded-full"
-            aria-label={isAgentMode ? "Edit agent" : "Open AI settings"}>
+            aria-label={isAgentMode ? "Edit agent" : "Open AI settings"}
+          >
             <HugeiconsIcon
               icon={isAgentMode ? PencilEdit01Icon : AiSettingIcon}
               size={18}
@@ -107,7 +110,8 @@ export function AISidebarHeader({
           size="icon-sm"
           onClick={onClose}
           className="h-8 w-8 rounded-full"
-          aria-label="Close AI sidebar">
+          aria-label="Close AI sidebar"
+        >
           <HugeiconsIcon icon={Cancel01Icon} size={18} strokeWidth={2} />
         </Button>
       </div>

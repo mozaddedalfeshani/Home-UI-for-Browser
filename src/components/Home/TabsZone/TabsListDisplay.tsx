@@ -181,7 +181,8 @@ const SortableShortcutCard = ({
               : isDragging
                 ? "grabbing"
                 : "grab",
-          }}>
+          }}
+        >
           <Tooltip>
             <TooltipTrigger asChild>
               <Link
@@ -191,26 +192,30 @@ const SortableShortcutCard = ({
                 aria-label={`Open ${tab.title || hostname || "shortcut"}`}
                 onClick={handleShortcutClick}
                 className="block [&:hover]:cursor-pointer"
-                style={{ textDecoration: "none" }}>
+                style={{ textDecoration: "none" }}
+              >
                 <Card
                   className="group relative flex flex-col items-center justify-center gap-2 border border-border/60 bg-card/70 backdrop-blur-sm p-3 text-center shadow-sm transition hover:border-primary/70 hover:shadow-lg cursor-pointer"
                   style={{
                     width: `${cardSize}rem`,
                     height: `${cardSize}rem`,
                     borderRadius: `${cardRadius}rem`,
-                  }}>
+                  }}
+                >
                   <div
                     className="group relative flex items-center justify-center rounded-full bg-muted/70 p-0 text-foreground transition hover:bg-muted"
                     style={{
                       height: `${Math.min(cardSize * 0.5, cardSize - 2)}rem`,
                       width: `${Math.min(cardSize * 0.5, cardSize - 2)}rem`,
-                    }}>
+                    }}
+                  >
                     <Avatar
                       className="border border-transparent bg-transparent"
                       style={{
                         height: `${Math.min(cardSize * 0.5, cardSize - 2)}rem`,
                         width: `${Math.min(cardSize * 0.5, cardSize - 2)}rem`,
-                      }}>
+                      }}
+                    >
                       {favicon ? (
                         <AvatarImage src={favicon} alt={hostname} />
                       ) : null}
@@ -219,7 +224,8 @@ const SortableShortcutCard = ({
                           backgroundColor: accent,
                           fontSize: `${Math.max(0.5, cardSize * 0.12)}rem`,
                         }}
-                        className="text-white">
+                        className="text-white"
+                      >
                         {getFallbackChar(tab.title || hostname)}
                       </AvatarFallback>
                     </Avatar>
@@ -230,7 +236,8 @@ const SortableShortcutCard = ({
                       className="w-full truncate font-medium text-foreground leading-tight"
                       style={{
                         fontSize: `${Math.max(0.5, cardSize * 0.1)}rem`,
-                      }}>
+                      }}
+                    >
                       {tab.title}
                     </p>
                   </div>
@@ -252,7 +259,8 @@ const SortableShortcutCard = ({
         <EditTabDialog tab={tab}>
           <ContextMenuItem
             className="gap-2.5 font-bold text-xs rounded-lg"
-            onSelect={(e) => e.preventDefault()}>
+            onSelect={(e) => e.preventDefault()}
+          >
             <Pencil className="h-3.5 w-3.5 text-primary" />
             {t("edit")}
           </ContextMenuItem>
@@ -260,7 +268,8 @@ const SortableShortcutCard = ({
         <ShortcutDialog tab={tab}>
           <ContextMenuItem
             className="gap-2.5 font-bold text-xs rounded-lg"
-            onSelect={(e) => e.preventDefault()}>
+            onSelect={(e) => e.preventDefault()}
+          >
             <Keyboard className="h-3.5 w-3.5 text-primary" />
             {t("keyboardShortcut")}
           </ContextMenuItem>
@@ -271,10 +280,12 @@ const SortableShortcutCard = ({
             t("deleteShortcutDesc") ||
             `Permanently remove "${tab.title || hostname}"?`
           }
-          onConfirm={() => removeTab(tab.id)}>
+          onConfirm={() => removeTab(tab.id)}
+        >
           <ContextMenuItem
             className="gap-2.5 font-bold text-xs rounded-lg text-destructive focus:text-destructive"
-            onSelect={(e) => e.preventDefault()}>
+            onSelect={(e) => e.preventDefault()}
+          >
             <Trash2 className="h-3.5 w-3.5" />
             {t("deleteShortcut")}
           </ContextMenuItem>
@@ -288,19 +299,22 @@ const SortableShortcutCard = ({
 
         <ContextMenuItem
           onSelect={() => setClockDialogOpen(true)}
-          className="gap-2.5 font-bold text-xs rounded-lg">
+          className="gap-2.5 font-bold text-xs rounded-lg"
+        >
           <Clock className="h-3.5 w-3.5 text-primary" />
           {t("clockSettings")}
         </ContextMenuItem>
         <ContextMenuItem
           onSelect={() => setBackgroundDialogOpen(true)}
-          className="gap-2.5 font-bold text-xs rounded-lg">
+          className="gap-2.5 font-bold text-xs rounded-lg"
+        >
           <ImageIcon className="h-3.5 w-3.5 text-primary" />
           {t("backgroundImage")}
         </ContextMenuItem>
         <ContextMenuItem
           onSelect={() => setResizeDialogOpen(true)}
-          className="gap-2.5 font-bold text-xs rounded-lg">
+          className="gap-2.5 font-bold text-xs rounded-lg"
+        >
           <Maximize2 className="h-3.5 w-3.5 text-primary" />
           {t("resizeShortcuts")}
         </ContextMenuItem>
@@ -361,7 +375,8 @@ export const TabsList = () => {
             className={cn(
               "flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-muted-foreground/30 scrollbar-track-transparent flex flex-col",
               tabsPosition === "top" ? "justify-start" : "justify-center",
-            )}>
+            )}
+          >
             <div
               className="flex flex-wrap gap-4 justify-center w-full mx-auto"
               style={
@@ -370,14 +385,16 @@ export const TabsList = () => {
                   maxWidth: `calc(8 * ${cardSize}rem + 7 * 1rem)`, // 8 items + 7 gaps
                   minWidth: `calc(2 * ${cardSize}rem + 1 * 1rem)`, // 2 items + 1 gap
                 } as React.CSSProperties
-              }>
+              }
+            >
               {sortedTabs.map((tab: Tab, index) => (
                 <div
                   key={tab.id}
                   style={{
                     width: `${cardSize}rem`,
                     height: `${cardSize}rem`,
-                  }}>
+                  }}
+                >
                   <SortableShortcutCard
                     tab={tab}
                     index={index}
@@ -400,7 +417,8 @@ export const TabsList = () => {
         <Link
           href="https://imurad.pages.dev/"
           target="_blank"
-          rel="noopener noreferrer">
+          rel="noopener noreferrer"
+        >
           Murad
         </Link>
       </p>

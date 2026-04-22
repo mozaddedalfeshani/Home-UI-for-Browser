@@ -2,7 +2,11 @@
 
 import { useState, useEffect, useRef } from "react";
 import { Search, SearchCheck } from "lucide-react";
-import { Dialog, DialogContentBottom, DialogTitle } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContentBottom,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useSettingsStore } from "@/store/settingsStore";
@@ -42,7 +46,9 @@ const SearchModal = ({
     (state) => state.addTabClickHistoryEntry,
   );
   const tabs = useTabsStore((state) => state.tabs);
-  const incrementVisitCount = useTabsStore((state) => state.incrementVisitCount);
+  const incrementVisitCount = useTabsStore(
+    (state) => state.incrementVisitCount,
+  );
   const t = useTranslation(language);
 
   useEffect(() => {
@@ -70,7 +76,10 @@ const SearchModal = ({
       return;
     }
 
-    if (openRequest.id === 0 || lastAppliedRequestIdRef.current === openRequest.id) {
+    if (
+      openRequest.id === 0 ||
+      lastAppliedRequestIdRef.current === openRequest.id
+    ) {
       return;
     }
 
@@ -209,7 +218,9 @@ const SearchModal = ({
   const activeSuggestion =
     activeIndex >= 0 ? suggestionItems[activeIndex] : undefined;
 
-  const handleSuggestionSelect = (suggestion: (typeof suggestionItems)[number]) => {
+  const handleSuggestionSelect = (
+    suggestion: (typeof suggestionItems)[number],
+  ) => {
     if (suggestion.type === "tab") {
       onOpenChange(false);
       const matchingTab = tabs.find((tab) => tab.id === suggestion.tabId);
@@ -314,7 +325,8 @@ const SearchModal = ({
               onClick={handleSearch}
               aria-label={`Search with ${providerLabel}`}
               className="absolute right-3 top-1/2 h-9 w-9 -translate-y-1/2 rounded-full border border-border/50 bg-background/90 p-0 text-muted-foreground shadow-none hover:bg-accent hover:text-foreground"
-              disabled={!query.trim()}>
+              disabled={!query.trim()}
+            >
               <SearchCheck aria-hidden="true" />
             </Button>
           </div>
@@ -338,8 +350,11 @@ const SearchModal = ({
                           isActive
                             ? "border-primary/20 bg-primary/10 text-primary"
                             : "hover:border-border/40 hover:bg-accent/40 hover:text-foreground",
-                        )}>
-                        <span className="block truncate font-medium">{suggestion.label}</span>
+                        )}
+                      >
+                        <span className="block truncate font-medium">
+                          {suggestion.label}
+                        </span>
                         <span className="mt-0.5 block truncate text-xs text-muted-foreground">
                           {suggestion.sublabel}
                         </span>

@@ -19,8 +19,12 @@ interface ResizeShortcutsDialogProps {
   onOpenChange: (open: boolean) => void;
 }
 
-export function ResizeShortcutsDialog({ open, onOpenChange }: ResizeShortcutsDialogProps) {
-  const { cardSize, cardRadius, setCardSize, setCardRadius } = useSettingsStore();
+export function ResizeShortcutsDialog({
+  open,
+  onOpenChange,
+}: ResizeShortcutsDialogProps) {
+  const { cardSize, cardRadius, setCardSize, setCardRadius } =
+    useSettingsStore();
   const [tempSize, setTempSize] = useState(cardSize);
   const [tempRadius, setTempRadius] = useState(cardRadius);
 
@@ -53,10 +57,11 @@ export function ResizeShortcutsDialog({ open, onOpenChange }: ResizeShortcutsDia
             Resize Shortcuts
           </DialogTitle>
           <DialogDescription>
-            Adjust the size and border radius of your shortcut cards. Changes will be applied in real-time.
+            Adjust the size and border radius of your shortcut cards. Changes
+            will be applied in real-time.
           </DialogDescription>
         </DialogHeader>
-        
+
         <div className="space-y-6 py-4">
           <div className="space-y-4">
             <div className="flex items-center justify-between">
@@ -65,7 +70,7 @@ export function ResizeShortcutsDialog({ open, onOpenChange }: ResizeShortcutsDia
                 {tempSize.toFixed(1)} rem
               </span>
             </div>
-            
+
             <div className="space-y-2">
               <Slider
                 value={[tempSize]}
@@ -89,7 +94,7 @@ export function ResizeShortcutsDialog({ open, onOpenChange }: ResizeShortcutsDia
                 {tempRadius.toFixed(1)} rem
               </span>
             </div>
-            
+
             <div className="space-y-2">
               <Slider
                 value={[tempRadius]}
@@ -109,13 +114,13 @@ export function ResizeShortcutsDialog({ open, onOpenChange }: ResizeShortcutsDia
           <div className="rounded-lg border bg-muted/50 p-4">
             <div className="text-xs text-muted-foreground mb-2">Preview:</div>
             <div className="flex items-center gap-2">
-              <div 
+              <div
                 className="border bg-card p-2 flex items-center justify-center"
-                style={{ 
-                  width: `${tempSize * 0.8}rem`, 
+                style={{
+                  width: `${tempSize * 0.8}rem`,
                   height: `${tempSize * 0.6}rem`,
                   fontSize: `${Math.max(0.6, tempSize * 0.08)}rem`,
-                  borderRadius: `${tempRadius}rem`
+                  borderRadius: `${tempRadius}rem`,
                 }}
               >
                 <div className="w-6 h-6 rounded-full bg-primary/20 flex items-center justify-center text-xs">
@@ -123,7 +128,17 @@ export function ResizeShortcutsDialog({ open, onOpenChange }: ResizeShortcutsDia
                 </div>
               </div>
               <div className="text-xs text-muted-foreground">
-                {tempSize < 6 ? "Compact" : tempSize < 8 ? "Medium" : "Spacious"} • {tempRadius < 1 ? "Sharp" : tempRadius < 2 ? "Rounded" : "Round"}
+                {tempSize < 6
+                  ? "Compact"
+                  : tempSize < 8
+                    ? "Medium"
+                    : "Spacious"}{" "}
+                •{" "}
+                {tempRadius < 1
+                  ? "Sharp"
+                  : tempRadius < 2
+                    ? "Rounded"
+                    : "Round"}
               </div>
             </div>
           </div>

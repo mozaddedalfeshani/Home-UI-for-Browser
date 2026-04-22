@@ -96,7 +96,8 @@ export default function DigitalClock() {
               "--glow-color": clockColor,
               "--clock-glow-strength": showClockGlow ? "1" : "0",
             } as React.CSSProperties
-          }>
+          }
+        >
           <span>{timeData.digits}</span>
           {timeData.ampm && (
             <span
@@ -109,7 +110,8 @@ export default function DigitalClock() {
                   clockStyle === "modern"
                     ? "var(--font-fredoka)"
                     : "var(--font-share-tech-mono)",
-              }}>
+              }}
+            >
               {timeData.ampm}
             </span>
           )}
@@ -122,19 +124,22 @@ export default function DigitalClock() {
 
         <ContextMenuItem
           onSelect={() => setClockDialogOpen(true)}
-          className="gap-2.5 font-bold text-xs rounded-lg">
+          className="gap-2.5 font-bold text-xs rounded-lg"
+        >
           <ClockIcon className="h-3.5 w-3.5 text-primary" />
           {t("clockSettings")}
         </ContextMenuItem>
         <ContextMenuItem
           onSelect={() => setBackgroundDialogOpen(true)}
-          className="gap-2.5 font-bold text-xs rounded-lg">
+          className="gap-2.5 font-bold text-xs rounded-lg"
+        >
           <ImageIcon className="h-3.5 w-3.5 text-primary" />
           {t("backgroundImage")}
         </ContextMenuItem>
         <ContextMenuItem
           onSelect={() => setResizeDialogOpen(true)}
-          className="gap-2.5 font-bold text-xs rounded-lg">
+          className="gap-2.5 font-bold text-xs rounded-lg"
+        >
           <Maximize2 className="h-3.5 w-3.5 text-primary" />
           {t("resizeShortcuts")}
         </ContextMenuItem>

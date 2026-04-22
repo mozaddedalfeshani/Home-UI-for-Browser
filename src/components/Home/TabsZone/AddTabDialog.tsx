@@ -76,7 +76,8 @@ export const AddTabDialog = () => {
         <Button
           variant="outline"
           size="icon-lg"
-          className="rounded-full border-dashed border-primary/60 bg-background text-primary shadow-none hover:border-primary">
+          className="rounded-full border-dashed border-primary/60 bg-background text-primary shadow-none hover:border-primary"
+        >
           <Plus className="h-5 w-5" />
           <span className="sr-only">Add shortcut</span>
         </Button>
