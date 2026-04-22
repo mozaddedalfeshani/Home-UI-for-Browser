@@ -127,19 +127,12 @@ export const useAuthStore = create<AuthState>()(
             const data = await res.json();
             if (data.authenticated) {
               set({ user: data.user, isAuthenticated: true });
+              // We don't auto-apply data anymore on init.
+              // We only set lastSynced if data was found to show the status.
               if (data.data) {
-                const cloudData = data.data;
-                if (cloudData.tabs)
-                  useTabsStore
-                    .getState()
-                    .replaceTabsFromShareProfile(cloudData.tabs);
-                if (cloudData.settings)
-                  useSettingsStore
-                    .getState()
-                    .applyShareProfileSettings(cloudData.settings);
                 set({
-                  lastSynced: cloudData.updatedAt
-                    ? new Date(cloudData.updatedAt).getTime()
+                  lastSynced: data.data.updatedAt
+                    ? new Date(data.data.updatedAt).getTime()
                     : Date.now(),
                 });
               }

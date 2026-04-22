@@ -12,7 +12,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { LoginForm } from "./LoginForm";
 import { SignupForm } from "./SignupForm";
 import { VerifyForm } from "./VerifyForm";
-import { Cloud } from "lucide-react";
+import { PullPrompt } from "./PullPrompt";
+import { HugeiconsIcon } from "@hugeicons/react";
+import { CloudIcon } from "@hugeicons/core-free-icons";
 
 interface AuthDialogProps {
   open: boolean;
@@ -28,8 +30,14 @@ export function AuthDialog({ open, onOpenChange }: AuthDialogProps) {
     setTab("verify");
   };
 
-  const handleSuccess = () => {
+  const handleLoginSuccess = () => {
+    setTab("pull-prompt");
+  };
+
+  const handleFinalSuccess = () => {
     onOpenChange(false);
+    // Reset tab for next time
+    setTimeout(() => setTab("login"), 300);
   };
 
   return (
@@ -37,16 +45,22 @@ export function AuthDialog({ open, onOpenChange }: AuthDialogProps) {
       <DialogContent className="sm:max-w-[400px]">
         <DialogHeader className="items-center text-center">
           <div className="bg-primary/10 p-3 rounded-full mb-2">
-            <Cloud className="h-6 w-6 text-primary" />
+            <HugeiconsIcon
+              icon={CloudIcon}
+              size={24}
+              className="text-primary"
+            />
           </div>
           <DialogTitle>LaunchTab Cloud</DialogTitle>
           <DialogDescription>
-            Sync your tabs and settings across all devices.
+            {tab === "pull-prompt"
+              ? "Finalize your sync settings"
+              : "Sync your tabs and settings across all devices."}
           </DialogDescription>
         </DialogHeader>
 
         <Tabs value={tab} onValueChange={setTab} className="w-full">
-          {tab !== "verify" && (
+          {tab !== "verify" && tab !== "pull-prompt" && (
             <TabsList className="grid w-full grid-cols-2">
               <TabsTrigger value="login">Login</TabsTrigger>
               <TabsTrigger value="signup">Sign Up</TabsTrigger>
@@ -54,7 +68,7 @@ export function AuthDialog({ open, onOpenChange }: AuthDialogProps) {
           )}
 
           <TabsContent value="login">
-            <LoginForm onSuccess={handleSuccess} />
+            <LoginForm onSuccess={handleLoginSuccess} />
           </TabsContent>
 
           <TabsContent value="signup">
@@ -62,7 +76,11 @@ export function AuthDialog({ open, onOpenChange }: AuthDialogProps) {
           </TabsContent>
 
           <TabsContent value="verify">
-            <VerifyForm email={verifyEmail} onSuccess={handleSuccess} />
+            <VerifyForm email={verifyEmail} onSuccess={handleLoginSuccess} />
+          </TabsContent>
+
+          <TabsContent value="pull-prompt">
+            <PullPrompt onComplete={handleFinalSuccess} />
           </TabsContent>
         </Tabs>
       </DialogContent>
