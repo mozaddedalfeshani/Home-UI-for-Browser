@@ -17,6 +17,8 @@ import GithubLink from "@/components/Home/GithubLink";
 import { cn } from "@/lib/utils";
 import StickyAlarmDialog from "@/components/Notepad/StickyAlarmDialog";
 import { Bot } from "lucide-react";
+import { useAuthStore } from "@/store/authStore";
+import { useTabsStore } from "@/store/tabsStore";
 
 type SearchOpenRequest = {
   id: number;
@@ -172,6 +174,30 @@ export function PageClient() {
       hasAutoOpenedRef.current = true;
     }
   }, [isHydrated, autoFocusSearch]);
+
+  const { fetchMe, pullSync, pushSync, isAuthenticated } = useAuthStore();
+  const tabs = useTabsStore((state) => state.tabs);
+  const settings = useSettingsStore();
+
+  // Initial Auth Check and Pull
+  useEffect(() => {
+    if (isHydrated) {
+      fetchMe().then(() => {
+        pullSync(true);
+      });
+    }
+  }, [isHydrated, fetchMe, pullSync]);
+
+  // Auto-push Sync on changes (Debounced)
+  useEffect(() => {
+    if (!isHydrated || !isAuthenticated) return;
+
+    const timer = setTimeout(() => {
+      pushSync();
+    }, 5000); // 5s debounce for auto-push
+
+    return () => clearTimeout(timer);
+  }, [tabs, settings, isHydrated, isAuthenticated, pushSync]);
 
   return (
     <div className="min-h-screen w-full relative overflow-hidden">

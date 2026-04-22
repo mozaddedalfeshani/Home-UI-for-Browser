@@ -26,6 +26,7 @@ import { ClockColorDialog } from "./Clock/ClockColorDialog";
 import { HistoryDialog } from "./History/HistoryDialog";
 import { ResetDialog } from "./Reset/ResetDialog";
 import { ProfileDialog } from "./Profile/ProfileDialog";
+import { AccountButton } from "../Auth/AccountButton";
 
 const SettingsMenu = () => {
   const [isHistoryDialogOpen, setIsHistoryDialogOpen] = useState(false);
@@ -62,16 +63,19 @@ const SettingsMenu = () => {
             <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
               {t("settings")}
             </span>
-            <ResetDialog>
-              <Button
-                variant="ghost"
-                size="icon-sm"
-                className="h-6 w-6 text-destructive hover:bg-destructive/10"
-                aria-label="Reset settings"
-              >
-                <RotateCcw className="h-3 w-3" />
-              </Button>
-            </ResetDialog>
+            <div className="flex items-center gap-1">
+              <AccountButton />
+              <ResetDialog>
+                <Button
+                  variant="ghost"
+                  size="icon-sm"
+                  className="h-6 w-6 text-destructive hover:bg-destructive/10"
+                  aria-label="Reset settings"
+                >
+                  <RotateCcw className="h-3 w-3" />
+                </Button>
+              </ResetDialog>
+            </div>
           </div>
 
           <DropdownMenuSeparator />
