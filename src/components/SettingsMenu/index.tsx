@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import {
   Settings,
   Monitor,
@@ -17,6 +17,7 @@ import {
   Languages,
   Search,
   LayoutTemplate,
+  Plus,
 } from "lucide-react";
 import { useTheme } from "next-themes";
 import { cn } from "@/lib/utils";
@@ -31,6 +32,7 @@ import {
   SearchEngine,
   useSettingsStore,
   Theme,
+  DEFAULT_DYNAMIC_WALLPAPERS,
 } from "@/store/settingsStore";
 import { Language, useTranslation } from "@/constants/languages";
 import { ResizeShortcutsDialog } from "./ResizeShortcutsDialog";
@@ -45,6 +47,7 @@ const SettingsMenu = () => {
   const [isHistoryDialogOpen, setIsHistoryDialogOpen] = useState(false);
   const [isProfileDialogOpen, setIsProfileDialogOpen] = useState(false);
   const [showMore, setShowMore] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const {
     theme,
@@ -73,6 +76,8 @@ const SettingsMenu = () => {
     setClockDialogOpen,
     setBackgroundDialogOpen,
     setResizeDialogOpen,
+    backgroundImage,
+    setBackgroundImage,
   } = useSettingsStore();
 
   const handleThemeChange = (newTheme: string) => {
@@ -88,6 +93,13 @@ const SettingsMenu = () => {
 
   const handleSearchEngineChange = (newEngine: string) => {
     setSearchEngine(newEngine as SearchEngine);
+  };
+ 
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setBackgroundImage(file);
+    }
   };
 
   // Translation function
@@ -121,17 +133,7 @@ const SettingsMenu = () => {
             </ResetDialog>
           </div>
           <DropdownMenuSeparator />
-          <div className="p-1">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setBackgroundDialogOpen(true)}
-              className="h-9 w-full justify-start gap-2 px-2 text-[11px] font-medium hover:bg-accent/50">
-              <ImageIcon className="h-3.5 w-3.5 text-muted-foreground" />
-              {t("backgroundImage")}
-            </Button>
-          </div>
-          <DropdownMenuSeparator />
+          {/* Background image button removed from here */}
 
           {/* Theme & Language Row */}
           <div className="grid grid-cols-2 gap-2 p-1">
@@ -328,6 +330,67 @@ const SettingsMenu = () => {
                 <ChevronDown className="h-3 w-3" />
               )}
             </Button>
+          </div>
+ 
+          <DropdownMenuSeparator />
+ 
+          {/* Visual Background Selection */}
+          <div className="space-y-2 p-1">
+            <input
+              type="file"
+              ref={fileInputRef}
+              className="hidden"
+              accept="image/*"
+              onChange={handleFileUpload}
+            />
+            <button
+              onClick={() => setDynamicWallpaper(!isDynamicWallpaper)}
+              className="flex w-full items-center justify-between rounded-md px-2 py-1 transition-colors hover:bg-accent/50 group">
+              <div className="flex items-center gap-2">
+                <ImageIcon className="h-3.5 w-3.5 text-muted-foreground" />
+                <span className="text-[11px] font-medium text-foreground/90 group-hover:text-foreground">
+                  {t("backgroundImage")}
+                </span>
+              </div>
+              <div
+                className={cn(
+                  "relative h-4 w-8 rounded-full transition-colors",
+                  isDynamicWallpaper ? "bg-primary" : "bg-muted",
+                )}>
+                <div
+                  className={cn(
+                    "absolute top-0.5 h-3 w-3 rounded-full bg-background transition-all",
+                    isDynamicWallpaper ? "translate-x-4" : "translate-x-0.5",
+                  )}
+                />
+              </div>
+            </button>
+ 
+            <div className="flex gap-2 overflow-x-auto pb-1 px-1 scrollbar-hide h-14 items-center">
+              <button
+                onClick={() => fileInputRef.current?.click()}
+                className="flex h-10 w-16 shrink-0 items-center justify-center rounded-md border-2 border-dashed border-border/40 bg-muted/10 hover:border-primary/50 hover:bg-muted/20 transition-all">
+                <Plus className="h-3.5 w-3.5 text-muted-foreground" />
+              </button>
+ 
+              {DEFAULT_DYNAMIC_WALLPAPERS.map((url, idx) => (
+                <button
+                  key={url}
+                  onClick={() => setBackgroundImage(url)}
+                  className={cn(
+                    "h-10 w-16 shrink-0 rounded-md border-2 overflow-hidden transition-all",
+                    backgroundImage === url && !isDynamicWallpaper
+                      ? "border-primary scale-[1.05] shadow-lg"
+                      : "border-transparent opacity-60 hover:opacity-100",
+                  )}>
+                  <img
+                    src={url}
+                    alt={`Wallpaper ${idx}`}
+                    className="h-full w-full object-cover"
+                  />
+                </button>
+              ))}
+            </div>
           </div>
 
           {showMore && (
