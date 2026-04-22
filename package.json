@@ -1,6 +1,6 @@
 {
   "name": "launchtab",
-  "version": "0.1.0",
+  "version": "0.02.15",
   "private": true,
   "scripts": {
     "dev": "next dev",
