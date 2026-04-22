@@ -18,15 +18,21 @@ export async function POST(request: NextRequest) {
 
     if (!email || !password) {
       return withCorsHeaders(
-        NextResponse.json({ error: "Email and password are required" }, { status: 400 }),
-        request
+        NextResponse.json(
+          { error: "Email and password are required" },
+          { status: 400 },
+        ),
+        request,
       );
     }
 
     if (password.length < 4 || password.length > 12) {
       return withCorsHeaders(
-        NextResponse.json({ error: "Password must be between 4 and 12 characters" }, { status: 400 }),
-        request
+        NextResponse.json(
+          { error: "Password must be between 4 and 12 characters" },
+          { status: 400 },
+        ),
+        request,
       );
     }
 
@@ -34,7 +40,7 @@ export async function POST(request: NextRequest) {
     if (existingUser && existingUser.verified) {
       return withCorsHeaders(
         NextResponse.json({ error: "User already exists" }, { status: 400 }),
-        request
+        request,
       );
     }
 
@@ -53,13 +59,13 @@ export async function POST(request: NextRequest) {
 
     return withCorsHeaders(
       NextResponse.json({ message: "Verification code sent to your email" }),
-      request
+      request,
     );
   } catch (error) {
     console.error("Signup error:", error);
     return withCorsHeaders(
       NextResponse.json({ error: "Internal server error" }, { status: 500 }),
-      request
+      request,
     );
   }
 }

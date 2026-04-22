@@ -3,6 +3,7 @@ import type { NextRequest } from "next/server";
 import { cookies } from "next/headers";
 import { verifyToken } from "@/lib/auth/jwt";
 import { pullUserData } from "@/lib/auth/sync";
+import { UserData } from "@/lib/auth/db";
 import { corsGuard, handleCorsOptions, withCorsHeaders } from "@/lib/auth/cors";
 
 export async function OPTIONS(request: NextRequest) {
@@ -19,8 +20,8 @@ export async function GET(request: NextRequest) {
 
     if (!token) {
       return withCorsHeaders(
-        NextResponse.json({ error: "Not authenticated" }, { status: 401 }),
-        request
+        NextResponse.json<{ authenticated: boolean }>({ authenticated: false }),
+        request,
       );
     }
 
@@ -28,22 +29,25 @@ export async function GET(request: NextRequest) {
 
     if (!payload) {
       return withCorsHeaders(
-        NextResponse.json({ error: "Invalid token" }, { status: 401 }),
-        request
+        NextResponse.json<{ authenticated: boolean }>({ authenticated: false }),
+        request,
       );
     }
 
     const userData = await pullUserData(payload.userId);
 
     return withCorsHeaders(
-      NextResponse.json({ data: userData }),
-      request
+      NextResponse.json<{ data: UserData | null }>({ data: userData }),
+      request,
     );
   } catch (error) {
     console.error("Sync pull error:", error);
     return withCorsHeaders(
-      NextResponse.json({ error: "Internal server error" }, { status: 500 }),
-      request
+      NextResponse.json<{ error: string }>(
+        { error: "Internal server error" },
+        { status: 500 },
+      ),
+      request,
     );
   }
 }

@@ -1,18 +1,22 @@
 import { getMongoDb } from "@/lib/mongodb";
+import { ShareProfileTab, ShareProfileSettings } from "@/lib/shareProfile";
 import { UserData } from "./db";
 
-export async function pushUserData(userId: string, data: { tabs: any[]; settings: any }): Promise<void> {
+export async function pushUserData(
+  userId: string,
+  data: { tabs: ShareProfileTab[]; settings: ShareProfileSettings },
+): Promise<void> {
   const db = await getMongoDb();
   await db.collection<UserData>("user_data").updateOne(
     { userId },
-    { 
-      $set: { 
-        tabs: data.tabs, 
-        settings: data.settings, 
-        updatedAt: new Date() 
-      } 
+    {
+      $set: {
+        tabs: data.tabs,
+        settings: data.settings,
+        updatedAt: new Date(),
+      },
     },
-    { upsert: true }
+    { upsert: true },
   );
 }
 

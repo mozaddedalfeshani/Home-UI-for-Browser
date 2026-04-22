@@ -19,7 +19,7 @@ export async function GET(request: NextRequest) {
     if (!token) {
       return withCorsHeaders(
         NextResponse.json({ error: "Not authenticated" }, { status: 401 }),
-        request
+        request,
       );
     }
 
@@ -28,18 +28,18 @@ export async function GET(request: NextRequest) {
     if (!payload) {
       return withCorsHeaders(
         NextResponse.json({ error: "Invalid token" }, { status: 401 }),
-        request
+        request,
       );
     }
 
     return withCorsHeaders(
       NextResponse.json({ user: { email: payload.email, id: payload.userId } }),
-      request
+      request,
     );
-  } catch (error) {
+  } catch {
     return withCorsHeaders(
       NextResponse.json({ error: "Internal server error" }, { status: 500 }),
-      request
+      request,
     );
   }
 }

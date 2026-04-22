@@ -9,17 +9,26 @@ interface AuthState {
   isAuthenticated: boolean;
   isLoading: boolean;
   lastSynced: number | null;
-  
+
   setUser: (user: { email: string; id: string } | null) => void;
   setLoading: (loading: boolean) => void;
-  
-  login: (email: string, pass: string) => Promise<{ success: boolean; error?: string }>;
-  signup: (email: string, pass: string) => Promise<{ success: boolean; error?: string }>;
-  verify: (email: string, code: string) => Promise<{ success: boolean; error?: string }>;
+
+  login: (
+    email: string,
+    pass: string,
+  ) => Promise<{ success: boolean; error?: string }>;
+  signup: (
+    email: string,
+    pass: string,
+  ) => Promise<{ success: boolean; error?: string }>;
+  verify: (
+    email: string,
+    code: string,
+  ) => Promise<{ success: boolean; error?: string }>;
   logout: () => Promise<void>;
   fetchMe: () => Promise<void>;
   initCloudSession: () => Promise<void>;
-  
+
   pushSync: () => Promise<void>;
   pullSync: (autoApply?: boolean) => Promise<void>;
 }
@@ -49,7 +58,7 @@ export const useAuthStore = create<AuthState>()(
           }
           set({ isLoading: false });
           return { success: false, error: data.error };
-        } catch (error) {
+        } catch {
           set({ isLoading: false });
           return { success: false, error: "Network error" };
         }
@@ -66,7 +75,7 @@ export const useAuthStore = create<AuthState>()(
           set({ isLoading: false });
           if (res.ok) return { success: true };
           return { success: false, error: data.error };
-        } catch (error) {
+        } catch {
           set({ isLoading: false });
           return { success: false, error: "Network error" };
         }
@@ -86,7 +95,7 @@ export const useAuthStore = create<AuthState>()(
           }
           set({ isLoading: false });
           return { success: false, error: data.error };
-        } catch (error) {
+        } catch {
           set({ isLoading: false });
           return { success: false, error: "Network error" };
         }
@@ -106,7 +115,7 @@ export const useAuthStore = create<AuthState>()(
           } else {
             set({ user: null, isAuthenticated: false });
           }
-        } catch (error) {
+        } catch {
           set({ user: null, isAuthenticated: false });
         }
       },
@@ -120,9 +129,19 @@ export const useAuthStore = create<AuthState>()(
               set({ user: data.user, isAuthenticated: true });
               if (data.data) {
                 const cloudData = data.data;
-                if (cloudData.tabs) useTabsStore.getState().replaceTabsFromShareProfile(cloudData.tabs);
-                if (cloudData.settings) useSettingsStore.getState().applyShareProfileSettings(cloudData.settings);
-                set({ lastSynced: cloudData.updatedAt ? new Date(cloudData.updatedAt).getTime() : Date.now() });
+                if (cloudData.tabs)
+                  useTabsStore
+                    .getState()
+                    .replaceTabsFromShareProfile(cloudData.tabs);
+                if (cloudData.settings)
+                  useSettingsStore
+                    .getState()
+                    .applyShareProfileSettings(cloudData.settings);
+                set({
+                  lastSynced: cloudData.updatedAt
+                    ? new Date(cloudData.updatedAt).getTime()
+                    : Date.now(),
+                });
               }
             } else {
               set({ user: null, isAuthenticated: false });
@@ -135,10 +154,10 @@ export const useAuthStore = create<AuthState>()(
 
       pushSync: async () => {
         if (!get().isAuthenticated) return;
-        
+
         const tabs = useTabsStore.getState().getShareableTabs();
         const settings = useSettingsStore.getState().getShareableSettings();
-        
+
         try {
           const res = await fetch("/api/auth/sync/push", {
             method: "POST",
@@ -154,16 +173,26 @@ export const useAuthStore = create<AuthState>()(
 
       pullSync: async (autoApply = false) => {
         if (!get().isAuthenticated) return;
-        
+
         try {
           const res = await fetch("/api/auth/sync/pull");
           if (res.ok) {
             const { data } = await res.json();
             if (data) {
               if (autoApply) {
-                if (data.tabs) useTabsStore.getState().replaceTabsFromShareProfile(data.tabs);
-                if (data.settings) useSettingsStore.getState().applyShareProfileSettings(data.settings);
-                set({ lastSynced: data.updatedAt ? new Date(data.updatedAt).getTime() : Date.now() });
+                if (data.tabs)
+                  useTabsStore
+                    .getState()
+                    .replaceTabsFromShareProfile(data.tabs);
+                if (data.settings)
+                  useSettingsStore
+                    .getState()
+                    .applyShareProfileSettings(data.settings);
+                set({
+                  lastSynced: data.updatedAt
+                    ? new Date(data.updatedAt).getTime()
+                    : Date.now(),
+                });
                 toast.success("Synced with cloud");
               }
               // Else return data for confirmation UI if needed
@@ -179,6 +208,6 @@ export const useAuthStore = create<AuthState>()(
       partialize: (state) => ({
         lastSynced: state.lastSynced,
       }),
-    }
-  )
+    },
+  ),
 );

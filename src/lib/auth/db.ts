@@ -1,6 +1,8 @@
 import { getMongoDb } from "@/lib/mongodb";
 import { ObjectId } from "mongodb";
 
+import { ShareProfileTab, ShareProfileSettings } from "@/lib/shareProfile";
+
 export interface User {
   _id?: ObjectId;
   email: string;
@@ -17,8 +19,8 @@ export interface VerifyCode {
 
 export interface UserData {
   userId: string;
-  tabs: any[];
-  settings: any;
+  tabs: ShareProfileTab[];
+  settings: ShareProfileSettings;
   updatedAt: Date;
 }
 
@@ -27,7 +29,10 @@ export async function getUserByEmail(email: string): Promise<User | null> {
   return db.collection<User>("users").findOne({ email });
 }
 
-export async function createUser(email: string, passwordHash: string): Promise<void> {
+export async function createUser(
+  email: string,
+  passwordHash: string,
+): Promise<void> {
   const db = await getMongoDb();
   await db.collection<User>("users").insertOne({
     email,
@@ -39,19 +44,20 @@ export async function createUser(email: string, passwordHash: string): Promise<v
 
 export async function verifyUser(email: string): Promise<void> {
   const db = await getMongoDb();
-  await db.collection<User>("users").updateOne(
-    { email },
-    { $set: { verified: true } }
-  );
+  await db
+    .collection<User>("users")
+    .updateOne({ email }, { $set: { verified: true } });
 }
 
-export async function saveVerifyCode(email: string, code: string, expiresAt: Date): Promise<void> {
+export async function saveVerifyCode(
+  email: string,
+  code: string,
+  expiresAt: Date,
+): Promise<void> {
   const db = await getMongoDb();
-  await db.collection<VerifyCode>("verify_codes").updateOne(
-    { email },
-    { $set: { code, expiresAt } },
-    { upsert: true }
-  );
+  await db
+    .collection<VerifyCode>("verify_codes")
+    .updateOne({ email }, { $set: { code, expiresAt } }, { upsert: true });
 }
 
 export async function getVerifyCode(email: string): Promise<VerifyCode | null> {

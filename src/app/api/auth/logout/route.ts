@@ -12,7 +12,7 @@ export async function POST(request: NextRequest) {
 
   const response = withCorsHeaders(
     NextResponse.json({ message: "Logged out successfully" }),
-    request
+    request,
   );
 
   response.cookies.set("__lt_session", "", {

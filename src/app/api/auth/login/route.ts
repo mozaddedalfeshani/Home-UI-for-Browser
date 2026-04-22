@@ -18,8 +18,11 @@ export async function POST(request: NextRequest) {
 
     if (!email || !password) {
       return withCorsHeaders(
-        NextResponse.json({ error: "Email and password are required" }, { status: 400 }),
-        request
+        NextResponse.json(
+          { error: "Email and password are required" },
+          { status: 400 },
+        ),
+        request,
       );
     }
 
@@ -27,8 +30,11 @@ export async function POST(request: NextRequest) {
 
     if (!user || !user.verified) {
       return withCorsHeaders(
-        NextResponse.json({ error: "Invalid credentials or unverified account" }, { status: 401 }),
-        request
+        NextResponse.json(
+          { error: "Invalid credentials or unverified account" },
+          { status: 401 },
+        ),
+        request,
       );
     }
 
@@ -37,11 +43,14 @@ export async function POST(request: NextRequest) {
     if (!passwordMatch) {
       return withCorsHeaders(
         NextResponse.json({ error: "Invalid credentials" }, { status: 401 }),
-        request
+        request,
       );
     }
 
-    const token = signToken({ userId: user._id!.toString(), email: user.email });
+    const token = signToken({
+      userId: user._id!.toString(),
+      email: user.email,
+    });
 
     const response = withCorsHeaders(
       NextResponse.json({
@@ -49,7 +58,7 @@ export async function POST(request: NextRequest) {
         token,
         user: { email: user.email },
       }),
-      request
+      request,
     );
 
     response.cookies.set("__lt_session", token, {
@@ -64,7 +73,7 @@ export async function POST(request: NextRequest) {
     console.error("Login error:", error);
     return withCorsHeaders(
       NextResponse.json({ error: "Internal server error" }, { status: 500 }),
-      request
+      request,
     );
   }
 }

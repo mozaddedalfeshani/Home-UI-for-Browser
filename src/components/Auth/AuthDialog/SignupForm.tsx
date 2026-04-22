@@ -8,7 +8,11 @@ import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 
-export function SignupForm({ onVerify }: { onVerify: (email: string) => void }) {
+export function SignupForm({
+  onVerify,
+}: {
+  onVerify: (email: string) => void;
+}) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const { signup, isLoading } = useAuthStore();
@@ -51,10 +55,15 @@ export function SignupForm({ onVerify }: { onVerify: (email: string) => void }) 
         />
       </div>
       <Button type="submit" className="w-full" disabled={isLoading}>
-        {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : "Sign Up"}
+        {isLoading ? (
+          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+        ) : (
+          "Sign Up"
+        )}
       </Button>
       <p className="text-xs text-muted-foreground text-center">
-        By signing up, you agree to enable cloud sync for your settings and tabs.
+        By signing up, you agree to enable cloud sync for your settings and
+        tabs.
       </p>
     </form>
   );

@@ -47,10 +47,7 @@ export function corsGuard(request: NextRequest): NextResponse | null {
     return null;
   }
 
-  return NextResponse.json(
-    { error: "Forbidden" },
-    { status: 403 }
-  );
+  return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 }
 
 /**
@@ -58,7 +55,7 @@ export function corsGuard(request: NextRequest): NextResponse | null {
  */
 export function withCorsHeaders(
   response: NextResponse,
-  request: NextRequest
+  request: NextRequest,
 ): NextResponse {
   const origin = request.headers.get("origin") ?? "";
   const allowed = getAllowedOrigins();
@@ -66,13 +63,10 @@ export function withCorsHeaders(
   if (allowed.includes(origin)) {
     response.headers.set("Access-Control-Allow-Origin", origin);
     response.headers.set("Access-Control-Allow-Credentials", "true");
-    response.headers.set(
-      "Access-Control-Allow-Methods",
-      "GET, POST, OPTIONS"
-    );
+    response.headers.set("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
     response.headers.set(
       "Access-Control-Allow-Headers",
-      "Content-Type, Authorization"
+      "Content-Type, Authorization",
     );
   }
 

@@ -4,6 +4,7 @@ import { cookies } from "next/headers";
 import { verifyToken } from "@/lib/auth/jwt";
 import { pushUserData } from "@/lib/auth/sync";
 import { corsGuard, handleCorsOptions, withCorsHeaders } from "@/lib/auth/cors";
+import { ShareProfileTab, ShareProfileSettings } from "@/lib/shareProfile";
 
 export async function OPTIONS(request: NextRequest) {
   return handleCorsOptions(request);
@@ -19,8 +20,11 @@ export async function POST(request: NextRequest) {
 
     if (!token) {
       return withCorsHeaders(
-        NextResponse.json({ error: "Not authenticated" }, { status: 401 }),
-        request
+        NextResponse.json<{ error: string }>(
+          { error: "Not authenticated" },
+          { status: 401 },
+        ),
+        request,
       );
     }
 
@@ -28,23 +32,32 @@ export async function POST(request: NextRequest) {
 
     if (!payload) {
       return withCorsHeaders(
-        NextResponse.json({ error: "Invalid token" }, { status: 401 }),
-        request
+        NextResponse.json<{ error: string }>(
+          { error: "Invalid token" },
+          { status: 401 },
+        ),
+        request,
       );
     }
 
-    const { tabs, settings } = await request.json();
+    const { tabs, settings } = (await request.json()) as {
+      tabs: ShareProfileTab[];
+      settings: ShareProfileSettings;
+    };
     await pushUserData(payload.userId, { tabs, settings });
 
     return withCorsHeaders(
-      NextResponse.json({ ok: true }),
-      request
+      NextResponse.json<{ ok: boolean }>({ ok: true }),
+      request,
     );
   } catch (error) {
     console.error("Sync push error:", error);
     return withCorsHeaders(
-      NextResponse.json({ error: "Internal server error" }, { status: 500 }),
-      request
+      NextResponse.json<{ error: string }>(
+        { error: "Internal server error" },
+        { status: 500 },
+      ),
+      request,
     );
   }
 }

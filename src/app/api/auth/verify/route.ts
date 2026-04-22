@@ -1,6 +1,11 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import { getVerifyCode, verifyUser, deleteVerifyCode, getUserByEmail } from "@/lib/auth/db";
+import {
+  getVerifyCode,
+  verifyUser,
+  deleteVerifyCode,
+  getUserByEmail,
+} from "@/lib/auth/db";
 import { signToken } from "@/lib/auth/jwt";
 import { corsGuard, handleCorsOptions, withCorsHeaders } from "@/lib/auth/cors";
 
@@ -17,8 +22,11 @@ export async function POST(request: NextRequest) {
 
     if (!email || !code) {
       return withCorsHeaders(
-        NextResponse.json({ error: "Email and code are required" }, { status: 400 }),
-        request
+        NextResponse.json(
+          { error: "Email and code are required" },
+          { status: 400 },
+        ),
+        request,
       );
     }
 
@@ -26,15 +34,21 @@ export async function POST(request: NextRequest) {
 
     if (!storedCode || storedCode.code !== code) {
       return withCorsHeaders(
-        NextResponse.json({ error: "Invalid verification code" }, { status: 400 }),
-        request
+        NextResponse.json(
+          { error: "Invalid verification code" },
+          { status: 400 },
+        ),
+        request,
       );
     }
 
     if (new Date() > storedCode.expiresAt) {
       return withCorsHeaders(
-        NextResponse.json({ error: "Verification code expired" }, { status: 400 }),
-        request
+        NextResponse.json(
+          { error: "Verification code expired" },
+          { status: 400 },
+        ),
+        request,
       );
     }
 
@@ -45,11 +59,14 @@ export async function POST(request: NextRequest) {
     if (!user) {
       return withCorsHeaders(
         NextResponse.json({ error: "User not found" }, { status: 404 }),
-        request
+        request,
       );
     }
 
-    const token = signToken({ userId: user._id!.toString(), email: user.email });
+    const token = signToken({
+      userId: user._id!.toString(),
+      email: user.email,
+    });
 
     const response = withCorsHeaders(
       NextResponse.json({
@@ -57,7 +74,7 @@ export async function POST(request: NextRequest) {
         token,
         user: { email: user.email },
       }),
-      request
+      request,
     );
 
     response.cookies.set("__lt_session", token, {
@@ -72,7 +89,7 @@ export async function POST(request: NextRequest) {
     console.error("Verification error:", error);
     return withCorsHeaders(
       NextResponse.json({ error: "Internal server error" }, { status: 500 }),
-      request
+      request,
     );
   }
 }
