@@ -48,6 +48,7 @@ const SettingsMenu = () => {
     showRightSidebar,
     enableLeftSidebarHover,
     enableSearchHoverZone,
+    autoFocusSearch,
     searchEngine,
     tabsPosition,
     isClockDialogOpen,
@@ -63,6 +64,7 @@ const SettingsMenu = () => {
     toggleShowRightSidebar,
     toggleLeftSidebarHover,
     toggleSearchHoverZone,
+    toggleAutoFocusSearch,
     setClockDialogOpen,
     setBackgroundDialogOpen,
     setResizeDialogOpen,
@@ -282,6 +284,12 @@ const SettingsMenu = () => {
                 label: t("dynamicWallpaper"),
                 checked: isDynamicWallpaper,
                 onCheckedChange: () => setDynamicWallpaper(!isDynamicWallpaper),
+              },
+              {
+                id: "autoFocusSearch",
+                label: t("autoFocusSearch"),
+                checked: autoFocusSearch,
+                onCheckedChange: toggleAutoFocusSearch,
               },
             ].map((item) => (
               <div
