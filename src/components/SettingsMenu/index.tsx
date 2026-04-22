@@ -126,35 +126,27 @@ const SettingsMenu = () => {
               <span className="text-[10px] font-medium uppercase text-muted-foreground/70">
                 {t("theme")}
               </span>
-              <div className="flex items-center justify-between gap-1">
-                <Button
-                  variant={theme === "light" ? "secondary" : "ghost"}
-                  size="icon-sm"
-                  className="h-8 w-8"
-                  onClick={() => handleThemeChange("light")}
-                  aria-label={t("light")}
-                  title={t("light")}>
+              <Button
+                variant="secondary"
+                size="sm"
+                className="h-8 w-full justify-start gap-2 bg-background/50 hover:bg-accent"
+                onClick={() => {
+                  const themes: Theme[] = ["system", "light", "dark"];
+                  const currentIndex = themes.indexOf(theme);
+                  const nextIndex = (currentIndex + 1) % themes.length;
+                  handleThemeChange(themes[nextIndex]);
+                }}>
+                {theme === "light" ? (
                   <Sun className="h-4 w-4" />
-                </Button>
-                <Button
-                  variant={theme === "dark" ? "secondary" : "ghost"}
-                  size="icon-sm"
-                  className="h-8 w-8"
-                  onClick={() => handleThemeChange("dark")}
-                  aria-label={t("dark")}
-                  title={t("dark")}>
+                ) : theme === "dark" ? (
                   <Moon className="h-4 w-4" />
-                </Button>
-                <Button
-                  variant={theme === "system" ? "secondary" : "ghost"}
-                  size="icon-sm"
-                  className="h-8 w-8"
-                  onClick={() => handleThemeChange("system")}
-                  aria-label={t("system")}
-                  title={t("system")}>
+                ) : (
                   <Monitor className="h-4 w-4" />
-                </Button>
-              </div>
+                )}
+                <span className="text-[10px] font-semibold capitalize">
+                  {t(theme)}
+                </span>
+              </Button>
             </div>
 
             <div className="flex flex-col gap-1.5 rounded-lg bg-muted/30 p-2">
@@ -277,12 +269,14 @@ const SettingsMenu = () => {
                 onCheckedChange: toggleAutoFocusSearch,
               },
             ].map((item) => (
-              <div
+              <button
                 key={item.id}
-                className="flex items-center justify-between rounded-md px-2 py-1 hover:bg-accent/50">
-                <span className="text-[11px] font-medium">{item.label}</span>
-                <button
-                  onClick={item.onCheckedChange}
+                onClick={item.onCheckedChange}
+                className="flex w-full items-center justify-between rounded-md px-2 py-1 transition-colors hover:bg-accent/50 group">
+                <span className="text-[11px] font-medium text-foreground/90 group-hover:text-foreground">
+                  {item.label}
+                </span>
+                <div
                   className={cn(
                     "relative h-4 w-8 rounded-full transition-colors",
                     item.checked ? "bg-primary" : "bg-muted",
@@ -293,8 +287,8 @@ const SettingsMenu = () => {
                       item.checked ? "translate-x-4" : "translate-x-0.5",
                     )}
                   />
-                </button>
-              </div>
+                </div>
+              </button>
             ))}
 
             {showMore &&
@@ -319,12 +313,14 @@ const SettingsMenu = () => {
                     setDynamicWallpaper(!isDynamicWallpaper),
                 },
               ].map((item) => (
-                <div
+                <button
                   key={item.id}
-                  className="flex items-center justify-between rounded-md px-2 py-1 hover:bg-accent/50">
-                  <span className="text-[11px] font-medium">{item.label}</span>
-                  <button
-                    onClick={item.onCheckedChange}
+                  onClick={item.onCheckedChange}
+                  className="flex w-full items-center justify-between rounded-md px-2 py-1 transition-colors hover:bg-accent/50 group">
+                  <span className="text-[11px] font-medium text-foreground/90 group-hover:text-foreground">
+                    {item.label}
+                  </span>
+                  <div
                     className={cn(
                       "relative h-4 w-8 rounded-full transition-colors",
                       item.checked ? "bg-primary" : "bg-muted",
@@ -335,8 +331,8 @@ const SettingsMenu = () => {
                         item.checked ? "translate-x-4" : "translate-x-0.5",
                       )}
                     />
-                  </button>
-                </div>
+                  </div>
+                </button>
               ))}
 
             <Button
