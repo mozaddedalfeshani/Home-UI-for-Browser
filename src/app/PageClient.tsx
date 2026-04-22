@@ -175,18 +175,16 @@ export function PageClient() {
     }
   }, [isHydrated, autoFocusSearch]);
 
-  const { fetchMe, pullSync, pushSync, isAuthenticated } = useAuthStore();
+  const { initCloudSession, pushSync, isAuthenticated } = useAuthStore();
   const tabs = useTabsStore((state) => state.tabs);
   const settings = useSettingsStore();
 
-  // Initial Auth Check and Pull
+  // Optimized Initial Auth Check and Pull (Combined Request)
   useEffect(() => {
     if (isHydrated) {
-      fetchMe().then(() => {
-        pullSync(true);
-      });
+      initCloudSession();
     }
-  }, [isHydrated, fetchMe, pullSync]);
+  }, [isHydrated, initCloudSession]);
 
   // Auto-push Sync on changes (Debounced)
   useEffect(() => {
@@ -194,7 +192,7 @@ export function PageClient() {
 
     const timer = setTimeout(() => {
       pushSync();
-    }, 5000); // 5s debounce for auto-push
+    }, 10000); // 10s debounce for auto-push to minimize impact
 
     return () => clearTimeout(timer);
   }, [tabs, settings, isHydrated, isAuthenticated, pushSync]);

@@ -18,6 +18,7 @@ interface AuthState {
   verify: (email: string, code: string) => Promise<{ success: boolean; error?: string }>;
   logout: () => Promise<void>;
   fetchMe: () => Promise<void>;
+  initCloudSession: () => Promise<void>;
   
   pushSync: () => Promise<void>;
   pullSync: (autoApply?: boolean) => Promise<void>;
@@ -107,6 +108,28 @@ export const useAuthStore = create<AuthState>()(
           }
         } catch (error) {
           set({ user: null, isAuthenticated: false });
+        }
+      },
+
+      initCloudSession: async () => {
+        try {
+          const res = await fetch("/api/auth/init");
+          if (res.ok) {
+            const data = await res.json();
+            if (data.authenticated) {
+              set({ user: data.user, isAuthenticated: true });
+              if (data.data) {
+                const cloudData = data.data;
+                if (cloudData.tabs) useTabsStore.getState().replaceTabsFromShareProfile(cloudData.tabs);
+                if (cloudData.settings) useSettingsStore.getState().applyShareProfileSettings(cloudData.settings);
+                set({ lastSynced: cloudData.updatedAt ? new Date(cloudData.updatedAt).getTime() : Date.now() });
+              }
+            } else {
+              set({ user: null, isAuthenticated: false });
+            }
+          }
+        } catch (error) {
+          console.error("Cloud init failed:", error);
         }
       },
 
