@@ -14,6 +14,7 @@ import {
   User,
   ChevronDown,
   ChevronUp,
+  Languages,
 } from "lucide-react";
 import { useTheme } from "next-themes";
 import { cn } from "@/lib/utils";
@@ -153,28 +154,16 @@ const SettingsMenu = () => {
               <span className="text-[10px] font-medium uppercase text-muted-foreground/70">
                 {t("language")}
               </span>
-              <div className="flex h-8 items-center rounded-md border border-border/50 bg-background/50 p-0.5">
-                <button
-                  onClick={() => handleLanguageChange("en")}
-                  className={cn(
-                    "flex-1 rounded-sm py-1 text-[10px] font-semibold transition-all",
-                    language === "en"
-                      ? "bg-primary text-primary-foreground shadow-sm"
-                      : "text-muted-foreground hover:bg-accent",
-                  )}>
-                  EN
-                </button>
-                <button
-                  onClick={() => handleLanguageChange("bn")}
-                  className={cn(
-                    "flex-1 rounded-sm py-1 text-[10px] font-semibold transition-all",
-                    language === "bn"
-                      ? "bg-primary text-primary-foreground shadow-sm"
-                      : "text-muted-foreground hover:bg-accent",
-                  )}>
-                  BN
-                </button>
-              </div>
+              <Button
+                variant="secondary"
+                size="sm"
+                className="h-8 w-full justify-start gap-2 bg-background/50 hover:bg-accent"
+                onClick={() => handleLanguageChange(language === "en" ? "bn" : "en")}>
+                <Languages className="h-4 w-4" />
+                <span className="text-[10px] font-semibold uppercase">
+                  {language === "en" ? "EN (English)" : "BN (বাংলা)"}
+                </span>
+              </Button>
             </div>
           </div>
 
