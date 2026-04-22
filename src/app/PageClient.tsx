@@ -17,6 +17,7 @@ import GithubLink from "@/components/Home/GithubLink";
 import { cn } from "@/lib/utils";
 import StickyAlarmDialog from "@/components/Notepad/StickyAlarmDialog";
 import { Bot } from "lucide-react";
+import { useAuthStore } from "@/store/authStore";
 
 type SearchOpenRequest = {
   id: number;
@@ -172,6 +173,15 @@ export function PageClient() {
       hasAutoOpenedRef.current = true;
     }
   }, [isHydrated, autoFocusSearch]);
+
+  const { initCloudSession } = useAuthStore();
+
+  // Restore cloud data once local stores are hydrated (silent, non-blocking)
+  useEffect(() => {
+    if (isHydrated) {
+      initCloudSession();
+    }
+  }, [isHydrated, initCloudSession]);
 
   return (
     <div className="min-h-screen w-full relative overflow-hidden">

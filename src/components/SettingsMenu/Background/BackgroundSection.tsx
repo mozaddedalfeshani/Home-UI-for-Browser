@@ -2,6 +2,7 @@
 
 import { useRef } from "react";
 import { Image as ImageIcon, Plus } from "lucide-react";
+import Image from "next/image";
 import {
   useSettingsStore,
   DEFAULT_DYNAMIC_WALLPAPERS,
@@ -80,9 +81,11 @@ export const BackgroundSection = () => {
                 : "border-transparent opacity-60 hover:opacity-100",
             )}
           >
-            <img
+            <Image
               src={url}
               alt={`Wallpaper ${idx}`}
+              width={64}
+              height={40}
               className="h-full w-full object-cover"
             />
           </button>
