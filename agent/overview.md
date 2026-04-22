@@ -37,6 +37,8 @@ LaunchTab is a free, open-source, AI-powered browser new tab dashboard built wit
 - `/src/store/` - Zustand state management stores
 - `/src/lib/` - Utility functions and storage helpers
 - `/src/hooks/` - Custom React hooks
+- `SYSTEM_PROMPT_LANGUAGE.md` - Multi-language implementation rules
+- `SYSTEM_PROMPT_ARCHITECTURE.md` - Component structure and organization rules
 
 ### State Management
 - `settingsStore.ts` - App settings, theme, layout, clock preferences

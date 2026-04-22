@@ -203,7 +203,7 @@ export function PageClient() {
         </div>
       </div>
 
-      <div className="fixed bottom-4 left-4 z-[70] md:hidden">
+      <div className="fixed bottom-4 left-4 z-70 md:hidden">
         {!isAISidebarVisible ? (
           <button
             type="button"
@@ -217,14 +217,14 @@ export function PageClient() {
 
       {enableLeftSidebarHover && !isAISidebarVisible ? (
         <div
-          className="fixed left-0 top-0 bottom-0 z-[65] hidden w-8 cursor-e-resize md:block"
+          className="fixed left-0 top-0 bottom-0 z-65 hidden w-8 cursor-e-resize md:block"
           onMouseEnter={() => setIsAISidebarVisible(true)}
         />
       ) : null}
 
       <div
         className={cn(
-          "fixed left-0 top-0 bottom-0 z-[80] w-[min(94vw,26rem)] transform transition-all duration-500 ease-out md:w-[28rem]",
+          "fixed left-0 top-0 bottom-0 z-80 w-[min(94vw,26rem)] transform transition-all duration-500 ease-out md:w-md",
           isAISidebarVisible ? "translate-x-0" : "-translate-x-full",
         )}>
         <AISidebar
