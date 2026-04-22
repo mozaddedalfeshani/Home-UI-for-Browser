@@ -46,10 +46,21 @@ const SearchModal = ({
   const t = useTranslation(language);
 
   useEffect(() => {
+    const handleFocus = () => {
+      if (open && inputRef.current) {
+        inputRef.current.focus();
+      }
+    };
+
     if (open && inputRef.current) {
       inputRef.current.focus();
       onInputReady?.();
     }
+
+    window.addEventListener("focus", handleFocus);
+    return () => {
+      window.removeEventListener("focus", handleFocus);
+    };
   }, [open, onInputReady]);
 
   useEffect(() => {

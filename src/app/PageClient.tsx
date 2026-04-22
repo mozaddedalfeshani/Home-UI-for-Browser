@@ -162,6 +162,16 @@ export function PageClient() {
   // Keep sticky-note reminders active while dashboard tab is open
   useStickyNoteAlarms();
 
+  const hasAutoOpenedRef = useRef(false);
+
+  // Auto-focus search on visit
+  useEffect(() => {
+    if (isHydrated && !hasAutoOpenedRef.current) {
+      setIsSearchModalOpen(true);
+      hasAutoOpenedRef.current = true;
+    }
+  }, [isHydrated]);
+
   return (
     <div className="min-h-screen w-full relative overflow-hidden">
       {backgroundImageUrl && (
