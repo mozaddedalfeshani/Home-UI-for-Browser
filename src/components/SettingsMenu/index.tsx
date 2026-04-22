@@ -16,6 +16,7 @@ import {
   ChevronUp,
   Languages,
   Search,
+  LayoutTemplate,
 } from "lucide-react";
 import { useTheme } from "next-themes";
 import { cn } from "@/lib/utils";
@@ -28,7 +29,6 @@ import {
 } from "@/components/ui/dropdown-menu";
 import {
   SearchEngine,
-  TabsPosition,
   useSettingsStore,
   Theme,
 } from "@/store/settingsStore";
@@ -121,6 +121,17 @@ const SettingsMenu = () => {
             </ResetDialog>
           </div>
           <DropdownMenuSeparator />
+          <div className="p-1">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setBackgroundDialogOpen(true)}
+              className="h-9 w-full justify-start gap-2 px-2 text-[11px] font-medium hover:bg-accent/50">
+              <ImageIcon className="h-3.5 w-3.5 text-muted-foreground" />
+              {t("backgroundImage")}
+            </Button>
+          </div>
+          <DropdownMenuSeparator />
 
           {/* Theme & Language Row */}
           <div className="grid grid-cols-2 gap-2 p-1">
@@ -169,73 +180,49 @@ const SettingsMenu = () => {
           </div>
 
           <DropdownMenuSeparator />
-
-          {/* Search Engine Selection */}
-          <div className="px-2 py-2">
-            <span className="mb-2 block text-[10px] font-medium uppercase text-muted-foreground/70">
-              {t("searchEngine")}
-            </span>
-            <Button
-              variant="secondary"
-              size="sm"
-              className="h-8 w-full justify-start gap-2 bg-background/50 hover:bg-accent"
-              onClick={() => {
-                const engines: SearchEngine[] = ["google", "duckduckgo", "bing"];
-                const currentIndex = engines.indexOf(searchEngine);
-                // If current engine is not in the list (like 'brave'), start from index -1 which gives 0
-                const nextIndex = (currentIndex + 1) % engines.length;
-                handleSearchEngineChange(engines[nextIndex]);
-              }}>
-              <Search className="h-4 w-4" />
-              <span className="text-[10px] font-semibold capitalize">
-                {searchEngine === "duckduckgo" ? "DDG (DuckDuckGo)" : searchEngine}
+          {/* Search Engine & Shortcut Position Row */}
+          <div className="grid grid-cols-2 gap-2 p-1">
+            <div className="flex flex-col gap-1.5 rounded-lg bg-muted/30 p-2">
+              <span className="text-[10px] font-medium uppercase text-muted-foreground/70">
+                {t("searchEngine")}
               </span>
-            </Button>
-          </div>
-
-          {/* Layout Selection */}
-          {/* <div className="px-2 py-2">
-            <span className="mb-2 block text-[10px] font-medium uppercase text-muted-foreground/70">
-              {t("layoutMode")}
-            </span>
-            <div className="flex rounded-md border border-border/50 bg-background/50 p-0.5">
-              {["default", "compact", "focus"].map((preset) => (
-                <button
-                  key={preset}
-                  onClick={() => handleLayoutPresetChange(preset)}
-                  className={cn(
-                    "flex-1 rounded-sm py-1 text-[10px] font-semibold capitalize transition-all",
-                    layoutPreset === preset
-                      ? "bg-primary text-primary-foreground shadow-sm"
-                      : "text-muted-foreground hover:bg-accent",
-                  )}>
-                  {t(
-                    `layout${preset.charAt(0).toUpperCase() + preset.slice(1)}`,
-                  )}
-                </button>
-              ))}
+              <Button
+                variant="secondary"
+                size="sm"
+                className="h-8 w-full justify-start gap-1 bg-background/50 px-1.5 hover:bg-accent"
+                onClick={() => {
+                  const engines: SearchEngine[] = [
+                    "google",
+                    "duckduckgo",
+                    "bing",
+                  ];
+                  const currentIndex = engines.indexOf(searchEngine);
+                  const nextIndex = (currentIndex + 1) % engines.length;
+                  handleSearchEngineChange(engines[nextIndex]);
+                }}>
+                <Search className="h-3.5 w-3.5" />
+                <span className="text-[10px] font-semibold capitalize">
+                  {searchEngine === "duckduckgo" ? "DDG" : searchEngine}
+                </span>
+              </Button>
             </div>
-          </div> */}
-
-          {/* Shortcut Position Selection */}
-          <div className="px-2 py-2">
-            <span className="mb-2 block text-[10px] font-medium uppercase text-muted-foreground/70">
-              {t("shortcutPosition")}
-            </span>
-            <div className="flex rounded-md border border-border/50 bg-background/50 p-0.5">
-              {["top", "center"].map((pos) => (
-                <button
-                  key={pos}
-                  onClick={() => setTabsPosition(pos as TabsPosition)}
-                  className={cn(
-                    "flex-1 rounded-sm py-1 text-[10px] font-semibold capitalize transition-all",
-                    tabsPosition === pos
-                      ? "bg-primary text-primary-foreground shadow-sm"
-                      : "text-muted-foreground hover:bg-accent",
-                  )}>
-                  {t(pos)}
-                </button>
-              ))}
+ 
+            <div className="flex flex-col gap-1.5 rounded-lg bg-muted/30 p-2">
+              <span className="text-[10px] font-medium uppercase text-muted-foreground/70">
+                {t("shortcutPosition")}
+              </span>
+              <Button
+                variant="secondary"
+                size="sm"
+                className="h-8 w-full justify-start gap-1 bg-background/50 px-1.5 hover:bg-accent"
+                onClick={() =>
+                  setTabsPosition(tabsPosition === "top" ? "center" : "top")
+                }>
+                <LayoutTemplate className="h-3.5 w-3.5" />
+                <span className="text-[10px] font-semibold capitalize">
+                  {t(tabsPosition)}
+                </span>
+              </Button>
             </div>
           </div>
 
@@ -367,10 +354,10 @@ const SettingsMenu = () => {
                 <Button
                   variant="ghost"
                   size="sm"
-                  onClick={() => setBackgroundDialogOpen(true)}
+                  onClick={() => setClockDialogOpen(true)}
                   className="h-9 justify-start gap-2 px-2 text-[11px] font-normal">
-                  <ImageIcon className="h-3.5 w-3.5 text-muted-foreground" />
-                  {t("backgroundImage")}
+                  <Clock className="h-3.5 w-3.5 text-muted-foreground" />
+                  {t("clockSettings")}
                 </Button>
                 <Button
                   variant="ghost"
@@ -379,14 +366,6 @@ const SettingsMenu = () => {
                   className="h-9 justify-start gap-2 px-2 text-[11px] font-normal">
                   <User className="h-3.5 w-3.5 text-muted-foreground" />
                   {t("profileShare")}
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setClockDialogOpen(true)}
-                  className="h-9 justify-start gap-2 px-2 text-[11px] font-normal col-span-2">
-                  <Clock className="h-3.5 w-3.5 text-muted-foreground" />
-                  Digital Clock Settings
                 </Button>
               </div>
             </>
