@@ -36,6 +36,7 @@ export interface ShareProfileSettings {
   clockPosition: ClockPosition;
   clockStyle: ClockStyle;
   isDynamicWallpaper: boolean;
+  autoFocusSearch: boolean;
 }
 
 export interface ShareProfileV1 {
@@ -64,6 +65,7 @@ export const SHARE_SETTINGS_DEFAULTS: ShareProfileSettings = {
   clockPosition: "top-center",
   clockStyle: "modern",
   isDynamicWallpaper: true,
+  autoFocusSearch: false,
 };
 
 const THEME_VALUES: Theme[] = ["light", "dark", "system"];
@@ -272,6 +274,10 @@ export const sanitizeShareSettings = (
     isDynamicWallpaper: toBoolean(
       settings.isDynamicWallpaper,
       SHARE_SETTINGS_DEFAULTS.isDynamicWallpaper,
+    ),
+    autoFocusSearch: toBoolean(
+      settings.autoFocusSearch,
+      SHARE_SETTINGS_DEFAULTS.autoFocusSearch,
     ),
   };
 };

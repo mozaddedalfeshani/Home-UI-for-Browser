@@ -35,6 +35,7 @@ export function PageClient() {
     layoutPreset,
     isDynamicWallpaper,
     dynamicWallpapers,
+    autoFocusSearch,
     setBackgroundImage,
   } = useSettingsStore();
 
@@ -166,11 +167,11 @@ export function PageClient() {
 
   // Auto-focus search on visit
   useEffect(() => {
-    if (isHydrated && !hasAutoOpenedRef.current) {
+    if (isHydrated && !hasAutoOpenedRef.current && autoFocusSearch) {
       setIsSearchModalOpen(true);
       hasAutoOpenedRef.current = true;
     }
-  }, [isHydrated]);
+  }, [isHydrated, autoFocusSearch]);
 
   return (
     <div className="min-h-screen w-full relative overflow-hidden">

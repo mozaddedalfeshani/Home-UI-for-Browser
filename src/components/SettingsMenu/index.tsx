@@ -12,6 +12,8 @@ import {
   RotateCcw,
   History,
   User,
+  ChevronDown,
+  ChevronUp,
 } from "lucide-react";
 import { useTheme } from "next-themes";
 import { cn } from "@/lib/utils";
@@ -40,6 +42,7 @@ const SettingsMenu = () => {
   const { setTheme } = useTheme();
   const [isHistoryDialogOpen, setIsHistoryDialogOpen] = useState(false);
   const [isProfileDialogOpen, setIsProfileDialogOpen] = useState(false);
+  const [showMore, setShowMore] = useState(false);
 
   const {
     theme,
@@ -252,7 +255,7 @@ const SettingsMenu = () => {
 
           <DropdownMenuSeparator />
 
-          {/* Toggles Group */}
+           {/* Toggles Group */}
           <div className="space-y-1 p-1">
             {[
               {
@@ -266,24 +269,6 @@ const SettingsMenu = () => {
                 label: t("showRightSidebar"),
                 checked: showRightSidebar,
                 onCheckedChange: toggleShowRightSidebar,
-              },
-              {
-                id: "enableLeftSidebarHover",
-                label: t("enableLeftSidebarHover"),
-                checked: enableLeftSidebarHover,
-                onCheckedChange: toggleLeftSidebarHover,
-              },
-              {
-                id: "enableSearchHoverZone",
-                label: t("enableSearchHoverZone"),
-                checked: enableSearchHoverZone,
-                onCheckedChange: toggleSearchHoverZone,
-              },
-              {
-                id: "dynamicWallpaper",
-                label: t("dynamicWallpaper"),
-                checked: isDynamicWallpaper,
-                onCheckedChange: () => setDynamicWallpaper(!isDynamicWallpaper),
               },
               {
                 id: "autoFocusSearch",
@@ -311,53 +296,111 @@ const SettingsMenu = () => {
                 </button>
               </div>
             ))}
+
+            {showMore &&
+              [
+                {
+                  id: "enableLeftSidebarHover",
+                  label: t("enableLeftSidebarHover"),
+                  checked: enableLeftSidebarHover,
+                  onCheckedChange: toggleLeftSidebarHover,
+                },
+                {
+                  id: "enableSearchHoverZone",
+                  label: t("enableSearchHoverZone"),
+                  checked: enableSearchHoverZone,
+                  onCheckedChange: toggleSearchHoverZone,
+                },
+                {
+                  id: "dynamicWallpaper",
+                  label: t("dynamicWallpaper"),
+                  checked: isDynamicWallpaper,
+                  onCheckedChange: () =>
+                    setDynamicWallpaper(!isDynamicWallpaper),
+                },
+              ].map((item) => (
+                <div
+                  key={item.id}
+                  className="flex items-center justify-between rounded-md px-2 py-1 hover:bg-accent/50">
+                  <span className="text-[11px] font-medium">{item.label}</span>
+                  <button
+                    onClick={item.onCheckedChange}
+                    className={cn(
+                      "relative h-4 w-8 rounded-full transition-colors",
+                      item.checked ? "bg-primary" : "bg-muted",
+                    )}>
+                    <div
+                      className={cn(
+                        "absolute top-0.5 h-3 w-3 rounded-full bg-background transition-all",
+                        item.checked ? "translate-x-4" : "translate-x-0.5",
+                      )}
+                    />
+                  </button>
+                </div>
+              ))}
+
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setShowMore(!showMore)}
+              className="h-8 w-full justify-between px-2 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/80 hover:bg-accent/40">
+              {t("moreSettings")}
+              {showMore ? (
+                <ChevronUp className="h-3 w-3" />
+              ) : (
+                <ChevronDown className="h-3 w-3" />
+              )}
+            </Button>
           </div>
 
-          <DropdownMenuSeparator />
-
-          {/* Action Grid */}
-          <div className="grid grid-cols-2 gap-1 p-1">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setResizeDialogOpen(true)}
-              className="h-9 justify-start gap-2 px-2 text-[11px] font-normal">
-              <Maximize2 className="h-3.5 w-3.5 text-muted-foreground" />
-              {t("resizeShortcuts")}
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setIsHistoryDialogOpen(true)}
-              className="h-9 justify-start gap-2 px-2 text-[11px] font-normal">
-              <History className="h-3.5 w-3.5 text-muted-foreground" />
-              {t("history")}
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setBackgroundDialogOpen(true)}
-              className="h-9 justify-start gap-2 px-2 text-[11px] font-normal">
-              <ImageIcon className="h-3.5 w-3.5 text-muted-foreground" />
-              {t("backgroundImage")}
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setIsProfileDialogOpen(true)}
-              className="h-9 justify-start gap-2 px-2 text-[11px] font-normal">
-              <User className="h-3.5 w-3.5 text-muted-foreground" />
-              {t("profileShare")}
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setClockDialogOpen(true)}
-              className="h-9 justify-start gap-2 px-2 text-[11px] font-normal col-span-2">
-              <Clock className="h-3.5 w-3.5 text-muted-foreground" />
-              Digital Clock Settings
-            </Button>
-          </div>
+          {showMore && (
+            <>
+              <DropdownMenuSeparator />
+              {/* Action Grid */}
+              <div className="grid grid-cols-2 gap-1 p-1">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setResizeDialogOpen(true)}
+                  className="h-9 justify-start gap-2 px-2 text-[11px] font-normal">
+                  <Maximize2 className="h-3.5 w-3.5 text-muted-foreground" />
+                  {t("resizeShortcuts")}
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setIsHistoryDialogOpen(true)}
+                  className="h-9 justify-start gap-2 px-2 text-[11px] font-normal">
+                  <History className="h-3.5 w-3.5 text-muted-foreground" />
+                  {t("history")}
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setBackgroundDialogOpen(true)}
+                  className="h-9 justify-start gap-2 px-2 text-[11px] font-normal">
+                  <ImageIcon className="h-3.5 w-3.5 text-muted-foreground" />
+                  {t("backgroundImage")}
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setIsProfileDialogOpen(true)}
+                  className="h-9 justify-start gap-2 px-2 text-[11px] font-normal">
+                  <User className="h-3.5 w-3.5 text-muted-foreground" />
+                  {t("profileShare")}
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setClockDialogOpen(true)}
+                  className="h-9 justify-start gap-2 px-2 text-[11px] font-normal col-span-2">
+                  <Clock className="h-3.5 w-3.5 text-muted-foreground" />
+                  Digital Clock Settings
+                </Button>
+              </div>
+            </>
+          )}
         </DropdownMenuContent>
       </DropdownMenu>
 

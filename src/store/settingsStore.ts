@@ -48,12 +48,14 @@ interface SettingsState {
   isDynamicWallpaper: boolean;
   dynamicWallpapers: string[];
   alarmSoundRef: string | null;
+  autoFocusSearch: boolean;
   setTheme: (theme: Theme) => void;
   toggleAutoOrderTabs: () => void;
   toggleShowClock: () => void;
   toggleShowRightSidebar: () => void;
   toggleLeftSidebarHover: () => void;
   toggleSearchHoverZone: () => void;
+  toggleAutoFocusSearch: () => void;
   setShowRightSidebar: (show: boolean) => void;
   setCardSize: (size: number) => void;
   setCardRadius: (radius: number) => void;
@@ -109,6 +111,7 @@ export const useSettingsStore = create<SettingsState>()(
       isDynamicWallpaper: SHARE_SETTINGS_DEFAULTS.isDynamicWallpaper,
       dynamicWallpapers: DEFAULT_DYNAMIC_WALLPAPERS,
       alarmSoundRef: null,
+      autoFocusSearch: SHARE_SETTINGS_DEFAULTS.autoFocusSearch,
       setTheme: (theme) => set({ theme }),
       toggleAutoOrderTabs: () =>
         set((state) => ({ autoOrderTabs: !state.autoOrderTabs })),
@@ -122,6 +125,10 @@ export const useSettingsStore = create<SettingsState>()(
       toggleSearchHoverZone: () =>
         set((state) => ({
           enableSearchHoverZone: !state.enableSearchHoverZone,
+        })),
+      toggleAutoFocusSearch: () =>
+        set((state) => ({
+          autoFocusSearch: !state.autoFocusSearch,
         })),
       setShowRightSidebar: (show) => set({ showRightSidebar: show }),
       setCardSize: (size) => set({ cardSize: size }),
@@ -236,6 +243,7 @@ export const useSettingsStore = create<SettingsState>()(
           clockPosition: state.clockPosition,
           clockStyle: state.clockStyle,
           isDynamicWallpaper: state.isDynamicWallpaper,
+          autoFocusSearch: state.autoFocusSearch,
         };
       },
       applyShareProfileSettings: (settings) =>
@@ -258,6 +266,7 @@ export const useSettingsStore = create<SettingsState>()(
           clockPosition: settings.clockPosition,
           clockStyle: settings.clockStyle,
           isDynamicWallpaper: settings.isDynamicWallpaper,
+          autoFocusSearch: settings.autoFocusSearch,
         }),
       resetSettings: async () => {
         set({
@@ -282,6 +291,7 @@ export const useSettingsStore = create<SettingsState>()(
           layoutPreset: SHARE_SETTINGS_DEFAULTS.layoutPreset,
           clockPosition: SHARE_SETTINGS_DEFAULTS.clockPosition,
           clockStyle: SHARE_SETTINGS_DEFAULTS.clockStyle,
+          autoFocusSearch: SHARE_SETTINGS_DEFAULTS.autoFocusSearch,
           isHydrated: true,
           isClockDialogOpen: false,
           isBackgroundDialogOpen: false,

@@ -14,6 +14,7 @@ export const TRANSLATIONS = {
   [LANGUAGES.EN]: {
     // Settings Menu
     settings: "Settings",
+    moreSettings: "More Settings",
     theme: "Theme",
     light: "Light",
     dark: "Dark",
@@ -24,7 +25,7 @@ export const TRANSLATIONS = {
     autoOrderTabs: "Auto Order Tabs",
     showClock: "Show Clock",
     showRightSidebar: "Show Right Sidebar",
-    enableLeftSidebarHover: "Left Hover Open",
+    enableLeftSidebarHover: "AI Bar",
     enableSearchHoverZone: "Search Hover Zone",
     autoFocusSearch: "Auto-focus Search Box",
     resizeShortcuts: "Resize Shortcuts",
@@ -187,6 +188,7 @@ export const TRANSLATIONS = {
   [LANGUAGES.BN]: {
     // Settings Menu
     settings: "সেটিংস",
+    moreSettings: "আরও সেটিংস",
     theme: "থিম",
     light: "আলো",
     dark: "অন্ধকার",
@@ -197,7 +199,7 @@ export const TRANSLATIONS = {
     autoOrderTabs: "অটো অর্ডার ট্যাব",
     showClock: "ঘড়ি দেখান",
     showRightSidebar: "ডান সাইডবার দেখান",
-    enableLeftSidebarHover: "বাম হোভার ওপেন",
+    enableLeftSidebarHover: "এআই বার",
     enableSearchHoverZone: "সার্চ হোভার জোন",
     autoFocusSearch: "অটো-ফোকাস সার্চ বক্স",
     resizeShortcuts: "শর্টকাট রিসাইজ",
