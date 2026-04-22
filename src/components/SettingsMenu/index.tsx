@@ -15,6 +15,7 @@ import {
   ChevronDown,
   ChevronUp,
   Languages,
+  Search,
 } from "lucide-react";
 import { useTheme } from "next-themes";
 import { cn } from "@/lib/utils";
@@ -174,18 +175,22 @@ const SettingsMenu = () => {
             <span className="mb-2 block text-[10px] font-medium uppercase text-muted-foreground/70">
               {t("searchEngine")}
             </span>
-            <div className="grid grid-cols-4 gap-1">
-              {["google", "duckduckgo", "bing", "brave"].map((engine) => (
-                <Button
-                  key={engine}
-                  variant={searchEngine === engine ? "secondary" : "ghost"}
-                  size="sm"
-                  className="h-7 px-0 text-[10px] capitalize"
-                  onClick={() => handleSearchEngineChange(engine)}>
-                  {engine === "duckduckgo" ? "DDG" : engine}
-                </Button>
-              ))}
-            </div>
+            <Button
+              variant="secondary"
+              size="sm"
+              className="h-8 w-full justify-start gap-2 bg-background/50 hover:bg-accent"
+              onClick={() => {
+                const engines: SearchEngine[] = ["google", "duckduckgo", "bing"];
+                const currentIndex = engines.indexOf(searchEngine);
+                // If current engine is not in the list (like 'brave'), start from index -1 which gives 0
+                const nextIndex = (currentIndex + 1) % engines.length;
+                handleSearchEngineChange(engines[nextIndex]);
+              }}>
+              <Search className="h-4 w-4" />
+              <span className="text-[10px] font-semibold capitalize">
+                {searchEngine === "duckduckgo" ? "DDG (DuckDuckGo)" : searchEngine}
+              </span>
+            </Button>
           </div>
 
           {/* Layout Selection */}
