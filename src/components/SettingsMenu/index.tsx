@@ -13,19 +13,19 @@ import { useSettingsStore } from "@/store/settingsStore";
 import { useTranslation } from "@/constants/languages";
 
 // Sections
-import { ThemeLanguageSection } from "./sections/ThemeLanguageSection";
-import { SearchPositionSection } from "./sections/SearchPositionSection";
-import { TogglesSection } from "./sections/TogglesSection";
-import { BackgroundSection } from "./sections/BackgroundSection";
-import { ActionGrid } from "./sections/ActionGrid";
+import { ThemeLanguageSection } from "./Theme/ThemeLanguageSection";
+import { SearchPositionSection } from "./Search/SearchPositionSection";
+import { TogglesSection } from "./Toggles/TogglesSection";
+import { BackgroundSection } from "./Background/BackgroundSection";
+import { ActionGrid } from "./Shortcuts/ActionGrid";
 
 // Dialogs
-import { ResizeShortcutsDialog } from "./dialogs/ResizeShortcutsDialog";
-import { BackgroundImageDialog } from "./dialogs/BackgroundImageDialog";
-import { ClockColorDialog } from "./dialogs/ClockColorDialog";
-import { HistoryDialog } from "./dialogs/HistoryDialog";
-import { ResetDialog } from "./dialogs/ResetDialog";
-import { ProfileDialog } from "./dialogs/ProfileDialog";
+import { ResizeShortcutsDialog } from "./Shortcuts/ResizeShortcutsDialog";
+import { BackgroundImageDialog } from "./Background/BackgroundImageDialog";
+import { ClockColorDialog } from "./Clock/ClockColorDialog";
+import { HistoryDialog } from "./History/HistoryDialog";
+import { ResetDialog } from "./Reset/ResetDialog";
+import { ProfileDialog } from "./Profile/ProfileDialog";
 
 const SettingsMenu = () => {
   const [isHistoryDialogOpen, setIsHistoryDialogOpen] = useState(false);
