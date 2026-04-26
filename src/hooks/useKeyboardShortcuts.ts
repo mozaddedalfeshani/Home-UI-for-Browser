@@ -11,10 +11,12 @@ import { trackVisit } from "@/lib/analyticsClient";
 
 interface UseKeyboardShortcutsProps {
   onSearchModalOpen?: (initialQuery?: string) => void;
+  isAuthenticated?: boolean;
 }
 
 export const useKeyboardShortcuts = ({
   onSearchModalOpen,
+  isAuthenticated = false,
 }: UseKeyboardShortcutsProps = {}) => {
   const getTabByShortcut = useTabsStore((state) => state.getTabByShortcut);
   const incrementVisitCount = useTabsStore(
@@ -33,14 +35,24 @@ export const useKeyboardShortcuts = ({
         tagName === "textarea" ||
         target.contentEditable === "true";
 
-      if (
+      const isCmdOrCtrl = event.ctrlKey || event.metaKey;
+      const isPlainSlash =
         event.key === "/" &&
         !isInputField &&
         !event.ctrlKey &&
         !event.altKey &&
         !event.shiftKey &&
-        !event.metaKey
-      ) {
+        !event.metaKey;
+      const isComboSlash =
+        event.key === "/" &&
+        !isInputField &&
+        isCmdOrCtrl &&
+        !event.altKey &&
+        !event.shiftKey;
+
+      const shouldTriggerSearch = isPlainSlash || (isAuthenticated && isComboSlash);
+
+      if (shouldTriggerSearch) {
         event.preventDefault();
         event.stopPropagation();
         onSearchModalOpen?.();
@@ -98,5 +110,6 @@ export const useKeyboardShortcuts = ({
     getTabByShortcut,
     incrementVisitCount,
     onSearchModalOpen,
+    isAuthenticated,
   ]);
 };
