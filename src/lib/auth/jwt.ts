@@ -4,6 +4,7 @@ const JWT_SECRET = process.env.JWT_SECRET || "fallback-secret-replace-me";
 
 export interface TokenPayload {
   userId: string;
+  name: string;
   email: string;
 }
 

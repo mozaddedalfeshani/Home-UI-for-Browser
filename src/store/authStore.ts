@@ -5,12 +5,12 @@ import { useSettingsStore } from "./settingsStore";
 import { toast } from "sonner";
 
 interface AuthState {
-  user: { email: string; id: string } | null;
+  user: { email: string; id: string; name: string } | null;
   isAuthenticated: boolean;
   isLoading: boolean;
   lastSynced: number | null;
 
-  setUser: (user: { email: string; id: string } | null) => void;
+  setUser: (user: { email: string; id: string; name: string } | null) => void;
   setLoading: (loading: boolean) => void;
 
   login: (
@@ -18,6 +18,7 @@ interface AuthState {
     pass: string,
   ) => Promise<{ success: boolean; error?: string }>;
   signup: (
+    name: string,
     email: string,
     pass: string,
   ) => Promise<{ success: boolean; error?: string }>;
@@ -64,12 +65,12 @@ export const useAuthStore = create<AuthState>()(
         }
       },
 
-      signup: async (email, password) => {
+      signup: async (name, email, password) => {
         set({ isLoading: true });
         try {
           const res = await fetch("/api/auth/signup", {
             method: "POST",
-            body: JSON.stringify({ email, password }),
+            body: JSON.stringify({ name, email, password }),
           });
           const data = await res.json();
           set({ isLoading: false });

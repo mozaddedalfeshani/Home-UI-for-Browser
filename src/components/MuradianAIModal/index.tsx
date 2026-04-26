@@ -8,6 +8,11 @@ import {
 } from "@/components/ui/dialog";
 import Sidebar from "./sidebar";
 import MainContent from "./main-content";
+import { useMuradianAiStore, Message } from "@/store/muradianAiStore";
+import { useAgentStore } from "@/store/agentStore";
+import { toast } from "sonner";
+import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
+import { Button } from "@/components/ui/button";
 
 interface MuradianAIModalProps {
   open: boolean;
@@ -18,27 +23,250 @@ const MuradianAIModal = ({
   open,
   onOpenChange,
 }: MuradianAIModalProps) => {
+  const { 
+    messages, 
+    setMessages, 
+    addMessage, 
+    saveCurrentSession,
+    fetchSessions,
+    activeAgentId
+  } = useMuradianAiStore();
+
+  const { agents } = useAgentStore();
+  const activeAgent = agents.find(a => a.id === activeAgentId);
+  
   const [query, setQuery] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [selectedModel, setSelectedModel] = useState("deepseek-v4-flash");
+  const [isAutoModel, setIsAutoModel] = useState(true);
+  const [selectedImages, setSelectedImages] = useState<string[]>([]);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+  const [isOutOfContext, setIsOutOfContext] = useState(false);
+  const [showConfirmClose, setShowConfirmClose] = useState(false);
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
     if (open) {
       setTimeout(() => inputRef.current?.focus(), 100);
+      fetchSessions();
     }
-  }, [open]);
+  }, [open, fetchSessions]);
+
+  // Model switching logic
+  useEffect(() => {
+    if (isAutoModel && messages.length > 0 && messages.length % 5 === 0) {
+      const detectComplexity = async () => {
+        try {
+          const res = await fetch("/api/ai/detect-complexity", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ messages })
+          });
+          if (res.ok) {
+            const data = await res.json();
+            setSelectedModel(data.model);
+          }
+        } catch (e) {
+          console.error("Failed to detect complexity", e);
+        }
+      };
+      detectComplexity();
+    }
+  }, [messages.length, isAutoModel, messages]);
+
+  const handleSend = async () => {
+    if ((!query.trim() && selectedImages.length === 0) || isLoading || isOutOfContext) return;
+
+    const userMessage: Message = {
+      id: crypto.randomUUID(),
+      role: "user",
+      content: query.trim(),
+      images: selectedImages.length > 0 ? [...selectedImages] : undefined
+    };
+
+    addMessage(userMessage);
+    setQuery("");
+    setSelectedImages([]);
+    setIsLoading(true);
+
+    try {
+      const systemPrompt = activeAgent?.rules || "You are a professional Office Assistant. Your primary language is Bangla. Always respond in Bangla by default. Focus on providing direct, concise, and helpful answers. Maintain a professional and efficient tone.";
+      
+      const systemMessage = {
+        role: "system" as const,
+        content: systemPrompt
+      };
+
+      const response = await fetch("/api/ai/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          messages: [systemMessage, ...messages, userMessage].map(m => {
+            const msg: any = { role: m.role, content: m.content };
+            if ("images" in m && m.images) msg.images = m.images;
+            return msg;
+          }),
+          provider: "deepseek",
+          model: selectedModel,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        if (response.status === 403 && errorData.error === "out_of_context") {
+          setIsOutOfContext(true);
+          addMessage({ 
+            id: crypto.randomUUID(), 
+            role: "assistant", 
+            content: "You are out of context. You have reached your monthly token limit of 100,000 tokens." 
+          });
+          setIsLoading(false);
+          return;
+        }
+        throw new Error(errorData.error || "Failed to get response");
+      }
+
+      const reader = response.body?.getReader();
+      if (!reader) throw new Error("No reader available");
+
+      const assistantMessageId = crypto.randomUUID();
+      const assistantMessage: Message = { id: assistantMessageId, role: "assistant", content: "" };
+      setMessages([...messages, userMessage, assistantMessage]);
+
+      let accumulatedContent = "";
+      const decoder = new TextDecoder();
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        const chunk = decoder.decode(value);
+        const lines = chunk.split("\n");
+
+        for (const line of lines) {
+          if (line.startsWith("data: ")) {
+            const data = line.slice(6);
+            if (data === "[DONE]") break;
+
+            try {
+              const parsed = JSON.parse(data);
+              const content = parsed.choices?.[0]?.delta?.content || "";
+              accumulatedContent += content;
+              
+              setMessages(
+                [...messages, userMessage, { id: assistantMessageId, role: "assistant", content: accumulatedContent }]
+              );
+            } catch (e) {
+              // Ignore parse errors
+            }
+          }
+        }
+      }
+
+      const updatedMessages: Message[] = [
+        ...messages, 
+        userMessage, 
+        { id: assistantMessageId, role: "assistant" as const, content: accumulatedContent }
+      ];
+      setMessages(updatedMessages);
+
+      let sessionTitle: string | undefined = undefined;
+
+      // Handle title generation
+      if (messages.length === 0) {
+        // Initial quick title
+        sessionTitle = userMessage.content.slice(0, 30) + "...";
+      } else if (updatedMessages.length === 4) {
+        // We have exactly 4 messages (2 user + 2 assistant). Let's generate a proper title.
+        try {
+          const titleRes = await fetch("/api/ai/generate-title", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ messages: updatedMessages })
+          });
+          if (titleRes.ok) {
+            const data = await titleRes.json();
+            sessionTitle = data.title;
+          }
+        } catch (e) {
+          console.error("Failed to generate title", e);
+        }
+      }
+
+      await saveCurrentSession(sessionTitle);
+
+    } catch (error) {
+      console.error("Chat Error:", error);
+      addMessage({ 
+        id: crypto.randomUUID(), 
+        role: "assistant", 
+        content: "Sorry, I encountered an error. Please check your API configuration." 
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-[95vw] w-[95vw] h-[95vh] p-0 border border-border bg-background shadow-2xl rounded-3xl overflow-hidden flex flex-row">
-        <Sidebar />
-        <MainContent 
-          query={query} 
-          setQuery={setQuery} 
-          inputRef={inputRef} 
-        />
-        <DialogTitle className="sr-only">Muradian AI - Ask Anything</DialogTitle>
-      </DialogContent>
-    </Dialog>
+    <>
+      <Dialog open={open} onOpenChange={onOpenChange}>
+        <DialogContent 
+          hideDefaultClose
+          className="max-w-[95vw] w-[95vw] h-[95vh] p-0 border border-border bg-background shadow-2xl rounded-3xl overflow-hidden flex flex-row"
+          onInteractOutside={(e) => {
+            e.preventDefault();
+            toast.warning("Click the Close badge to dismiss the AI panel.");
+          }}
+        >
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setShowConfirmClose(true)}
+            className="absolute right-6 top-6 z-50 rounded-full bg-background/80 backdrop-blur-md px-4 py-1.5 shadow-sm text-secondary-foreground"
+          >
+            <div className="w-1.5 h-1.5 rounded-full bg-destructive animate-pulse" />
+            Close
+          </Button>
+
+          <Sidebar isCollapsed={isSidebarCollapsed} setIsCollapsed={setIsSidebarCollapsed} />
+
+          <MainContent 
+            query={query} 
+            setQuery={setQuery} 
+            inputRef={inputRef} 
+            messages={messages}
+            isLoading={isLoading}
+            onSend={handleSend}
+            selectedModel={selectedModel}
+            setSelectedModel={(m) => {
+              setSelectedModel(m);
+              setIsAutoModel(false);
+            }}
+            isAutoModel={isAutoModel}
+            setIsAutoModel={setIsAutoModel}
+            selectedImages={selectedImages}
+            setSelectedImages={setSelectedImages}
+            isOutOfContext={isOutOfContext}
+            onSaveHistory={() => saveCurrentSession("Manually Saved Session")}
+          />
+          <DialogTitle className="sr-only">Muradian AI - Ask Anything</DialogTitle>
+        </DialogContent>
+      </Dialog>
+
+      <ConfirmDialog 
+        open={showConfirmClose} 
+        onOpenChange={setShowConfirmClose}
+        title="Close Muradian AI?"
+        description="Are you sure you want to close the AI panel? Your active chat session will be preserved."
+        confirmText="Yes, close"
+        cancelText="Cancel"
+        onConfirm={() => {
+          setShowConfirmClose(false);
+          onOpenChange(false);
+        }}
+        variant="warning"
+      />
+    </>
   );
 };
 

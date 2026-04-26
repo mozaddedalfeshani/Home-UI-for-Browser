@@ -14,12 +14,12 @@ export async function POST(request: NextRequest) {
   if (guard) return guard;
 
   try {
-    const { email, password } = await request.json();
+    const { name, email, password } = await request.json();
 
-    if (!email || !password) {
+    if (!name || !email || !password) {
       return withCorsHeaders(
         NextResponse.json(
-          { error: "Email and password are required" },
+          { error: "Name, email, and password are required" },
           { status: 400 },
         ),
         request,
@@ -47,7 +47,7 @@ export async function POST(request: NextRequest) {
     const passwordHash = await bcrypt.hash(password, 10);
 
     if (!existingUser) {
-      await createUser(email, passwordHash);
+      await createUser(name, email, passwordHash);
     }
 
     // Generate 4-digit OTP

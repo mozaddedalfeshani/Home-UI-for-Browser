@@ -5,10 +5,17 @@ import { ShareProfileTab, ShareProfileSettings } from "@/lib/shareProfile";
 
 export interface User {
   _id?: ObjectId;
+  name: string;
   email: string;
   passwordHash: string;
   verified: boolean;
   createdAt: Date;
+}
+
+export interface TokenUsage {
+  userId: string;
+  month: string; // Format: YYYY-MM
+  tokensUsed: number;
 }
 
 export interface VerifyCode {
@@ -30,16 +37,33 @@ export async function getUserByEmail(email: string): Promise<User | null> {
 }
 
 export async function createUser(
+  name: string,
   email: string,
   passwordHash: string,
 ): Promise<void> {
   const db = await getMongoDb();
   await db.collection<User>("users").insertOne({
+    name,
     email,
     passwordHash,
     verified: false,
     createdAt: new Date(),
   });
+}
+
+export async function getUserTokenUsage(userId: string, month: string): Promise<number> {
+  const db = await getMongoDb();
+  const record = await db.collection<TokenUsage>("token_usage").findOne({ userId, month });
+  return record?.tokensUsed || 0;
+}
+
+export async function incrementTokenUsage(userId: string, month: string, tokens: number): Promise<void> {
+  const db = await getMongoDb();
+  await db.collection<TokenUsage>("token_usage").updateOne(
+    { userId, month },
+    { $inc: { tokensUsed: tokens } },
+    { upsert: true }
+  );
 }
 
 export async function verifyUser(email: string): Promise<void> {

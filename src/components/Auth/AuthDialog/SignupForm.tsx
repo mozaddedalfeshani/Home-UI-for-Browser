@@ -14,15 +14,16 @@ export function SignupForm({
 }: {
   onVerify: (email: string) => void;
 }) {
+  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const { signup, isLoading } = useAuthStore();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const result = await signup(email, password);
+    const result = await signup(name, email, password);
     if (result.success) {
-      toast.success("Verification code sent to your email");
+      toast.success("Verification code sent to your email!");
       onVerify(email);
     } else {
       toast.error(result.error || "Signup failed");
@@ -30,7 +31,18 @@ export function SignupForm({
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4 pt-4">
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <div className="space-y-2">
+        <Label htmlFor="signup-name">Name</Label>
+        <Input
+          id="signup-name"
+          type="text"
+          placeholder="John Doe"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          required
+        />
+      </div>
       <div className="space-y-2">
         <Label htmlFor="signup-email">Email</Label>
         <Input
