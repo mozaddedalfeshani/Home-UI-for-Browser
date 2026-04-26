@@ -7,6 +7,7 @@ import SettingsMenu from "@/components/SettingsMenu";
 import Notepad from "@/components/Notepad";
 import AISidebar from "@/components/AISidebar";
 import SearchModal from "@/components/SearchModal";
+import MuradianAIModal from "@/components/MuradianAIModal";
 import { useSettingsStore } from "@/store/settingsStore";
 import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
 import { useMediaUrl } from "@/hooks/useMediaUrl";
@@ -61,6 +62,7 @@ export function PageClient() {
   );
   const [isSidebarVisible, setIsSidebarVisible] = useState(false);
   const [isAISidebarVisible, setIsAISidebarVisible] = useState(false);
+  const [isMuradianModalOpen, setIsMuradianModalOpen] = useState(false);
   const isSearchModalOpenRef = useRef(false);
   const isSearchInputReadyRef = useRef(false);
 
@@ -136,9 +138,23 @@ export function PageClient() {
         ? "pt-24 pb-6 px-6"
         : "pt-16 pb-4 px-4";
 
+  const { isAuthenticated, initCloudSession } = useAuthStore();
+
+  // Restore cloud data once local stores are hydrated (silent, non-blocking)
+  useEffect(() => {
+    if (isHydrated) {
+      initCloudSession();
+    }
+  }, [isHydrated, initCloudSession]);
+
   // Initialize keyboard shortcuts
   useKeyboardShortcuts({
+    isAuthenticated,
     onSearchModalOpen: (initialQuery) => {
+      if (isAuthenticated) {
+        setIsMuradianModalOpen(true);
+        return;
+      }
       if (initialQuery) {
         setSearchOpenRequest((currentRequest) => ({
           id: currentRequest.id + 1,
@@ -173,15 +189,6 @@ export function PageClient() {
       hasAutoOpenedRef.current = true;
     }
   }, [isHydrated, autoFocusSearch]);
-
-  const { initCloudSession } = useAuthStore();
-
-  // Restore cloud data once local stores are hydrated (silent, non-blocking)
-  useEffect(() => {
-    if (isHydrated) {
-      initCloudSession();
-    }
-  }, [isHydrated, initCloudSession]);
 
   return (
     <div className="min-h-screen w-full relative overflow-hidden">
@@ -294,6 +301,10 @@ export function PageClient() {
         onInputReady={() => {
           isSearchInputReadyRef.current = true;
         }}
+      />
+      <MuradianAIModal
+        open={isMuradianModalOpen}
+        onOpenChange={setIsMuradianModalOpen}
       />
       <StickyAlarmDialog />
     </div>
