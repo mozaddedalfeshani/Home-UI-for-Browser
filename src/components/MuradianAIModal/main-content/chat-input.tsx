@@ -122,8 +122,9 @@ export const ChatInput = ({
           onChange={handleFileChange}
         />
         <button 
-          onClick={() => fileInputRef.current?.click()}
-          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full hover:bg-zinc-200 dark:hover:bg-zinc-800 transition-colors text-zinc-500"
+          disabled
+          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full transition-colors text-zinc-300 dark:text-zinc-700 cursor-not-allowed"
+          title="Image upload is not supported by the current model."
         >
           <HugeiconsIcon icon={Add01Icon} size={24} />
         </button>

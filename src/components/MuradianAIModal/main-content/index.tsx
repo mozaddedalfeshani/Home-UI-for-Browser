@@ -62,8 +62,11 @@ export default function MainContent({
 
   return (
     <main className="flex-1 relative flex flex-col bg-background h-full overflow-hidden">
-      <div className="flex-1 overflow-y-auto p-8 pb-40">
-        <div className="max-w-4xl mx-auto space-y-12">
+      {/* Top gradient to protect the Close badge and provide a smooth scroll-fade effect */}
+      <div className="absolute top-0 left-0 right-0 h-24 bg-gradient-to-b from-background via-background/80 to-transparent z-40 pointer-events-none" />
+
+      <div className="flex-1 overflow-y-auto p-8 pb-40 pt-16">
+        <div className="max-w-4xl mx-auto space-y-12 relative z-10">
           {!isChatActive && <WelcomeHeader />}
           
           <ChatMessages messages={messages} isLoading={isLoading} />

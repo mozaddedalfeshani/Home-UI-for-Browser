@@ -150,11 +150,12 @@ export function PageClient() {
   // Initialize keyboard shortcuts
   useKeyboardShortcuts({
     isAuthenticated,
-    onSearchModalOpen: (initialQuery) => {
+    onAIModalOpen: () => {
       if (isAuthenticated) {
         setIsMuradianModalOpen(true);
-        return;
       }
+    },
+    onSearchModalOpen: (initialQuery) => {
       if (initialQuery) {
         setSearchOpenRequest((currentRequest) => ({
           id: currentRequest.id + 1,

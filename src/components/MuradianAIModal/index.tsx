@@ -88,6 +88,14 @@ const MuradianAIModal = ({
 
     addMessage(userMessage);
     setQuery("");
+    
+    // DeepSeek API doesn't support images yet. Show a warning to the user.
+    if (selectedImages.length > 0) {
+      toast.warning("DeepSeek API currently does not support image analysis. Images will be ignored.", {
+        duration: 4000
+      });
+    }
+    
     setSelectedImages([]);
     setIsLoading(true);
 
@@ -103,10 +111,9 @@ const MuradianAIModal = ({
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          // DeepSeek strictly requires content to be a string. It will reject the OpenAI Vision array format.
           messages: [systemMessage, ...messages, userMessage].map(m => {
-            const msg: any = { role: m.role, content: m.content };
-            if ("images" in m && m.images) msg.images = m.images;
-            return msg;
+            return { role: m.role, content: m.content };
           }),
           provider: "deepseek",
           model: selectedModel,
