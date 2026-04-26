@@ -44,6 +44,7 @@ const MuradianAIModal = ({
   const [isOutOfContext, setIsOutOfContext] = useState(false);
   const [showConfirmClose, setShowConfirmClose] = useState(false);
   const inputRef = useRef<HTMLTextAreaElement>(null);
+  const lastCheckedLengthRef = useRef(0);
 
   useEffect(() => {
     if (open) {
@@ -54,7 +55,8 @@ const MuradianAIModal = ({
 
   // Model switching logic
   useEffect(() => {
-    if (isAutoModel && messages.length > 0 && messages.length % 5 === 0) {
+    if (isAutoModel && messages.length > 0 && messages.length % 5 === 0 && messages.length !== lastCheckedLengthRef.current) {
+      lastCheckedLengthRef.current = messages.length;
       const detectComplexity = async () => {
         try {
           const res = await fetch("/api/ai/detect-complexity", {
