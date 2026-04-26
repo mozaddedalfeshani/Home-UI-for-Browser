@@ -178,9 +178,10 @@ export const ChatInput = ({
               {MODELS.map((model) => (
                 <DropdownMenuItem
                   key={model.id}
+                  disabled
                   onClick={() => setSelectedModel(model.id)}
                   className={cn(
-                    "flex items-center gap-3 p-3 rounded-xl cursor-pointer transition-colors",
+                    "flex items-center gap-3 p-3 rounded-xl transition-colors opacity-50 cursor-not-allowed",
                     (!isAutoModel && selectedModel === model.id) ? "bg-primary/10 text-primary" : "hover:bg-muted"
                   )}
                 >
@@ -192,7 +193,7 @@ export const ChatInput = ({
                   </div>
                   <div className="flex flex-col">
                     <span className="text-sm font-semibold">{model.label}</span>
-                    <span className="text-[10px] text-muted-foreground">{model.subtitle}</span>
+                    <span className="text-[10px] text-muted-foreground">{model.subtitle} (Coming Soon)</span>
                   </div>
                 </DropdownMenuItem>
               ))}
