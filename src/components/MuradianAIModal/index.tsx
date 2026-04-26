@@ -100,7 +100,7 @@ const MuradianAIModal = ({
     setIsLoading(true);
 
     try {
-      const systemPrompt = activeAgent?.rules || "You are a professional Office Assistant. Your primary language is Bangla. Always respond in Bangla by default. Focus on providing direct, concise, and helpful answers. Maintain a professional and efficient tone.";
+      const systemPrompt = activeAgent?.rules || "You are a professional Office Assistant. Your primary language is Bangla. Always respond in Bangla by default. Give direct answers and keep them as simple as possible. Avoid unnecessary explanations unless explicitly asked.";
       
       const systemMessage = {
         role: "system" as const,

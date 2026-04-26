@@ -34,7 +34,7 @@ export const AgentManagement = () => {
       provider: "deepseek",
       apiKey: "global",
       model: "deepseek-v4-flash",
-      rules: "You are a helpful assistant.",
+      rules: "You are a helpful assistant. Give direct answers and keep them as simple as possible. Avoid unnecessary explanations unless explicitly asked.",
       language: "auto",
       behavior: "professional",
     });
