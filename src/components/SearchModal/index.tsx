@@ -17,6 +17,40 @@ import { useTabClickHistoryStore } from "@/store/tabClickHistoryStore";
 import { trackSearch, trackVisit } from "@/lib/analyticsClient";
 import { cn } from "@/lib/utils";
 
+const escapeRegExp = (value: string) =>
+  value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
+const renderHighlightedMatch = (
+  text: string,
+  searchText: string,
+  highlightClassName = "font-semibold text-primary",
+) => {
+  const trimmedSearchText = searchText.trim();
+
+  if (!trimmedSearchText) {
+    return text;
+  }
+
+  const matcher = new RegExp(`(${escapeRegExp(trimmedSearchText)})`, "ig");
+  const parts = text.split(matcher);
+
+  return parts.map((part, index) => {
+    if (!part) {
+      return null;
+    }
+
+    if (part.toLowerCase() !== trimmedSearchText.toLowerCase()) {
+      return part;
+    }
+
+    return (
+      <span key={`${part}-${index}`} className={highlightClassName}>
+        {part}
+      </span>
+    );
+  });
+};
+
 interface SearchModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -34,6 +68,9 @@ const SearchModal = ({
   onInputReady,
 }: SearchModalProps) => {
   const [query, setQuery] = useState("");
+  const [searchQuerySuggestions, setSearchQuerySuggestions] = useState<
+    string[]
+  >([]);
   const [activeIndex, setActiveIndex] = useState(-1);
   const inputRef = useRef<HTMLInputElement>(null);
   const lastAppliedRequestIdRef = useRef(0);
@@ -103,6 +140,47 @@ const SearchModal = ({
     setActiveIndex(-1);
   }, [query]);
 
+  useEffect(() => {
+    const trimmedQuery = query.trim();
+
+    if (!open || !trimmedQuery) {
+      setSearchQuerySuggestions([]);
+      return;
+    }
+
+    const controller = new AbortController();
+    const timeoutId = window.setTimeout(async () => {
+      try {
+        const response = await fetch(
+          `/api/analytics/search?query=${encodeURIComponent(trimmedQuery)}&suggestions=1`,
+          {
+            headers: { "x-home-ui-request": "search-analytics" },
+            signal: controller.signal,
+          },
+        );
+
+        if (!response.ok) {
+          setSearchQuerySuggestions([]);
+          return;
+        }
+
+        const payload = (await response.json()) as {
+          data?: string[];
+        };
+        setSearchQuerySuggestions(payload.data ?? []);
+      } catch (error) {
+        if ((error as Error).name !== "AbortError") {
+          setSearchQuerySuggestions([]);
+        }
+      }
+    }, 180);
+
+    return () => {
+      controller.abort();
+      window.clearTimeout(timeoutId);
+    };
+  }, [open, query]);
+
   const isUrl = (input: string): boolean => {
     // Check if it starts with http:// or https://
     if (input.startsWith("http://") || input.startsWith("https://")) {
@@ -169,6 +247,17 @@ const SearchModal = ({
   const normalizedQuery = query.trim().toLowerCase();
 
   const suggestionItems = [
+    ...searchQuerySuggestions
+      .map((suggestion) => suggestion.trim())
+      .filter(Boolean)
+      .filter((suggestion) => suggestion.toLowerCase() !== normalizedQuery)
+      .slice(0, 6)
+      .map((suggestion) => ({
+        id: `search-query-${suggestion.toLowerCase()}`,
+        type: "search-query" as const,
+        label: suggestion,
+        value: suggestion,
+      })),
     ...tabs
       .filter((tab) => {
         if (!normalizedQuery) {
@@ -203,6 +292,10 @@ const SearchModal = ({
             (tab) =>
               tab.url === entry.value ||
               tab.title.trim().toLowerCase() === entry.normalizedValue,
+          ) &&
+          !searchQuerySuggestions.some(
+            (suggestion) =>
+              suggestion.trim().toLowerCase() === entry.normalizedValue,
           ),
       )
       .slice(0, 5)
@@ -217,6 +310,34 @@ const SearchModal = ({
 
   const activeSuggestion =
     activeIndex >= 0 ? suggestionItems[activeIndex] : undefined;
+  const inlineCompletion = searchQuerySuggestions.find((suggestion) => {
+    const trimmedSuggestion = suggestion.trim();
+
+    return (
+      normalizedQuery &&
+      trimmedSuggestion.toLowerCase().startsWith(normalizedQuery) &&
+      trimmedSuggestion.toLowerCase() !== normalizedQuery
+    );
+  });
+  const inlineCompletionSuffix = inlineCompletion
+    ? inlineCompletion.slice(query.trim().length)
+    : "";
+
+  const acceptInlineCompletion = () => {
+    if (!inlineCompletion) {
+      return false;
+    }
+
+    setQuery(inlineCompletion);
+    setActiveIndex(-1);
+
+    requestAnimationFrame(() => {
+      const cursorPosition = inlineCompletion.length;
+      inputRef.current?.setSelectionRange(cursorPosition, cursorPosition);
+    });
+
+    return true;
+  };
 
   const handleSuggestionSelect = (
     suggestion: (typeof suggestionItems)[number],
@@ -282,6 +403,10 @@ const SearchModal = ({
       }
 
       handleSearch();
+    } else if (e.key === "Tab" || e.key === "ArrowRight") {
+      if (acceptInlineCompletion()) {
+        e.preventDefault();
+      }
     } else if (e.key === "Escape") {
       e.preventDefault();
       onOpenChange(false);
@@ -307,8 +432,20 @@ const SearchModal = ({
       <DialogContentBottom className="w-full border-0 bg-transparent p-4 shadow-none sm:bottom-8 sm:max-w-2xl">
         <DialogTitle className="sr-only">Search</DialogTitle>
         <div className="mx-auto w-full max-w-2xl">
-          <div className="relative">
+          <div className="relative rounded-full border border-border/50 bg-background/92 backdrop-blur-md">
             <Search className="pointer-events-none absolute left-5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground/70" />
+
+            {inlineCompletionSuffix && (
+              <div
+                aria-hidden="true"
+                className="pointer-events-none absolute inset-0 flex h-14 items-center overflow-hidden whitespace-pre rounded-full pl-12 pr-16 text-base"
+              >
+                <span className="invisible">{query}</span>
+                <span className="text-muted-foreground/45">
+                  {inlineCompletionSuffix}
+                </span>
+              </div>
+            )}
 
             <Input
               ref={inputRef}
@@ -316,7 +453,7 @@ const SearchModal = ({
               value={query}
               onChange={handleInputChange}
               onKeyDown={handleKeyDown}
-              className="h-14 rounded-full border border-border/50 bg-background/92 pl-12 pr-16 text-base shadow-none backdrop-blur-md focus-visible:border-primary/40 focus-visible:ring-0"
+              className="relative h-14 rounded-full border-0 bg-transparent pl-12 pr-16 text-base shadow-none focus-visible:ring-0"
             />
 
             <Button
@@ -353,11 +490,25 @@ const SearchModal = ({
                         )}
                       >
                         <span className="block truncate font-medium">
-                          {suggestion.label}
+                          {renderHighlightedMatch(
+                            suggestion.label,
+                            query,
+                            isActive
+                              ? "font-semibold text-primary"
+                              : "font-semibold text-primary/90",
+                          )}
                         </span>
-                        <span className="mt-0.5 block truncate text-xs text-muted-foreground">
-                          {suggestion.sublabel}
-                        </span>
+                        {"sublabel" in suggestion && (
+                          <span className="mt-0.5 block truncate text-xs text-muted-foreground">
+                            {renderHighlightedMatch(
+                              suggestion.sublabel,
+                              query,
+                              isActive
+                                ? "font-semibold text-primary"
+                                : "font-semibold text-primary/80",
+                            )}
+                          </span>
+                        )}
                       </button>
                     );
                   })}

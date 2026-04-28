@@ -9,7 +9,10 @@ const postJson = async (path: string, payload: unknown) => {
   try {
     await fetch(path, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        "x-home-ui-request": "search-analytics",
+      },
       body: JSON.stringify(payload),
       keepalive: true,
     });
