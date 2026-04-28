@@ -38,8 +38,7 @@ const MuradianAIModal = ({
   const [query, setQuery] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [selectedModel, setSelectedModel] = useState("deepseek-v4-flash");
-  const [isAutoModel, setIsAutoModel] = useState(true);
-  const [selectedImages, setSelectedImages] = useState<string[]>([]);
+  const [isAutoModel] = useState(true);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [isOutOfContext, setIsOutOfContext] = useState(false);
   const [showConfirmClose, setShowConfirmClose] = useState(false);
@@ -77,26 +76,16 @@ const MuradianAIModal = ({
   }, [messages.length, isAutoModel, messages]);
 
   const handleSend = async () => {
-    if ((!query.trim() && selectedImages.length === 0) || isLoading || isOutOfContext) return;
+    if (!query.trim() || isLoading || isOutOfContext) return;
 
     const userMessage: Message = {
       id: crypto.randomUUID(),
       role: "user",
       content: query.trim(),
-      images: selectedImages.length > 0 ? [...selectedImages] : undefined
     };
 
     addMessage(userMessage);
     setQuery("");
-    
-    // DeepSeek API doesn't support images yet. Show a warning to the user.
-    if (selectedImages.length > 0) {
-      toast.warning("DeepSeek API currently does not support image analysis. Images will be ignored.", {
-        duration: 4000
-      });
-    }
-    
-    setSelectedImages([]);
     setIsLoading(true);
 
     try {
@@ -165,7 +154,7 @@ const MuradianAIModal = ({
               setMessages(
                 [...messages, userMessage, { id: assistantMessageId, role: "assistant", content: accumulatedContent }]
               );
-            } catch (e) {
+            } catch {
               // Ignore parse errors
             }
           }
@@ -246,15 +235,6 @@ const MuradianAIModal = ({
             messages={messages}
             isLoading={isLoading}
             onSend={handleSend}
-            selectedModel={selectedModel}
-            setSelectedModel={(m) => {
-              setSelectedModel(m);
-              setIsAutoModel(false);
-            }}
-            isAutoModel={isAutoModel}
-            setIsAutoModel={setIsAutoModel}
-            selectedImages={selectedImages}
-            setSelectedImages={setSelectedImages}
             isOutOfContext={isOutOfContext}
             onSaveHistory={() => saveCurrentSession("Manually Saved Session")}
           />

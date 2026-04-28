@@ -15,12 +15,6 @@ interface MainContentProps {
   messages: Message[];
   isLoading: boolean;
   onSend: () => void;
-  selectedModel: string;
-  setSelectedModel: (v: string) => void;
-  isAutoModel: boolean;
-  setIsAutoModel: (v: boolean) => void;
-  selectedImages: string[];
-  setSelectedImages: (v: string[]) => void;
   isOutOfContext?: boolean;
   onSaveHistory?: () => void;
 }
@@ -32,12 +26,6 @@ export default function MainContent({
   messages, 
   isLoading, 
   onSend,
-  selectedModel,
-  setSelectedModel,
-  isAutoModel,
-  setIsAutoModel,
-  selectedImages,
-  setSelectedImages,
   isOutOfContext,
   onSaveHistory
 }: MainContentProps) {
@@ -65,67 +53,57 @@ export default function MainContent({
       {/* Top gradient to protect the Close badge and provide a smooth scroll-fade effect */}
       <div className="absolute top-0 left-0 right-0 h-24 bg-gradient-to-b from-background via-background/80 to-transparent z-40 pointer-events-none" />
 
-      <div className="flex-1 overflow-y-auto p-8 pb-40 pt-16">
-        <div className="max-w-4xl mx-auto space-y-12 relative z-10">
-          {!isChatActive && <WelcomeHeader />}
-          
-          <ChatMessages messages={messages} isLoading={isLoading} />
-          
-          {isOutOfContext && (
-            <div className="flex flex-col items-center justify-center p-6 mt-4 border border-destructive/20 bg-destructive/5 rounded-2xl animate-in fade-in slide-in-from-bottom-4">
-              <p className="text-sm font-medium text-destructive mb-3 text-center">
-                You have exhausted your monthly token limit (100,000). 
-              </p>
-              <button 
-                onClick={onSaveHistory}
-                className="px-4 py-2 bg-destructive text-destructive-foreground rounded-full text-sm font-medium shadow-sm hover:bg-destructive/90 transition-colors"
-              >
-                Push AI chat history to DB
-              </button>
-            </div>
-          )}
+      <div className="flex h-full min-h-0 flex-col px-8 pb-8 pt-16">
+        <div className="mx-auto flex h-full w-full max-w-5xl min-h-0 flex-col gap-8 relative z-10">
+          <div className="flex-1 min-h-0 overflow-y-auto">
+            <div className="space-y-12">
+              {!isChatActive ? <WelcomeHeader /> : null}
 
-          {!isChatActive && (
-            <div className="max-w-3xl mx-auto">
-              <ChatInput 
-                query={query} 
-                setQuery={setQuery} 
-                inputRef={inputRef} 
-                onSend={onSend}
-                isLoading={isLoading}
-                isCompact={false}
-                selectedModel={selectedModel}
-                setSelectedModel={setSelectedModel}
-                isAutoModel={isAutoModel}
-                setIsAutoModel={setIsAutoModel}
-                selectedImages={selectedImages}
-                setSelectedImages={setSelectedImages}
-              />
-            </div>
-          )}
-        </div>
-      </div>
+              <ChatMessages messages={messages} isLoading={isLoading} />
 
-      {isChatActive && (
-        <div className="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-background via-background to-transparent pt-12 pointer-events-none">
-          <div className="max-w-3xl mx-auto pointer-events-auto">
-            <ChatInput 
-              query={query} 
-              setQuery={setQuery} 
-              inputRef={inputRef} 
+              {isOutOfContext && (
+                <div className="flex flex-col items-center justify-center rounded-2xl border border-destructive/20 bg-destructive/5 p-6 animate-in fade-in slide-in-from-bottom-4">
+                  <p className="mb-3 text-center text-sm font-medium text-destructive">
+                    You have exhausted your monthly token limit (100,000).
+                  </p>
+                  <button
+                    onClick={onSaveHistory}
+                    className="rounded-full bg-destructive px-4 py-2 text-sm font-medium text-destructive-foreground shadow-sm transition-colors hover:bg-destructive/90"
+                  >
+                    Push AI chat history to DB
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+
+          <div className="shrink-0 pb-2">
+            <ChatInput
+              query={query}
+              setQuery={setQuery}
+              inputRef={inputRef}
               onSend={onSend}
               isLoading={isLoading}
-              isCompact={true}
-              selectedModel={selectedModel}
-              setSelectedModel={setSelectedModel}
-              isAutoModel={isAutoModel}
-              setIsAutoModel={setIsAutoModel}
-              selectedImages={selectedImages}
-              setSelectedImages={setSelectedImages}
+              isCompact={false}
             />
           </div>
         </div>
-      )}
+      </div>
+
+      {isChatActive ? (
+        <div className="pointer-events-none absolute bottom-0 left-0 right-0 bg-gradient-to-t from-background via-background to-transparent p-6 pt-12">
+          <div className="pointer-events-auto mx-auto max-w-5xl">
+            <ChatInput
+              query={query}
+              setQuery={setQuery}
+              inputRef={inputRef}
+              onSend={onSend}
+              isLoading={isLoading}
+              isCompact={true}
+            />
+          </div>
+        </div>
+      ) : null}
     </main>
   );
 }
