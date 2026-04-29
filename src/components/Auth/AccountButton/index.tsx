@@ -31,11 +31,14 @@ import {
 import { toast } from "sonner";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Textarea } from "@/components/ui/textarea";
 
 interface MemoryResponse {
   memory?: string;
   error?: string;
 }
+
+const MAX_MEMORY_LENGTH = 200;
 
 export function AccountButton() {
   const { user, isAuthenticated, logout, pushSync, pullSync, lastSynced } =
@@ -45,7 +48,9 @@ export function AccountButton() {
   const [isPushConfirmOpen, setIsPushConfirmOpen] = useState(false);
   const [isMemoryOpen, setIsMemoryOpen] = useState(false);
   const [isMemoryLoading, setIsMemoryLoading] = useState(false);
+  const [isMemorySaving, setIsMemorySaving] = useState(false);
   const [memory, setMemory] = useState("");
+  const [memoryDraft, setMemoryDraft] = useState("");
 
   const handleLogout = async () => {
     await logout();
@@ -78,14 +83,51 @@ export function AccountButton() {
         throw new Error(data.error || "Failed to load memory");
       }
 
-      setMemory(data.memory?.trim() ?? "");
+      const nextMemory = data.memory?.trim() ?? "";
+      setMemory(nextMemory);
+      setMemoryDraft(nextMemory);
     } catch (error) {
       const message =
         error instanceof Error ? error.message : "Failed to load memory";
       toast.error(message);
       setMemory("");
+      setMemoryDraft("");
     } finally {
       setIsMemoryLoading(false);
+    }
+  };
+
+  const handleSaveMemory = async () => {
+    const nextMemory = memoryDraft.trim();
+    if (nextMemory.length > MAX_MEMORY_LENGTH) {
+      toast.error(`Memory must be ${MAX_MEMORY_LENGTH} characters or less.`);
+      return;
+    }
+
+    setIsMemorySaving(true);
+
+    try {
+      const response = await fetch("/api/ai/memory", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ memory: nextMemory }),
+      });
+      const data = (await response.json().catch(() => ({}))) as MemoryResponse;
+
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to save memory");
+      }
+
+      const savedMemory = data.memory?.trim() ?? "";
+      setMemory(savedMemory);
+      setMemoryDraft(savedMemory);
+      toast.success("Memory updated");
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : "Failed to save memory";
+      toast.error(message);
+    } finally {
+      setIsMemorySaving(false);
     }
   };
 
@@ -172,18 +214,56 @@ export function AccountButton() {
 
       <Dialog open={isMemoryOpen} onOpenChange={setIsMemoryOpen}>
         <DialogContent className="max-w-xl rounded-2xl p-5">
-          <div className="min-h-[120px]">
+          <div className="space-y-4">
+            <div>
+              <h2 className="text-base font-semibold text-foreground">
+                Memory
+              </h2>
+              <p className="mt-1 text-sm text-muted-foreground">
+                Edit what MuradianAsk remembers in normal ask mode.
+              </p>
+            </div>
             {isMemoryLoading ? (
-              <p className="text-sm text-muted-foreground">Loading memory...</p>
-            ) : memory ? (
-              <p className="whitespace-pre-wrap text-sm leading-6 text-foreground">
-                {memory}
-              </p>
+              <div className="min-h-[160px] rounded-xl border border-border/70 bg-muted/30 p-3 text-sm text-muted-foreground">
+                Loading memory...
+              </div>
             ) : (
-              <p className="text-sm text-muted-foreground">
-                No memory saved yet. Ask MuradianAsk AI a few questions and it
-                will save useful long-term context here.
-              </p>
+              <>
+                <Textarea
+                  value={memoryDraft}
+                  onChange={(event) => setMemoryDraft(event.target.value)}
+                  placeholder="No memory saved yet. You can write useful long-term context here."
+                  className="min-h-[180px] resize-none rounded-xl bg-muted/30 text-sm leading-6"
+                  maxLength={MAX_MEMORY_LENGTH}
+                  disabled={isMemorySaving}
+                />
+                <div className="flex items-center justify-between gap-3">
+                  <p className="text-xs text-muted-foreground">
+                    {memoryDraft.trim().length}/{MAX_MEMORY_LENGTH}
+                  </p>
+                  <div className="flex items-center gap-2">
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      className="rounded-full"
+                      onClick={() => setMemoryDraft(memory)}
+                      disabled={isMemorySaving || memoryDraft === memory}
+                    >
+                      Reset
+                    </Button>
+                    <Button
+                      type="button"
+                      size="sm"
+                      className="rounded-full"
+                      onClick={handleSaveMemory}
+                      disabled={isMemorySaving || memoryDraft.trim() === memory}
+                    >
+                      {isMemorySaving ? "Saving..." : "Save memory"}
+                    </Button>
+                  </div>
+                </div>
+              </>
             )}
           </div>
         </DialogContent>
