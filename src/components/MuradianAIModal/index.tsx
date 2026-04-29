@@ -46,9 +46,6 @@ interface MuradianAIModalProps {
   onOpenChange: (open: boolean) => void;
 }
 
-const BASE_SYSTEM_PROMPT =
-  "You are MuradianAsk AI, a simple asking assistant. Answer as simply as you can while keeping the answer accurate, useful, and high quality. If the user does not ask for another language, reply in Bangla. Be direct, practical, and friendly. Before answering, silently check that the answer is correct and clear. Do not expose hidden chain-of-thought.";
-
 const MuradianAIModal = ({ open, onOpenChange }: MuradianAIModalProps) => {
   const [query, setQuery] = useState("");
   const [answer, setAnswer] = useState("");
@@ -114,10 +111,6 @@ const MuradianAIModal = ({ open, onOpenChange }: MuradianAIModalProps) => {
     setEditRules(agentToEdit.systemInstruction);
   }, [agentToEdit]);
 
-  const systemPrompt = selectedAgent
-    ? `${BASE_SYSTEM_PROMPT}\n\nUse these extra user-saved answer rules:\n${selectedAgent.systemInstruction}`
-    : BASE_SYSTEM_PROMPT;
-
   const handleSend = async () => {
     const trimmedQuery = query.trim();
     if (!trimmedQuery || isLoading) return;
@@ -130,10 +123,8 @@ const MuradianAIModal = ({ open, onOpenChange }: MuradianAIModalProps) => {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          messages: [
-            { role: "system", content: systemPrompt },
-            { role: "user", content: trimmedQuery },
-          ],
+          message: trimmedQuery,
+          agentId: selectedAgentId || undefined,
         }),
       });
 
@@ -164,6 +155,7 @@ const MuradianAIModal = ({ open, onOpenChange }: MuradianAIModalProps) => {
           try {
             const parsed = JSON.parse(data);
             const content = parsed.choices?.[0]?.delta?.content || "";
+            if (!content) continue;
             accumulatedContent += content;
             setAnswer(accumulatedContent);
           } catch {

@@ -26,9 +26,16 @@ import {
   CloudUploadIcon,
   RefreshIcon,
   Tick01Icon,
+  AiBrain01Icon,
 } from "@hugeicons/core-free-icons";
 import { toast } from "sonner";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
+
+interface MemoryResponse {
+  memory?: string;
+  error?: string;
+}
 
 export function AccountButton() {
   const { user, isAuthenticated, logout, pushSync, pullSync, lastSynced } =
@@ -36,6 +43,9 @@ export function AccountButton() {
   const [isAuthOpen, setIsAuthOpen] = useState(false);
   const [isSyncing, setIsSyncing] = useState(false);
   const [isPushConfirmOpen, setIsPushConfirmOpen] = useState(false);
+  const [isMemoryOpen, setIsMemoryOpen] = useState(false);
+  const [isMemoryLoading, setIsMemoryLoading] = useState(false);
+  const [memory, setMemory] = useState("");
 
   const handleLogout = async () => {
     await logout();
@@ -54,6 +64,29 @@ export function AccountButton() {
     // pullSync(true) instantly replaces local tabs and settings
     await pullSync(true);
     setIsSyncing(false);
+  };
+
+  const handleOpenMemory = async () => {
+    setIsMemoryOpen(true);
+    setIsMemoryLoading(true);
+
+    try {
+      const response = await fetch("/api/ai/memory");
+      const data = (await response.json().catch(() => ({}))) as MemoryResponse;
+
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to load memory");
+      }
+
+      setMemory(data.memory?.trim() ?? "");
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : "Failed to load memory";
+      toast.error(message);
+      setMemory("");
+    } finally {
+      setIsMemoryLoading(false);
+    }
   };
 
   if (!isAuthenticated) {
@@ -112,6 +145,10 @@ export function AccountButton() {
             />
             <span>Pull from cloud</span>
           </DropdownMenuItem>
+          <DropdownMenuItem onClick={handleOpenMemory}>
+            <HugeiconsIcon icon={AiBrain01Icon} size={16} className="mr-2" />
+            <span>Memory</span>
+          </DropdownMenuItem>
           <DropdownMenuSeparator />
           <DropdownMenuItem
             className="text-red-500 focus:text-red-500"
@@ -132,6 +169,25 @@ export function AccountButton() {
         variant="warning"
         onConfirm={handlePushConfirm}
       />
+
+      <Dialog open={isMemoryOpen} onOpenChange={setIsMemoryOpen}>
+        <DialogContent className="max-w-xl rounded-2xl p-5">
+          <div className="min-h-[120px]">
+            {isMemoryLoading ? (
+              <p className="text-sm text-muted-foreground">Loading memory...</p>
+            ) : memory ? (
+              <p className="whitespace-pre-wrap text-sm leading-6 text-foreground">
+                {memory}
+              </p>
+            ) : (
+              <p className="text-sm text-muted-foreground">
+                No memory saved yet. Ask MuradianAsk AI a few questions and it
+                will save useful long-term context here.
+              </p>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {lastSynced && (
         <div className="hidden md:flex items-center text-[10px] text-muted-foreground gap-1 bg-muted/50 px-2 py-1 rounded-full border border-border/50">

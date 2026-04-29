@@ -29,6 +29,19 @@ export async function getMuradianAskAgents(userId: string) {
     .toArray();
 }
 
+export async function getMuradianAskAgentById(userId: string, agentId: string) {
+  if (!ObjectId.isValid(agentId)) {
+    return null;
+  }
+
+  const db = await getMongoDb();
+
+  return db.collection<MuradianAskAgentDocument>(collectionName).findOne({
+    _id: new ObjectId(agentId),
+    userId,
+  });
+}
+
 export async function createMuradianAskAgent(
   userId: string,
   payload: MuradianAskAgentPayload,

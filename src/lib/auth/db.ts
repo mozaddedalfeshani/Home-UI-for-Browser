@@ -31,6 +31,13 @@ export interface UserData {
   updatedAt: Date;
 }
 
+export interface UserMemoryProfile {
+  userId: string;
+  memory: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
 export async function getUserByEmail(email: string): Promise<User | null> {
   const db = await getMongoDb();
   return db.collection<User>("users").findOne({ email });
@@ -92,4 +99,34 @@ export async function getVerifyCode(email: string): Promise<VerifyCode | null> {
 export async function deleteVerifyCode(email: string): Promise<void> {
   const db = await getMongoDb();
   await db.collection<VerifyCode>("verify_codes").deleteOne({ email });
+}
+
+export async function getUserMemoryProfile(
+  userId: string,
+): Promise<UserMemoryProfile | null> {
+  const db = await getMongoDb();
+  return db.collection<UserMemoryProfile>("user_memory_profiles").findOne({ userId });
+}
+
+export async function upsertUserMemoryProfile(
+  userId: string,
+  memory: string,
+): Promise<void> {
+  const db = await getMongoDb();
+  const now = new Date();
+
+  await db.collection<UserMemoryProfile>("user_memory_profiles").updateOne(
+    { userId },
+    {
+      $set: {
+        userId,
+        memory,
+        updatedAt: now,
+      },
+      $setOnInsert: {
+        createdAt: now,
+      },
+    },
+    { upsert: true },
+  );
 }
