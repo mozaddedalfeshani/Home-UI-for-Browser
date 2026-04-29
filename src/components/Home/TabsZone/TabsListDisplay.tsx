@@ -63,15 +63,6 @@ const getFallbackChar = (title: string) => {
   return title.trim().charAt(0).toUpperCase();
 };
 
-const getAccent = (source: string) => {
-  const hash = Array.from(source).reduce(
-    (accumulator, char) => accumulator + char.charCodeAt(0),
-    0,
-  );
-  const hue = hash % 360;
-  return `hsl(${hue} 70% 45%)`;
-};
-
 type DragItem = {
   id: string;
   index: number;
@@ -98,7 +89,6 @@ const SortableShortcutCard = ({
   incrementVisitCount,
   autoOrderTabs,
   cardSize,
-  cardRadius,
 }: SortableShortcutCardProps) => {
   const ref = useRef<HTMLDivElement | null>(null);
   const {
@@ -150,7 +140,6 @@ const SortableShortcutCard = ({
   }
 
   const hostname = getHostname(tab.url);
-  const accent = getAccent(tab.title || hostname);
   const favicon = getFaviconUrl(tab.url);
 
   const handleShortcutClick = () => {
@@ -173,14 +162,15 @@ const SortableShortcutCard = ({
       <ContextMenuTrigger asChild>
         <div
           ref={ref}
-          className="h-full"
+          className="flex flex-col items-center gap-1"
           style={{
-            opacity: isDragging ? 0.6 : 1,
+            opacity: isDragging ? 0.5 : 1,
             cursor: autoOrderTabs
               ? "default"
               : isDragging
                 ? "grabbing"
                 : "grab",
+            width: `${cardSize}rem`,
           }}
         >
           <Tooltip>
@@ -191,57 +181,53 @@ const SortableShortcutCard = ({
                 rel="noopener noreferrer"
                 aria-label={`Open ${tab.title || hostname || "shortcut"}`}
                 onClick={handleShortcutClick}
-                className="block [&:hover]:cursor-pointer"
+                className="block"
                 style={{ textDecoration: "none" }}
               >
-                <Card
-                  className="group relative flex flex-col items-center justify-center gap-2 border border-border/60 bg-card/70 backdrop-blur-sm p-3 text-center shadow-sm transition hover:border-primary/70 hover:shadow-lg cursor-pointer"
+                <div
+                  className="relative flex items-center justify-center overflow-hidden transition-transform active:scale-90"
                   style={{
                     width: `${cardSize}rem`,
                     height: `${cardSize}rem`,
-                    borderRadius: `${cardRadius}rem`,
+                    border: "0.5px solid rgba(255,255,255,0.42)",
+                    borderRadius: `${cardSize * 0.15}rem`,
+                    background: "rgba(255,255,255,0.12)",
+                    backdropFilter: "blur(14px) saturate(1.2)",
+                    boxShadow: "0 8px 20px rgba(15,23,42,0.12)",
+                    WebkitBackdropFilter: "blur(14px) saturate(1.2)",
                   }}
                 >
-                  <div
-                    className="group relative flex items-center justify-center rounded-full bg-muted/70 p-0 text-foreground transition hover:bg-muted"
+                  <Avatar
+                    className="overflow-visible border-0 bg-transparent"
                     style={{
-                      height: `${Math.min(cardSize * 0.5, cardSize - 2)}rem`,
-                      width: `${Math.min(cardSize * 0.5, cardSize - 2)}rem`,
+                      width: `${cardSize * 0.68}rem`,
+                      height: `${cardSize * 0.68}rem`,
+                      borderRadius: `${cardSize * 0.06}rem`,
                     }}
                   >
-                    <Avatar
-                      className="border border-transparent bg-transparent"
-                      style={{
-                        height: `${Math.min(cardSize * 0.5, cardSize - 2)}rem`,
-                        width: `${Math.min(cardSize * 0.5, cardSize - 2)}rem`,
-                      }}
-                    >
-                      {favicon ? (
-                        <AvatarImage src={favicon} alt={hostname} />
-                      ) : null}
-                      <AvatarFallback
+                    {favicon ? (
+                      <AvatarImage
+                        src={favicon}
+                        alt={hostname}
+                        className="object-contain"
                         style={{
-                          backgroundColor: accent,
-                          fontSize: `${Math.max(0.5, cardSize * 0.12)}rem`,
+                          borderRadius: `${cardSize * 0.06}rem`,
                         }}
-                        className="text-white"
-                      >
-                        {getFallbackChar(tab.title || hostname)}
-                      </AvatarFallback>
-                    </Avatar>
-                  </div>
-
-                  <div className="flex w-full flex-col items-center gap-1 px-1">
-                    <p
-                      className="w-full truncate font-medium text-foreground leading-tight"
+                      />
+                    ) : null}
+                    <AvatarFallback
                       style={{
-                        fontSize: `${Math.max(0.5, cardSize * 0.1)}rem`,
+                        backgroundColor: "transparent",
+                        fontSize: `${Math.max(0.6, cardSize * 0.28)}rem`,
+                        fontWeight: 600,
+                        borderRadius: `${cardSize * 0.06}rem`,
                       }}
+                      className="text-foreground"
                     >
-                      {tab.title}
-                    </p>
-                  </div>
-                </Card>
+                      {getFallbackChar(tab.title || hostname)}
+                    </AvatarFallback>
+                  </Avatar>
+                </div>
               </Link>
             </TooltipTrigger>
             <TooltipContent className="max-w-xs space-y-1 text-left">
@@ -249,6 +235,20 @@ const SortableShortcutCard = ({
               <p className="text-xs text-muted-foreground">{tab.url}</p>
             </TooltipContent>
           </Tooltip>
+
+          <p
+            className="w-full text-center text-foreground leading-tight"
+            style={{
+              fontSize: `${Math.max(0.6, cardSize * 0.17)}rem`,
+              fontWeight: 400,
+              letterSpacing: "0px",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              whiteSpace: "nowrap",
+            }}
+          >
+            {tab.title || hostname}
+          </p>
         </div>
       </ContextMenuTrigger>
 
@@ -392,7 +392,6 @@ export const TabsList = () => {
                   key={tab.id}
                   style={{
                     width: `${cardSize}rem`,
-                    height: `${cardSize}rem`,
                   }}
                 >
                   <SortableShortcutCard
