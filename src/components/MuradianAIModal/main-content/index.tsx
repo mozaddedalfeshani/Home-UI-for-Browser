@@ -45,12 +45,12 @@ interface MainContentProps {
   agents: MuradianAskAgent[];
 }
 
-export default function MainContent({ 
-  query, 
-  setQuery, 
-  inputRef, 
-  messages, 
-  isLoading, 
+export default function MainContent({
+  query,
+  setQuery,
+  inputRef,
+  messages,
+  isLoading,
   onSend,
   isOutOfContext,
   onSaveHistory,
@@ -385,7 +385,9 @@ export default function MainContent({
               <Button
                 type="submit"
                 className="rounded-full px-5"
-                disabled={!editName.trim() || !editRules.trim() || isSavingAgent}
+                disabled={
+                  !editName.trim() || !editRules.trim() || isSavingAgent
+                }
               >
                 <Save className="h-4 w-4" />
                 {isSavingAgent ? "Saving..." : "Save rules"}
