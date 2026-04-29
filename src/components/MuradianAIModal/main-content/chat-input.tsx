@@ -44,7 +44,7 @@ export const ChatInput = ({
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder="আজ আমি আপনাকে কীভাবে সাহায্য করতে পারি?"
+            placeholder="Ask anything..."
             className="h-10 min-h-0 flex-1 resize-none rounded-none border-0 !bg-transparent dark:!bg-transparent px-0 py-0 text-base leading-10 shadow-none !shadow-none placeholder:text-zinc-500 focus-visible:ring-0 dark:placeholder:text-zinc-500"
             rows={1}
             disabled={isLoading}
@@ -90,7 +90,7 @@ export const ChatInput = ({
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           onKeyDown={handleKeyDown}
-          placeholder="আজ আমি আপনাকে কীভাবে সাহায্য করতে পারি?"
+          placeholder="Ask anything..."
           className="h-10 min-h-0 flex-1 resize-none rounded-none border-0 !bg-transparent dark:!bg-transparent px-0 py-0 text-base leading-10 shadow-none !shadow-none placeholder:text-zinc-500 focus-visible:ring-0 dark:placeholder:text-zinc-500"
           rows={1}
           disabled={isLoading}

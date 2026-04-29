@@ -6,10 +6,8 @@ import {
   DialogContent,
   DialogTitle,
 } from "@/components/ui/dialog";
-import Sidebar from "./sidebar";
 import MainContent from "./main-content";
 import { useMuradianAiStore, Message } from "@/store/muradianAiStore";
-import { useAgentStore } from "@/store/agentStore";
 import { toast } from "sonner";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { Button } from "@/components/ui/button";
@@ -29,17 +27,12 @@ const MuradianAIModal = ({
     addMessage, 
     saveCurrentSession,
     fetchSessions,
-    activeAgentId
   } = useMuradianAiStore();
-
-  const { agents } = useAgentStore();
-  const activeAgent = agents.find(a => a.id === activeAgentId);
   
   const [query, setQuery] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [selectedModel, setSelectedModel] = useState("deepseek-v4-flash");
   const [isAutoModel] = useState(true);
-  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [isOutOfContext, setIsOutOfContext] = useState(false);
   const [showConfirmClose, setShowConfirmClose] = useState(false);
   const inputRef = useRef<HTMLTextAreaElement>(null);
@@ -89,7 +82,7 @@ const MuradianAIModal = ({
     setIsLoading(true);
 
     try {
-      const systemPrompt = activeAgent?.rules || "You are a professional Office Assistant. Your primary language is Bangla. Always respond in Bangla by default. Give direct answers and keep them as simple as possible. Avoid unnecessary explanations unless explicitly asked.";
+      const systemPrompt = "You are MuradianAsk AI, a simple ask-and-answer assistant. Answer fast, but silently verify your answer before returning it. Use simple English by default. Be direct, practical, and friendly. If the user asks for deep thinking, reason carefully and then give a clear summary without exposing hidden chain-of-thought. If you are unsure, say what is uncertain and give the best safe next step.";
       
       const systemMessage = {
         role: "system" as const,
@@ -210,10 +203,10 @@ const MuradianAIModal = ({
       <Dialog open={open} onOpenChange={onOpenChange}>
         <DialogContent 
           hideDefaultClose
-          className="max-w-[95vw] w-[95vw] h-[95vh] p-0 border border-border bg-background shadow-2xl rounded-3xl overflow-hidden flex flex-row"
+          className="left-1/2 right-auto top-4 bottom-4 -translate-x-1/2 translate-y-0 max-w-none w-[95vw] h-auto p-0 border border-border bg-background shadow-2xl rounded-3xl overflow-hidden flex flex-col"
           onInteractOutside={(e) => {
             e.preventDefault();
-            toast.warning("Click the Close badge to dismiss the AI panel.");
+            toast.warning("Click the Close badge to dismiss MuradianAsk AI.");
           }}
         >
           <Button
@@ -226,8 +219,6 @@ const MuradianAIModal = ({
             Close
           </Button>
 
-          <Sidebar isCollapsed={isSidebarCollapsed} setIsCollapsed={setIsSidebarCollapsed} />
-
           <MainContent 
             query={query} 
             setQuery={setQuery} 
@@ -238,15 +229,15 @@ const MuradianAIModal = ({
             isOutOfContext={isOutOfContext}
             onSaveHistory={() => saveCurrentSession("Manually Saved Session")}
           />
-          <DialogTitle className="sr-only">Muradian AI - Ask Anything</DialogTitle>
+          <DialogTitle className="sr-only">MuradianAsk AI</DialogTitle>
         </DialogContent>
       </Dialog>
 
       <ConfirmDialog 
         open={showConfirmClose} 
         onOpenChange={setShowConfirmClose}
-        title="Close Muradian AI?"
-        description="Are you sure you want to close the AI panel? Your active chat session will be preserved."
+        title="Close MuradianAsk AI?"
+        description="Are you sure you want to close the ask-and-answer panel? Your active chat session will be preserved."
         confirmText="Yes, close"
         cancelText="Cancel"
         onConfirm={() => {

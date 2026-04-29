@@ -5,7 +5,6 @@ import DigitalClock from "@/components/Home/ClockZone/Clock";
 import TabsZone from "@/components/Home/TabsZone";
 import SettingsMenu from "@/components/SettingsMenu";
 import Notepad from "@/components/Notepad";
-import AISidebar from "@/components/AISidebar";
 import SearchModal from "@/components/SearchModal";
 import MuradianAIModal from "@/components/MuradianAIModal";
 import { useSettingsStore } from "@/store/settingsStore";
@@ -17,7 +16,6 @@ import Image from "next/image";
 import GithubLink from "@/components/Home/GithubLink";
 import { cn } from "@/lib/utils";
 import StickyAlarmDialog from "@/components/Notepad/StickyAlarmDialog";
-import { Bot } from "lucide-react";
 import { useAuthStore } from "@/store/authStore";
 
 type SearchOpenRequest = {
@@ -29,7 +27,6 @@ export function PageClient() {
   const {
     showClock,
     showRightSidebar,
-    enableLeftSidebarHover,
     enableSearchHoverZone,
     backgroundImage,
     isHydrated,
@@ -61,7 +58,6 @@ export function PageClient() {
     },
   );
   const [isSidebarVisible, setIsSidebarVisible] = useState(false);
-  const [isAISidebarVisible, setIsAISidebarVisible] = useState(false);
   const [isMuradianModalOpen, setIsMuradianModalOpen] = useState(false);
   const isSearchModalOpenRef = useRef(false);
   const isSearchInputReadyRef = useRef(false);
@@ -220,38 +216,6 @@ export function PageClient() {
           )}
           <TabsZone />
         </div>
-      </div>
-
-      <div className="fixed bottom-4 left-4 z-70 md:hidden">
-        {!isAISidebarVisible ? (
-          <button
-            type="button"
-            onClick={() => setIsAISidebarVisible(true)}
-            className="flex h-12 w-12 items-center justify-center rounded-full border border-border/60 bg-background/85 text-foreground shadow-xl backdrop-blur-xl transition-colors hover:bg-accent/90"
-            aria-label="Open AI sidebar"
-          >
-            <Bot className="h-5 w-5" />
-          </button>
-        ) : null}
-      </div>
-
-      {enableLeftSidebarHover && !isAISidebarVisible ? (
-        <div
-          className="fixed left-0 top-0 bottom-0 z-65 hidden w-8 cursor-e-resize md:block"
-          onMouseEnter={() => setIsAISidebarVisible(true)}
-        />
-      ) : null}
-
-      <div
-        className={cn(
-          "fixed left-0 top-0 bottom-0 z-80 w-[min(94vw,26rem)] transform transition-all duration-500 ease-out md:w-md",
-          isAISidebarVisible ? "translate-x-0" : "-translate-x-full",
-        )}
-      >
-        <AISidebar
-          open={isAISidebarVisible}
-          onClose={() => setIsAISidebarVisible(false)}
-        />
       </div>
 
       {/* Sidebar Hover Trigger Zone (Far Right) */}

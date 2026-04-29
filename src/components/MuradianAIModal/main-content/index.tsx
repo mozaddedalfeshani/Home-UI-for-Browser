@@ -1,12 +1,10 @@
 "use client";
 
 import { RefObject } from "react";
-import { Message, useMuradianAiStore } from "@/store/muradianAiStore";
+import { Message } from "@/store/muradianAiStore";
 import { ChatMessages } from "./chat-messages";
 import { ChatInput } from "./chat-input";
 import { WelcomeHeader } from "./welcome-header";
-import { AgentManagement } from "./agent-management";
-import { SettingsPanel } from "./settings-panel";
 
 interface MainContentProps {
   query: string;
@@ -29,24 +27,7 @@ export default function MainContent({
   isOutOfContext,
   onSaveHistory
 }: MainContentProps) {
-  const { activeView } = useMuradianAiStore();
   const isChatActive = messages.length > 0;
-
-  if (activeView === "agents") {
-    return (
-      <main className="flex-1 relative flex flex-col bg-background h-full overflow-hidden">
-        <AgentManagement />
-      </main>
-    );
-  }
-
-  if (activeView === "settings") {
-    return (
-      <main className="flex-1 relative flex flex-col bg-background h-full overflow-hidden">
-        <SettingsPanel />
-      </main>
-    );
-  }
 
   return (
     <main className="flex-1 relative flex flex-col bg-background h-full overflow-hidden">
@@ -54,7 +35,7 @@ export default function MainContent({
       <div className="absolute top-0 left-0 right-0 h-24 bg-gradient-to-b from-background via-background/80 to-transparent z-40 pointer-events-none" />
 
       <div className="flex h-full min-h-0 flex-col px-8 pb-8 pt-16">
-        <div className="mx-auto flex h-full w-full max-w-5xl min-h-0 flex-col gap-8 relative z-10">
+        <div className="mx-auto flex h-full w-full min-h-0 flex-col gap-8 relative z-10">
           <div className="flex-1 min-h-0 overflow-y-auto">
             <div className="space-y-12">
               {!isChatActive ? <WelcomeHeader /> : null}
@@ -90,20 +71,6 @@ export default function MainContent({
         </div>
       </div>
 
-      {isChatActive ? (
-        <div className="pointer-events-none absolute bottom-0 left-0 right-0 bg-gradient-to-t from-background via-background to-transparent p-6 pt-12">
-          <div className="pointer-events-auto mx-auto max-w-5xl">
-            <ChatInput
-              query={query}
-              setQuery={setQuery}
-              inputRef={inputRef}
-              onSend={onSend}
-              isLoading={isLoading}
-              isCompact={true}
-            />
-          </div>
-        </div>
-      ) : null}
     </main>
   );
 }

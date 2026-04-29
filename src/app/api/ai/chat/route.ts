@@ -35,7 +35,7 @@ export async function POST(req: NextRequest) {
 
     // Determine endpoint and headers based on provider
     let endpoint = "";
-    let headers: Record<string, string> = {
+    const headers: Record<string, string> = {
       "Content-Type": "application/json",
     };
 
@@ -43,7 +43,7 @@ export async function POST(req: NextRequest) {
       endpoint = "https://openrouter.ai/api/v1/chat/completions";
       headers["Authorization"] = `Bearer ${apiKey || process.env.OPENROUTER_API_KEY}`;
       headers["HTTP-Referer"] = "https://home-ui.local";
-      headers["X-Title"] = "Muradian AI";
+      headers["X-Title"] = "MuradianAsk AI";
     } else {
       endpoint = "https://api.deepseek.com/chat/completions";
       headers["Authorization"] = `Bearer ${apiKey || process.env.DEEPSEEK_API}`;
@@ -97,12 +97,12 @@ export async function POST(req: NextRequest) {
                     console.error("Failed to increment tokens:", err);
                   });
                 }
-              } catch (e) {
+              } catch {
                 // Ignore parse errors for incomplete chunks
               }
             }
           }
-        } catch (e) {
+        } catch {
           // Ignore decode errors
         }
       }
