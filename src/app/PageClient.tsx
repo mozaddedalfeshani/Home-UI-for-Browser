@@ -61,6 +61,7 @@ export function PageClient() {
   const [isSidebarVisible, setIsSidebarVisible] = useState(false);
   const [isMuradianModalOpen, setIsMuradianModalOpen] = useState(false);
   const [isAuthDialogOpen, setIsAuthDialogOpen] = useState(false);
+  const hasPickedDynamicWallpaperRef = useRef(false);
   const isSearchModalOpenRef = useRef(false);
   const isMuradianModalOpenRef = useRef(false);
   const isAuthDialogOpenRef = useRef(false);
@@ -93,47 +94,51 @@ export function PageClient() {
 
   // Dynamic Wallpaper Logic: Pick a new one on every refresh
   useEffect(() => {
-    // Only fetch a dynamic wallpaper when the store does not already have one.
-    if (
-      isHydrated &&
-      isDynamicWallpaper &&
-      !backgroundImage &&
-      dynamicWallpapers.length > 0
-    ) {
-      const fetchNewWallpaper = async () => {
-        try {
-          // Use sessionStorage to keep track of the last index across refreshes in the same session
-          const lastIndexStr = sessionStorage.getItem("lastWallpaperIndex");
-          const lastIndex = lastIndexStr ? parseInt(lastIndexStr, 10) : -1;
-
-          let randomIndex;
-          if (dynamicWallpapers.length > 1) {
-            // Ensure we pick a DIFFERENT index than the last one if possible
-            do {
-              randomIndex = Math.floor(
-                Math.random() * dynamicWallpapers.length,
-              );
-            } while (randomIndex === lastIndex);
-          } else {
-            randomIndex = 0;
-          }
-
-          sessionStorage.setItem("lastWallpaperIndex", randomIndex.toString());
-          const selectedUrl = dynamicWallpapers[randomIndex];
-
-          // console.log("Fetching dynamic wallpaper:", selectedUrl);
-
-          await setBackgroundImage(selectedUrl);
-          // console.log("Dynamic wallpaper updated successfully to index:", randomIndex);
-        } catch {
-          // console.error("Error updating dynamic wallpaper:", error);
-        }
-      };
-
-      fetchNewWallpaper();
+    if (!isHydrated) {
+      return;
     }
+
+    if (!isDynamicWallpaper) {
+      hasPickedDynamicWallpaperRef.current = false;
+      return;
+    }
+
+    if (
+      hasPickedDynamicWallpaperRef.current ||
+      dynamicWallpapers.length === 0
+    ) {
+      return;
+    }
+
+    hasPickedDynamicWallpaperRef.current = true;
+
+    const fetchNewWallpaper = async () => {
+      try {
+        // Use sessionStorage to keep track of the last index across refreshes in the same session
+        const lastIndexStr = sessionStorage.getItem("lastWallpaperIndex");
+        const lastIndex = lastIndexStr ? parseInt(lastIndexStr, 10) : -1;
+
+        let randomIndex;
+        if (dynamicWallpapers.length > 1) {
+          // Ensure we pick a DIFFERENT index than the last one if possible
+          do {
+            randomIndex = Math.floor(Math.random() * dynamicWallpapers.length);
+          } while (randomIndex === lastIndex);
+        } else {
+          randomIndex = 0;
+        }
+
+        sessionStorage.setItem("lastWallpaperIndex", randomIndex.toString());
+        const selectedUrl = dynamicWallpapers[randomIndex];
+
+        await setBackgroundImage(selectedUrl);
+      } catch {
+        hasPickedDynamicWallpaperRef.current = false;
+      }
+    };
+
+    fetchNewWallpaper();
   }, [
-    backgroundImage,
     dynamicWallpapers,
     isDynamicWallpaper,
     isHydrated,

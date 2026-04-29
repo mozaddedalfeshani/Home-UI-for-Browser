@@ -24,7 +24,31 @@ export const BackgroundSection = () => {
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      setDynamicWallpaper(false);
       setBackgroundImage(file);
+    }
+  };
+
+  const handleWallpaperClick = async (url: string) => {
+    const isSelectedStaticWallpaper =
+      backgroundImage === url && !isDynamicWallpaper;
+
+    if (isSelectedStaticWallpaper) {
+      setDynamicWallpaper(true);
+      await setBackgroundImage(null);
+      return;
+    }
+
+    setDynamicWallpaper(false);
+    await setBackgroundImage(url);
+  };
+
+  const handleDynamicWallpaperToggle = async () => {
+    const nextEnabled = !isDynamicWallpaper;
+    setDynamicWallpaper(nextEnabled);
+
+    if (nextEnabled) {
+      await setBackgroundImage(null);
     }
   };
 
@@ -38,7 +62,7 @@ export const BackgroundSection = () => {
         onChange={handleFileUpload}
       />
       <button
-        onClick={() => setDynamicWallpaper(!isDynamicWallpaper)}
+        onClick={handleDynamicWallpaperToggle}
         className="flex w-full items-center justify-between rounded-md px-2 py-1 transition-colors hover:bg-accent/50 group"
       >
         <div className="flex items-center gap-2">
@@ -73,7 +97,7 @@ export const BackgroundSection = () => {
         {DEFAULT_DYNAMIC_WALLPAPERS.map((url, idx) => (
           <button
             key={url}
-            onClick={() => setBackgroundImage(url)}
+            onClick={() => handleWallpaperClick(url)}
             className={cn(
               "h-10 w-16 shrink-0 rounded-md border-2 overflow-hidden transition-all",
               backgroundImage === url && !isDynamicWallpaper
