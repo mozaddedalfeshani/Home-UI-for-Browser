@@ -22,6 +22,7 @@ import {
   buildShortcutString,
   getPrimaryModifierLabel,
   hasPrimaryModifier,
+  isReservedShortcut,
 } from "@/lib/keyboardShortcuts";
 
 interface ShortcutDialogProps {
@@ -79,6 +80,11 @@ export const ShortcutDialog = ({ tab, children }: ShortcutDialogProps) => {
 
       if (!hasPrimaryModifier(shortcutString)) {
         setError(`${primaryModifierLabel}+... is required`);
+        return;
+      }
+
+      if (isReservedShortcut(shortcutString)) {
+        setError("Copy and paste shortcuts cannot be used.");
         return;
       }
 

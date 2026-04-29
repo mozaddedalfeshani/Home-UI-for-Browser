@@ -57,6 +57,14 @@ export const hasPrimaryModifier = (shortcut: string) => {
   return shortcut.split("+").includes(getPrimaryModifierLabel());
 };
 
+export const isReservedShortcut = (shortcut: string) => {
+  const parts = shortcut.split("+");
+  const key = parts.at(-1)?.toLowerCase();
+  const hasCopyPasteModifier = parts.includes("Cmd") || parts.includes("Ctrl");
+
+  return hasCopyPasteModifier && (key === "c" || key === "v");
+};
+
 export const migrateShortcutToPrimaryModifier = (shortcut?: string) => {
   if (!shortcut) {
     return shortcut;

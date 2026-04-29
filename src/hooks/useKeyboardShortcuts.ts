@@ -5,6 +5,7 @@ import { useTabsStore } from "@/store/tabsStore";
 import { useTabClickHistoryStore } from "@/store/tabClickHistoryStore";
 import {
   buildShortcutString,
+  isReservedShortcut,
   isTypingTriggerEvent,
 } from "@/lib/keyboardShortcuts";
 import { trackVisit } from "@/lib/analyticsClient";
@@ -72,6 +73,10 @@ export const useKeyboardShortcuts = ({
 
       const shortcutString = buildShortcutString(event);
       if (!shortcutString) {
+        return;
+      }
+
+      if (isReservedShortcut(shortcutString)) {
         return;
       }
 
