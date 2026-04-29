@@ -383,7 +383,7 @@ const MuradianAIModal = ({ open, onOpenChange }: MuradianAIModalProps) => {
               </div>
 
               {(answer || isLoading) && (
-              <div className="px-5 py-4">
+                <div className="px-5 py-4">
                   {answer ? (
                     <div className="space-y-3">
                       <div className="prose max-w-none text-sm leading-6 dark:prose-invert prose-p:my-2 prose-ul:my-2 prose-ol:my-2">
@@ -502,7 +502,9 @@ const MuradianAIModal = ({ open, onOpenChange }: MuradianAIModalProps) => {
               <Button
                 type="submit"
                 className="rounded-full px-5"
-                disabled={!editName.trim() || !editRules.trim() || isSavingAgent}
+                disabled={
+                  !editName.trim() || !editRules.trim() || isSavingAgent
+                }
               >
                 <Save className="h-4 w-4" />
                 {isSavingAgent ? "Saving..." : "Save rules"}
