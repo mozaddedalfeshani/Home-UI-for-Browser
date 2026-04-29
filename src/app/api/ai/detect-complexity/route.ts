@@ -99,12 +99,10 @@ export async function POST(request: NextRequest) {
             
             Respond ONLY with a JSON object: {"complexity": "hard" | "simple"}`,
             },
-            ...messages
-              .slice(-5)
-              .map((message) => ({
-                role: message.role,
-                content: message.content,
-              })),
+            ...messages.slice(-5).map((message) => ({
+              role: message.role,
+              content: message.content,
+            })),
           ],
           response_format: { type: "json_object" },
           max_tokens: 50,
