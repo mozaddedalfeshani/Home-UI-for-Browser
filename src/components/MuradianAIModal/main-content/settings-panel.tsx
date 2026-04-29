@@ -3,7 +3,13 @@
 import { useState, useEffect } from "react";
 import { useAuthStore } from "@/store/authStore";
 import { Progress } from "@/components/ui/progress";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Activity, Zap } from "lucide-react";
 
@@ -31,15 +37,19 @@ export function SettingsPanel() {
     fetchUsage();
   }, []);
 
-  const progressPercentage = tokensUsed !== null ? Math.min((tokensUsed / tokenLimit) * 100, 100) : 0;
-  
+  const progressPercentage =
+    tokensUsed !== null ? Math.min((tokensUsed / tokenLimit) * 100, 100) : 0;
+
   return (
     <div className="flex-1 overflow-y-auto p-8 bg-zinc-50/50 dark:bg-zinc-950/50">
       <div className="max-w-3xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-        
         <div>
-          <h1 className="text-3xl font-bold tracking-tight mb-2">Settings & Usage</h1>
-          <p className="text-muted-foreground">Manage your AI capabilities and track monthly limits.</p>
+          <h1 className="text-3xl font-bold tracking-tight mb-2">
+            Settings & Usage
+          </h1>
+          <p className="text-muted-foreground">
+            Manage your AI capabilities and track monthly limits.
+          </p>
         </div>
 
         <div className="grid gap-6">
@@ -84,21 +94,29 @@ export function SettingsPanel() {
                       {progressPercentage.toFixed(1)}% Used
                     </span>
                   </div>
-                  
-                  <Progress 
-                    value={progressPercentage} 
-                    className="h-3 bg-zinc-200 dark:bg-zinc-800" 
-                    indicatorClassName={progressPercentage > 90 ? "bg-destructive" : progressPercentage > 75 ? "bg-amber-500" : "bg-emerald-500"}
+
+                  <Progress
+                    value={progressPercentage}
+                    className="h-3 bg-zinc-200 dark:bg-zinc-800"
+                    indicatorClassName={
+                      progressPercentage > 90
+                        ? "bg-destructive"
+                        : progressPercentage > 75
+                          ? "bg-amber-500"
+                          : "bg-emerald-500"
+                    }
                   />
-                  
+
                   <p className="text-xs text-muted-foreground">
-                    This quota resets automatically on the first day of every month. Input prompts and generated responses both consume tokens.
+                    This quota resets automatically on the first day of every
+                    month. Input prompts and generated responses both consume
+                    tokens.
                   </p>
                 </div>
               )}
             </CardContent>
           </Card>
-          
+
           <Card className="shadow-sm">
             <CardHeader>
               <CardTitle className="text-lg">Account Profile</CardTitle>
@@ -115,8 +133,12 @@ export function SettingsPanel() {
                     </span>
                   </div>
                   <div>
-                    <p className="font-semibold text-lg leading-none capitalize mb-1.5">{user?.name || "User"}</p>
-                    <p className="text-sm text-muted-foreground">{user?.email}</p>
+                    <p className="font-semibold text-lg leading-none capitalize mb-1.5">
+                      {user?.name || "User"}
+                    </p>
+                    <p className="text-sm text-muted-foreground">
+                      {user?.email}
+                    </p>
                   </div>
                 </div>
               </div>
