@@ -12,13 +12,11 @@ import { trackVisit } from "@/lib/analyticsClient";
 interface UseKeyboardShortcutsProps {
   onSearchModalOpen?: (initialQuery?: string) => void;
   onAIModalOpen?: () => void;
-  isAuthenticated?: boolean;
 }
 
 export const useKeyboardShortcuts = ({
   onSearchModalOpen,
   onAIModalOpen,
-  isAuthenticated = false,
 }: UseKeyboardShortcutsProps = {}) => {
   const getTabByShortcut = useTabsStore((state) => state.getTabByShortcut);
   const incrementVisitCount = useTabsStore(
@@ -27,8 +25,6 @@ export const useKeyboardShortcuts = ({
   const addTabClickHistoryEntry = useTabClickHistoryStore(
     (state) => state.addTabClickHistoryEntry,
   );
-  void isAuthenticated;
-
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       const target = event.target as HTMLElement;

@@ -17,6 +17,7 @@ import GithubLink from "@/components/Home/GithubLink";
 import { cn } from "@/lib/utils";
 import StickyAlarmDialog from "@/components/Notepad/StickyAlarmDialog";
 import { useAuthStore } from "@/store/authStore";
+import { AuthDialog } from "@/components/Auth/AuthDialog";
 
 type SearchOpenRequest = {
   id: number;
@@ -59,6 +60,7 @@ export function PageClient() {
   );
   const [isSidebarVisible, setIsSidebarVisible] = useState(false);
   const [isMuradianModalOpen, setIsMuradianModalOpen] = useState(false);
+  const [isAuthDialogOpen, setIsAuthDialogOpen] = useState(false);
   const isSearchModalOpenRef = useRef(false);
   const isSearchInputReadyRef = useRef(false);
 
@@ -147,8 +149,12 @@ export function PageClient() {
 
   // Initialize keyboard shortcuts
   useKeyboardShortcuts({
-    isAuthenticated,
     onAIModalOpen: () => {
+      if (!isAuthenticated) {
+        setIsAuthDialogOpen(true);
+        return;
+      }
+
       setIsMuradianModalOpen(true);
     },
     onSearchModalOpen: (initialQuery) => {
@@ -268,9 +274,10 @@ export function PageClient() {
         }}
       />
       <MuradianAIModal
-        open={isMuradianModalOpen}
+        open={isAuthenticated && isMuradianModalOpen}
         onOpenChange={setIsMuradianModalOpen}
       />
+      <AuthDialog open={isAuthDialogOpen} onOpenChange={setIsAuthDialogOpen} />
       <StickyAlarmDialog />
     </div>
   );
