@@ -64,7 +64,7 @@ const MuradianAIModal = ({ open, onOpenChange }: MuradianAIModalProps) => {
   const [editRules, setEditRules] = useState("");
   const [isSavingAgent, setIsSavingAgent] = useState(false);
   const [isCopied, setIsCopied] = useState(false);
-  const inputRef = useRef<HTMLInputElement>(null);
+  const inputRef = useRef<HTMLTextAreaElement>(null);
 
   const agents = useMuradianAskAgentStore((state) => state.agents);
   const fetchAgents = useMuradianAskAgentStore((state) => state.fetchAgents);
@@ -173,8 +173,18 @@ const MuradianAIModal = ({ open, onOpenChange }: MuradianAIModalProps) => {
     }
   };
 
-  const handleInputKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
-    if (event.key !== "Enter") return;
+  useEffect(() => {
+    const input = inputRef.current;
+    if (!input) return;
+
+    const maxHeight = 76;
+    input.style.height = "40px";
+    input.style.height = `${Math.min(input.scrollHeight, maxHeight)}px`;
+    input.style.overflowY = input.scrollHeight > maxHeight ? "auto" : "hidden";
+  }, [query, open]);
+
+  const handleInputKeyDown = (event: KeyboardEvent<HTMLTextAreaElement>) => {
+    if (event.key !== "Enter" || event.shiftKey) return;
 
     event.preventDefault();
     handleSend();
@@ -257,13 +267,14 @@ const MuradianAIModal = ({ open, onOpenChange }: MuradianAIModalProps) => {
           <div className="mx-auto w-full max-w-2xl">
             <div className="overflow-hidden rounded-[20px] bg-background/78 backdrop-blur-sm">
               <div className="flex items-center gap-1.5 p-1.5">
-                <Input
+                <Textarea
                   ref={inputRef}
                   value={query}
                   onChange={(event) => setQuery(event.target.value)}
                   onKeyDown={handleInputKeyDown}
                   placeholder="Ask anything..."
-                  className="h-10 flex-1 rounded-full border-0 bg-transparent px-4 text-sm shadow-none focus-visible:ring-0 dark:bg-transparent"
+                  rows={1}
+                  className="max-h-[76px] min-h-10 flex-1 resize-none rounded-[18px] border-0 bg-transparent px-4 py-2.5 text-sm leading-5 shadow-none focus-visible:ring-0 dark:bg-transparent"
                   disabled={isLoading}
                 />
 
