@@ -75,13 +75,13 @@ export function ResizeShortcutsDialog({
               <Slider
                 value={[tempSize]}
                 onValueChange={handleSizeChange}
-                min={5}
+                min={3}
                 max={10}
                 step={0.5}
                 className="w-full"
               />
               <div className="flex justify-between text-xs text-muted-foreground">
-                <span>Small (5rem)</span>
+                <span>Small (3rem)</span>
                 <span>Large (10rem)</span>
               </div>
             </div>

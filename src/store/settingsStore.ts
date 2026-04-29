@@ -2,6 +2,8 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { mediaStorage } from "@/lib/mediaStorage";
 import {
+  DEFAULT_CARD_SIZE,
+  LEGACY_DEFAULT_CARD_SIZE,
   SHARE_SETTINGS_DEFAULTS,
   type ShareProfileSettings,
 } from "@/lib/shareProfile";
@@ -362,7 +364,22 @@ export const useSettingsStore = create<SettingsState>()(
     }),
     {
       name: "settings-store",
-      version: 1,
+      version: 2,
+      migrate: (persistedState) => {
+        if (
+          persistedState &&
+          typeof persistedState === "object" &&
+          "cardSize" in persistedState &&
+          persistedState.cardSize === LEGACY_DEFAULT_CARD_SIZE
+        ) {
+          return {
+            ...persistedState,
+            cardSize: DEFAULT_CARD_SIZE,
+          };
+        }
+
+        return persistedState;
+      },
       partialize: (state) => {
         const persistedState = { ...state } as Record<string, unknown>;
         delete persistedState.isClockDialogOpen;

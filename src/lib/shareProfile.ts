@@ -46,6 +46,9 @@ export interface ShareProfileV1 {
   settings: ShareProfileSettings;
 }
 
+export const DEFAULT_CARD_SIZE = 4;
+export const LEGACY_DEFAULT_CARD_SIZE = 5;
+
 export const SHARE_SETTINGS_DEFAULTS: ShareProfileSettings = {
   theme: "system",
   language: "bn",
@@ -54,7 +57,7 @@ export const SHARE_SETTINGS_DEFAULTS: ShareProfileSettings = {
   showRightSidebar: true,
   enableLeftSidebarHover: false,
   tabsPosition: "top",
-  cardSize: 5,
+  cardSize: DEFAULT_CARD_SIZE,
   cardRadius: 0.5,
   clockColor: "#ffffff",
   showClockGlow: false,
@@ -247,7 +250,7 @@ export const sanitizeShareSettings = (
     cardSize: toNumber(
       settings.cardSize,
       SHARE_SETTINGS_DEFAULTS.cardSize,
-      5,
+      3,
       10,
     ),
     cardRadius: toNumber(
