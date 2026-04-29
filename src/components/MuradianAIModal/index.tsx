@@ -7,6 +7,7 @@ import {
   Bot,
   Check,
   ChevronDown,
+  Copy,
   Loader2,
   Pencil,
   Plus,
@@ -62,6 +63,7 @@ const MuradianAIModal = ({ open, onOpenChange }: MuradianAIModalProps) => {
   const [editDescription, setEditDescription] = useState("");
   const [editRules, setEditRules] = useState("");
   const [isSavingAgent, setIsSavingAgent] = useState(false);
+  const [isCopied, setIsCopied] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
   const agents = useMuradianAskAgentStore((state) => state.agents);
@@ -232,6 +234,18 @@ const MuradianAIModal = ({ open, onOpenChange }: MuradianAIModalProps) => {
     }
   };
 
+  const handleCopyAnswer = async () => {
+    if (!answer.trim()) return;
+
+    try {
+      await navigator.clipboard.writeText(answer);
+      setIsCopied(true);
+      window.setTimeout(() => setIsCopied(false), 1500);
+    } catch (error) {
+      console.error("Failed to copy answer:", error);
+    }
+  };
+
   return (
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
@@ -371,10 +385,29 @@ const MuradianAIModal = ({ open, onOpenChange }: MuradianAIModalProps) => {
               {(answer || isLoading) && (
               <div className="px-5 py-4">
                   {answer ? (
-                    <div className="prose max-w-none text-sm leading-6 dark:prose-invert prose-p:my-2 prose-ul:my-2 prose-ol:my-2">
-                      <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                        {answer}
-                      </ReactMarkdown>
+                    <div className="space-y-3">
+                      <div className="prose max-w-none text-sm leading-6 dark:prose-invert prose-p:my-2 prose-ul:my-2 prose-ol:my-2">
+                        <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                          {answer}
+                        </ReactMarkdown>
+                      </div>
+
+                      <div className="flex justify-end">
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          onClick={handleCopyAnswer}
+                          className="h-8 rounded-full px-3 text-xs text-muted-foreground hover:text-foreground"
+                        >
+                          {isCopied ? (
+                            <Check className="h-3.5 w-3.5" />
+                          ) : (
+                            <Copy className="h-3.5 w-3.5" />
+                          )}
+                          <span>{isCopied ? "Copied" : "Copy"}</span>
+                        </Button>
+                      </div>
                     </div>
                   ) : (
                     <div className="flex items-center gap-2 text-sm text-muted-foreground">

@@ -110,6 +110,7 @@ async function updateMemoryProfile(params: {
     headers,
     body: JSON.stringify({
       model: DEEPSEEK_MODEL,
+      thinking: { type: "disabled" },
       stream: false,
       messages: [
         {
@@ -206,6 +207,7 @@ export async function POST(req: NextRequest) {
       headers,
       body: JSON.stringify({
         model: DEEPSEEK_MODEL,
+        thinking: { type: "disabled" },
         messages: trimmedMessages,
         stream: true,
         stream_options: { include_usage: true },

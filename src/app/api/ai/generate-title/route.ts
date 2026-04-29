@@ -4,6 +4,15 @@ import { cookies } from "next/headers";
 import { verifyToken } from "@/lib/auth/jwt";
 import { corsGuard, handleCorsOptions, withCorsHeaders } from "@/lib/auth/cors";
 
+interface TitleMessage {
+  role: "system" | "user" | "assistant";
+  content: string;
+}
+
+interface TitleResponse {
+  choices?: Array<{ message?: { content?: string } }>;
+}
+
 export async function OPTIONS(request: NextRequest) {
   return handleCorsOptions(request);
 }
@@ -20,7 +29,9 @@ export async function POST(request: NextRequest) {
     const payload = verifyToken(token);
     if (!payload) return withCorsHeaders(NextResponse.json({ error: "Invalid token" }, { status: 401 }), request);
 
-    const { messages } = await request.json();
+    const { messages } = (await request.json()) as {
+      messages?: TitleMessage[];
+    };
     
     if (!messages || !Array.isArray(messages)) {
       return withCorsHeaders(NextResponse.json({ error: "Messages array required" }, { status: 400 }), request);
@@ -45,7 +56,9 @@ export async function POST(request: NextRequest) {
             content: "You are a title generator. Generate a short, concise, and descriptive title (2 to 5 words maximum) for the following conversation. Do not use quotes or punctuation. Respond ONLY with the title string."
           },
           // Send the user/assistant messages for context
-          ...messages.filter(m => m.role !== "system").map((m: any) => ({ role: m.role, content: m.content }))
+          ...messages
+            .filter((message) => message.role !== "system")
+            .map((message) => ({ role: message.role, content: message.content }))
         ],
         max_tokens: 15,
         temperature: 0.7
@@ -56,8 +69,8 @@ export async function POST(request: NextRequest) {
       throw new Error("Failed to call generation API");
     }
 
-    const result = await titleResponse.json();
-    const generatedTitle = result.choices[0]?.message?.content?.trim() || "Chat Session";
+    const result = (await titleResponse.json()) as TitleResponse;
+    const generatedTitle = result.choices?.[0]?.message?.content?.trim() || "Chat Session";
 
     return withCorsHeaders(NextResponse.json({ title: generatedTitle }), request);
     

@@ -9,6 +9,7 @@ interface SidebarTopProps {
 }
 
 export const SidebarTop = ({ isCollapsed, setIsCollapsed }: SidebarTopProps) => {
+  void isCollapsed;
   return (
     <div className="p-6 pb-2 flex items-center justify-between">
       <div className="flex items-center gap-3">

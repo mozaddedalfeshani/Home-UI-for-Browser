@@ -6,7 +6,6 @@ import {
   PlusSignIcon, 
   Delete02Icon, 
   PencilEdit01Icon, 
-  Settings02Icon,
   BotIcon,
   ArrowLeft01Icon,
   Tick01Icon,
@@ -164,7 +163,7 @@ export const AgentManagement = () => {
                         </h3>
                         <p className="text-sm text-muted-foreground line-clamp-1">{agent.description}</p>
                         <p className="text-xs text-zinc-400 mt-2 line-clamp-2 italic">
-                          "{agent.rules.slice(0, 150)}..."
+                          &quot;{agent.rules.slice(0, 150)}...&quot;
                         </p>
                       </div>
                     </div>

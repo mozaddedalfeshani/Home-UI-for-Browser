@@ -1,6 +1,6 @@
 "use client";
 
-import { HugeiconsIcon } from "@hugeicons/react";
+import Image from "next/image";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { cn } from "@/lib/utils";
@@ -46,7 +46,13 @@ export const ChatMessages = ({ messages, isLoading }: ChatMessagesProps) => {
               )}>
                 {message.images.map((img, i) => (
                   <div key={i} className="relative h-40 w-40 rounded-xl overflow-hidden border border-border shadow-sm">
-                    <img src={img} alt="attachment" className="h-full w-full object-cover cursor-zoom-in" />
+                    <Image
+                      src={img}
+                      alt="attachment"
+                      fill
+                      sizes="160px"
+                      className="object-cover cursor-zoom-in"
+                    />
                   </div>
                 ))}
               </div>

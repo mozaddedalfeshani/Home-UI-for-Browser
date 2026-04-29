@@ -27,6 +27,7 @@ export const useKeyboardShortcuts = ({
   const addTabClickHistoryEntry = useTabClickHistoryStore(
     (state) => state.addTabClickHistoryEntry,
   );
+  void isAuthenticated;
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -115,7 +116,7 @@ export const useKeyboardShortcuts = ({
     addTabClickHistoryEntry,
     getTabByShortcut,
     incrementVisitCount,
+    onAIModalOpen,
     onSearchModalOpen,
-    isAuthenticated,
   ]);
 };
