@@ -27,27 +27,25 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const { messages, provider, apiKey, model } = await req.json();
+    const { messages } = await req.json();
 
     if (!messages || !Array.isArray(messages)) {
       return NextResponse.json({ error: "Messages are required" }, { status: 400 });
     }
 
-    // Determine endpoint and headers based on provider
-    let endpoint = "";
+    const systemMessage = messages.find((message: { role?: string }) => message?.role === "system");
+    const recentConversation = messages.filter(
+      (message: { role?: string }) => message?.role !== "system",
+    ).slice(-5);
+    const trimmedMessages = systemMessage
+      ? [systemMessage, ...recentConversation]
+      : recentConversation;
+
+    const endpoint = "https://api.deepseek.com/chat/completions";
     const headers: Record<string, string> = {
       "Content-Type": "application/json",
     };
-
-    if (provider === "openrouter") {
-      endpoint = "https://openrouter.ai/api/v1/chat/completions";
-      headers["Authorization"] = `Bearer ${apiKey || process.env.OPENROUTER_API_KEY}`;
-      headers["HTTP-Referer"] = "https://home-ui.local";
-      headers["X-Title"] = "MuradianAsk AI";
-    } else {
-      endpoint = "https://api.deepseek.com/chat/completions";
-      headers["Authorization"] = `Bearer ${apiKey || process.env.DEEPSEEK_API}`;
-    }
+    headers["Authorization"] = `Bearer ${process.env.DEEPSEEK_API}`;
 
     if (!headers["Authorization"] || headers["Authorization"] === "Bearer undefined") {
       return NextResponse.json({ error: "API Key is missing" }, { status: 401 });
@@ -57,8 +55,8 @@ export async function POST(req: NextRequest) {
       method: "POST",
       headers,
       body: JSON.stringify({
-        model: model || (provider === "openrouter" ? "openrouter/auto" : "deepseek-chat"),
-        messages,
+        model: "deepseek-chat",
+        messages: trimmedMessages,
         stream: true,
         stream_options: { include_usage: true } // Request usage stats in final chunk
       }),
