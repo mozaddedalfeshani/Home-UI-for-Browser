@@ -62,11 +62,21 @@ export function PageClient() {
   const [isMuradianModalOpen, setIsMuradianModalOpen] = useState(false);
   const [isAuthDialogOpen, setIsAuthDialogOpen] = useState(false);
   const isSearchModalOpenRef = useRef(false);
+  const isMuradianModalOpenRef = useRef(false);
+  const isAuthDialogOpenRef = useRef(false);
   const isSearchInputReadyRef = useRef(false);
 
   useEffect(() => {
     isSearchModalOpenRef.current = isSearchModalOpen;
   }, [isSearchModalOpen]);
+
+  useEffect(() => {
+    isMuradianModalOpenRef.current = isMuradianModalOpen;
+  }, [isMuradianModalOpen]);
+
+  useEffect(() => {
+    isAuthDialogOpenRef.current = isAuthDialogOpen;
+  }, [isAuthDialogOpen]);
 
   const handleSearchModalOpenChange = (nextOpen: boolean) => {
     isSearchModalOpenRef.current = nextOpen;
@@ -150,14 +160,24 @@ export function PageClient() {
   // Initialize keyboard shortcuts
   useKeyboardShortcuts({
     onAIModalOpen: () => {
+      if (isSearchModalOpenRef.current || isAuthDialogOpenRef.current) {
+        return;
+      }
+
       if (!isAuthenticated) {
+        isAuthDialogOpenRef.current = true;
         setIsAuthDialogOpen(true);
         return;
       }
 
+      isMuradianModalOpenRef.current = true;
       setIsMuradianModalOpen(true);
     },
     onSearchModalOpen: (initialQuery) => {
+      if (isMuradianModalOpenRef.current || isAuthDialogOpenRef.current) {
+        return;
+      }
+
       if (initialQuery) {
         setSearchOpenRequest((currentRequest) => ({
           id: currentRequest.id + 1,
@@ -250,7 +270,11 @@ export function PageClient() {
         <div
           className="fixed bottom-0 left-1/2 -translate-x-1/2 h-16 w-64 z-40 cursor-pointer"
           onMouseEnter={() => {
-            if (!isSearchModalOpenRef.current) {
+            if (
+              !isSearchModalOpenRef.current &&
+              !isMuradianModalOpenRef.current &&
+              !isAuthDialogOpenRef.current
+            ) {
               setSearchOpenRequest((currentRequest) => ({
                 id: currentRequest.id + 1,
                 seedText: "",
@@ -275,9 +299,18 @@ export function PageClient() {
       />
       <MuradianAIModal
         open={isAuthenticated && isMuradianModalOpen}
-        onOpenChange={setIsMuradianModalOpen}
+        onOpenChange={(nextOpen) => {
+          isMuradianModalOpenRef.current = nextOpen;
+          setIsMuradianModalOpen(nextOpen);
+        }}
       />
-      <AuthDialog open={isAuthDialogOpen} onOpenChange={setIsAuthDialogOpen} />
+      <AuthDialog
+        open={isAuthDialogOpen}
+        onOpenChange={(nextOpen) => {
+          isAuthDialogOpenRef.current = nextOpen;
+          setIsAuthDialogOpen(nextOpen);
+        }}
+      />
       <StickyAlarmDialog />
     </div>
   );
