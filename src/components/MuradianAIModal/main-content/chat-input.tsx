@@ -1,10 +1,7 @@
 "use client";
 
 import { HugeiconsIcon } from "@hugeicons/react";
-import { 
-  Mic01Icon, 
-  SentIcon,
-} from "@hugeicons/core-free-icons";
+import { Mic01Icon, SentIcon } from "@hugeicons/core-free-icons";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
@@ -20,11 +17,11 @@ interface ChatInputProps {
   isCompact?: boolean;
 }
 
-export const ChatInput = ({ 
-  query, 
-  setQuery, 
-  inputRef, 
-  onSend, 
+export const ChatInput = ({
+  query,
+  setQuery,
+  inputRef,
+  onSend,
   isLoading,
   isCompact,
 }: ChatInputProps) => {
@@ -82,9 +79,11 @@ export const ChatInput = ({
 
   return (
     <div className="flex w-full flex-col items-center gap-4">
-      <div className={cn(
-        "relative flex w-full items-center rounded-full min-h-[56px] border border-border/30 bg-transparent px-4 py-2 transition-all"
-      )}>
+      <div
+        className={cn(
+          "relative flex w-full items-center rounded-full min-h-[56px] border border-border/30 bg-transparent px-4 py-2 transition-all",
+        )}
+      >
         <Textarea
           ref={inputRef}
           value={query}
