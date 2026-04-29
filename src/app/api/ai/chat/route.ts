@@ -64,7 +64,9 @@ function buildChatMessages(params: {
   const systemParts = [BASE_SYSTEM_PROMPT];
 
   if (params.agentRules?.trim()) {
-    systemParts.push(`Use these extra user-saved answer rules:\n${params.agentRules.trim()}`);
+    systemParts.push(
+      `Use these extra user-saved answer rules:\n${params.agentRules.trim()}`,
+    );
   }
 
   if (params.memory?.trim()) {
@@ -150,7 +152,9 @@ async function updateMemoryProfile(params: {
 
   if (!memoryResponse.ok) {
     const errorData = await memoryResponse.json().catch(() => ({}));
-    throw new Error(errorData.error?.message || "Failed to update memory profile");
+    throw new Error(
+      errorData.error?.message || "Failed to update memory profile",
+    );
   }
 
   const memoryPayload = (await memoryResponse.json()) as {
@@ -159,11 +163,17 @@ async function updateMemoryProfile(params: {
   };
 
   const memoryText = normalizeMemoryText(
-    memoryPayload.choices?.[0]?.message?.content?.trim() || previousMemory?.trim() || "",
+    memoryPayload.choices?.[0]?.message?.content?.trim() ||
+      previousMemory?.trim() ||
+      "",
   );
 
   if (memoryPayload.usage?.total_tokens) {
-    await incrementTokenUsage(userId, currentMonth, memoryPayload.usage.total_tokens);
+    await incrementTokenUsage(
+      userId,
+      currentMonth,
+      memoryPayload.usage.total_tokens,
+    );
   }
 
   if (memoryText) {
@@ -176,20 +186,22 @@ export async function POST(req: NextRequest) {
     // 1. Authenticate user
     const cookieStore = await cookies();
     const token = cookieStore.get("__lt_session")?.value;
-    if (!token) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    if (!token)
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
     const authPayload = verifyToken(token);
-    if (!authPayload) return NextResponse.json({ error: "Invalid token" }, { status: 401 });
+    if (!authPayload)
+      return NextResponse.json({ error: "Invalid token" }, { status: 401 });
     const userId = authPayload.userId;
 
     // 2. Check token limit
     const currentMonth = new Date().toISOString().slice(0, 7); // YYYY-MM
     const currentUsage = await getUserTokenUsage(userId, currentMonth);
-    
+
     if (currentUsage >= TOKEN_LIMIT) {
       return NextResponse.json(
-        { error: "out_of_context", message: "You are out of context" }, 
-        { status: 403 }
+        { error: "out_of_context", message: "You are out of context" },
+        { status: 403 },
       );
     }
 
@@ -205,7 +217,10 @@ export async function POST(req: NextRequest) {
 
     const headers = getDeepSeekHeaders();
     if (!headers) {
-      return NextResponse.json({ error: "API Key is missing" }, { status: 401 });
+      return NextResponse.json(
+        { error: "API Key is missing" },
+        { status: 401 },
+      );
     }
 
     const persistedMemory = await getUserMemoryProfile(userId);
@@ -237,12 +252,15 @@ export async function POST(req: NextRequest) {
       const errorData = await response.json().catch(() => ({}));
       return NextResponse.json(
         { error: errorData.error?.message || "AI Service Error" },
-        { status: response.status }
+        { status: response.status },
       );
     }
 
     if (!response.body) {
-      return NextResponse.json({ error: "Empty response body" }, { status: 500 });
+      return NextResponse.json(
+        { error: "Empty response body" },
+        { status: 500 },
+      );
     }
 
     let assistantAnswer = "";
@@ -264,9 +282,11 @@ export async function POST(req: NextRequest) {
                 const parsed = JSON.parse(dataStr);
                 if (parsed.usage && parsed.usage.total_tokens) {
                   const tokens = parsed.usage.total_tokens;
-                  incrementTokenUsage(userId, currentMonth, tokens).catch((err) => {
-                    console.error("Failed to increment tokens:", err);
-                  });
+                  incrementTokenUsage(userId, currentMonth, tokens).catch(
+                    (err) => {
+                      console.error("Failed to increment tokens:", err);
+                    },
+                  );
                 }
 
                 const content = parsed.choices?.[0]?.delta?.content;
@@ -285,14 +305,21 @@ export async function POST(req: NextRequest) {
       async flush() {
         try {
           const trailingLine = pendingChunk.trim();
-          if (trailingLine.startsWith("data: ") && trailingLine !== "data: [DONE]") {
+          if (
+            trailingLine.startsWith("data: ") &&
+            trailingLine !== "data: [DONE]"
+          ) {
             const parsed = JSON.parse(trailingLine.slice(6));
             const content = parsed.choices?.[0]?.delta?.content;
             if (typeof content === "string") {
               assistantAnswer += content;
             }
             if (parsed.usage?.total_tokens) {
-              await incrementTokenUsage(userId, currentMonth, parsed.usage.total_tokens);
+              await incrementTokenUsage(
+                userId,
+                currentMonth,
+                parsed.usage.total_tokens,
+              );
             }
           }
         } catch {
@@ -318,11 +345,14 @@ export async function POST(req: NextRequest) {
       headers: {
         "Content-Type": "text/event-stream",
         "Cache-Control": "no-cache",
-        "Connection": "keep-alive",
+        Connection: "keep-alive",
       },
     });
   } catch (error) {
     console.error("AI Proxy Error:", error);
-    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Internal Server Error" },
+      { status: 500 },
+    );
   }
 }
