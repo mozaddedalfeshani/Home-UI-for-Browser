@@ -49,10 +49,7 @@ const isSameOriginRequest = (request: Request) => {
   const referer = request.headers.get("referer");
   const fetchSite = request.headers.get("sec-fetch-site");
 
-  if (
-    fetchSite &&
-    ["same-origin", "same-site", "none"].includes(fetchSite)
-  ) {
+  if (fetchSite && ["same-origin", "same-site", "none"].includes(fetchSite)) {
     return true;
   }
 
@@ -74,7 +71,10 @@ const isSameOriginRequest = (request: Request) => {
 const validateSearchApiRequest = (request: Request) => {
   const requestHeader = request.headers.get(SEARCH_API_HEADER);
 
-  if (requestHeader !== SEARCH_API_HEADER_VALUE || !isSameOriginRequest(request)) {
+  if (
+    requestHeader !== SEARCH_API_HEADER_VALUE ||
+    !isSameOriginRequest(request)
+  ) {
     return NextResponse.json({ error: "Forbidden." }, { status: 403 });
   }
 
@@ -177,10 +177,7 @@ export async function POST(request: Request) {
       return guardResponse;
     }
 
-    const rateLimitResponse = await enforceSearchApiRateLimit(
-      request,
-      "write",
-    );
+    const rateLimitResponse = await enforceSearchApiRateLimit(request, "write");
 
     if (rateLimitResponse) {
       return rateLimitResponse;
