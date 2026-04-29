@@ -47,10 +47,7 @@ export const useKeyboardShortcuts = ({
         !event.shiftKey &&
         !event.metaKey;
       const isComboSlash =
-        event.key === "/" &&
-        isCmdOrCtrl &&
-        !event.altKey &&
-        !event.shiftKey;
+        event.key === "/" && isCmdOrCtrl && !event.altKey && !event.shiftKey;
 
       if (isComboSlash) {
         event.preventDefault();

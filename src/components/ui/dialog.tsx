@@ -31,7 +31,9 @@ DialogOverlay.displayName = DialogPrimitive.Overlay.displayName;
 
 const DialogContent = React.forwardRef<
   React.ElementRef<typeof DialogPrimitive.Content>,
-  React.ComponentPropsWithoutRef<typeof DialogPrimitive.Content> & { hideDefaultClose?: boolean }
+  React.ComponentPropsWithoutRef<typeof DialogPrimitive.Content> & {
+    hideDefaultClose?: boolean;
+  }
 >(({ className, children, hideDefaultClose, ...props }, ref) => (
   <DialogPortal>
     <DialogOverlay />
@@ -57,7 +59,9 @@ DialogContent.displayName = DialogPrimitive.Content.displayName;
 
 const DialogContentBottom = React.forwardRef<
   React.ElementRef<typeof DialogPrimitive.Content>,
-  React.ComponentPropsWithoutRef<typeof DialogPrimitive.Content> & { hideDefaultClose?: boolean }
+  React.ComponentPropsWithoutRef<typeof DialogPrimitive.Content> & {
+    hideDefaultClose?: boolean;
+  }
 >(({ className, children, hideDefaultClose, ...props }, ref) => (
   <DialogPortal>
     <DialogOverlay />

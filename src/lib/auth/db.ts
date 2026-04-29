@@ -58,19 +58,30 @@ export async function createUser(
   });
 }
 
-export async function getUserTokenUsage(userId: string, month: string): Promise<number> {
+export async function getUserTokenUsage(
+  userId: string,
+  month: string,
+): Promise<number> {
   const db = await getMongoDb();
-  const record = await db.collection<TokenUsage>("token_usage").findOne({ userId, month });
+  const record = await db
+    .collection<TokenUsage>("token_usage")
+    .findOne({ userId, month });
   return record?.tokensUsed || 0;
 }
 
-export async function incrementTokenUsage(userId: string, month: string, tokens: number): Promise<void> {
+export async function incrementTokenUsage(
+  userId: string,
+  month: string,
+  tokens: number,
+): Promise<void> {
   const db = await getMongoDb();
-  await db.collection<TokenUsage>("token_usage").updateOne(
-    { userId, month },
-    { $inc: { tokensUsed: tokens } },
-    { upsert: true }
-  );
+  await db
+    .collection<TokenUsage>("token_usage")
+    .updateOne(
+      { userId, month },
+      { $inc: { tokensUsed: tokens } },
+      { upsert: true },
+    );
 }
 
 export async function verifyUser(email: string): Promise<void> {
@@ -105,7 +116,9 @@ export async function getUserMemoryProfile(
   userId: string,
 ): Promise<UserMemoryProfile | null> {
   const db = await getMongoDb();
-  return db.collection<UserMemoryProfile>("user_memory_profiles").findOne({ userId });
+  return db
+    .collection<UserMemoryProfile>("user_memory_profiles")
+    .findOne({ userId });
 }
 
 export async function upsertUserMemoryProfile(
