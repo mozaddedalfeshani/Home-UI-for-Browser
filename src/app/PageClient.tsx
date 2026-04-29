@@ -81,7 +81,13 @@ export function PageClient() {
 
   // Dynamic Wallpaper Logic: Pick a new one on every refresh
   useEffect(() => {
-    if (isHydrated && isDynamicWallpaper && dynamicWallpapers.length > 0) {
+    // Only fetch a dynamic wallpaper when the store does not already have one.
+    if (
+      isHydrated &&
+      isDynamicWallpaper &&
+      !backgroundImage &&
+      dynamicWallpapers.length > 0
+    ) {
       const fetchNewWallpaper = async () => {
         try {
           // Use sessionStorage to keep track of the last index across refreshes in the same session
@@ -105,17 +111,7 @@ export function PageClient() {
 
           // console.log("Fetching dynamic wallpaper:", selectedUrl);
 
-          // Add a cache-busting timestamp to bypass aggressive browser/proxy caching
-          const response = await fetch(
-            `/api/proxy-wallpaper?url=${encodeURIComponent(selectedUrl)}&_t=${Date.now()}`,
-          );
-          if (!response.ok) throw new Error("Failed to fetch through proxy");
-
-          const blob = await response.blob();
-          const filename = selectedUrl.split("/").pop() || "wallpaper.png";
-          const file = new File([blob], filename, { type: blob.type });
-
-          await setBackgroundImage(file);
+          await setBackgroundImage(selectedUrl);
           // console.log("Dynamic wallpaper updated successfully to index:", randomIndex);
         } catch {
           // console.error("Error updating dynamic wallpaper:", error);
@@ -124,7 +120,13 @@ export function PageClient() {
 
       fetchNewWallpaper();
     }
-  }, [dynamicWallpapers, isDynamicWallpaper, isHydrated, setBackgroundImage]); // Only run when hydrated or dynamic mode toggled
+  }, [
+    backgroundImage,
+    dynamicWallpapers,
+    isDynamicWallpaper,
+    isHydrated,
+    setBackgroundImage,
+  ]);
 
   const shouldShowRightSidebar = showRightSidebar && layoutPreset !== "focus";
   const clockPaddingClass =
@@ -147,9 +149,7 @@ export function PageClient() {
   useKeyboardShortcuts({
     isAuthenticated,
     onAIModalOpen: () => {
-      if (isAuthenticated) {
-        setIsMuradianModalOpen(true);
-      }
+      setIsMuradianModalOpen(true);
     },
     onSearchModalOpen: (initialQuery) => {
       if (initialQuery) {
