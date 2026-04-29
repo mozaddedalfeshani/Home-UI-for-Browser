@@ -33,7 +33,9 @@ export async function GET(request: NextRequest) {
     }
 
     return withCorsHeaders(
-      NextResponse.json({ user: { name: payload.name, email: payload.email, id: payload.userId } }),
+      NextResponse.json({
+        user: { name: payload.name, email: payload.email, id: payload.userId },
+      }),
       request,
     );
   } catch {
