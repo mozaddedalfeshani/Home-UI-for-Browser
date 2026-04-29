@@ -8,7 +8,9 @@ import {
   Check,
   ChevronDown,
   Copy,
+  Globe2,
   Loader2,
+  Lock,
   Pencil,
   Plus,
   Save,
@@ -39,6 +41,7 @@ import { cn } from "@/lib/utils";
 import {
   MuradianAskAgent,
   MuradianAskAgentId,
+  MuradianAskAgentVisibility,
   useMuradianAskAgentStore,
 } from "@/store/muradianAskAgentStore";
 
@@ -62,6 +65,10 @@ const MuradianAIModal = ({ open, onOpenChange }: MuradianAIModalProps) => {
   const [editName, setEditName] = useState("");
   const [editDescription, setEditDescription] = useState("");
   const [editRules, setEditRules] = useState("");
+  const [editVisibility, setEditVisibility] =
+    useState<MuradianAskAgentVisibility>("private");
+  const [publicAgents, setPublicAgents] = useState<MuradianAskAgent[]>([]);
+  const [isPublicSearchLoading, setIsPublicSearchLoading] = useState(false);
   const [isSavingAgent, setIsSavingAgent] = useState(false);
   const [isCopied, setIsCopied] = useState(false);
   const inputRef = useRef<HTMLTextAreaElement>(null);
@@ -71,9 +78,14 @@ const MuradianAIModal = ({ open, onOpenChange }: MuradianAIModalProps) => {
   const createAgent = useMuradianAskAgentStore((state) => state.createAgent);
   const updateAgent = useMuradianAskAgentStore((state) => state.updateAgent);
   const deleteAgent = useMuradianAskAgentStore((state) => state.deleteAgent);
-  const selectedAgent = agents.find((agent) => agent.id === selectedAgentId);
+  const selectedAgent = [...agents, ...publicAgents].find(
+    (agent) => agent.id === selectedAgentId,
+  );
   const filteredAgents = agents.filter((agent) =>
     agent.name.toLowerCase().includes(agentSearch.trim().toLowerCase()),
+  );
+  const filteredPublicAgents = publicAgents.filter(
+    (agent) => !agents.some((ownAgent) => ownAgent.id === agent.id),
   );
 
   useEffect(() => {
@@ -82,9 +94,52 @@ const MuradianAIModal = ({ open, onOpenChange }: MuradianAIModalProps) => {
     setQuery("");
     setAnswer("");
     setAgentSearch("");
+    setPublicAgents([]);
     fetchAgents();
     setTimeout(() => inputRef.current?.focus(), 80);
   }, [fetchAgents, open]);
+
+  useEffect(() => {
+    const query = agentSearch.trim();
+    if (!open || query.length < 2) {
+      setPublicAgents([]);
+      setIsPublicSearchLoading(false);
+      return;
+    }
+
+    const controller = new AbortController();
+    setIsPublicSearchLoading(true);
+
+    fetch(`/api/ai/agents/public?query=${encodeURIComponent(query)}`, {
+      signal: controller.signal,
+    })
+      .then((response) => (response.ok ? response.json() : { agents: [] }))
+      .then((data) => {
+        const nextPublicAgents = (data.agents ?? []).map(
+          (agent: Partial<MuradianAskAgent>) => ({
+            ...agent,
+            systemInstruction: "",
+            visibility: "public",
+          }),
+        ) as MuradianAskAgent[];
+        setPublicAgents(nextPublicAgents);
+      })
+      .catch((error) => {
+        if (error instanceof DOMException && error.name === "AbortError") {
+          return;
+        }
+
+        console.error("Failed to search public MuradianAsk agents", error);
+        setPublicAgents([]);
+      })
+      .finally(() => {
+        if (!controller.signal.aborted) {
+          setIsPublicSearchLoading(false);
+        }
+      });
+
+    return () => controller.abort();
+  }, [agentSearch, open]);
 
   useEffect(() => {
     const handleAgentStorageChange = (event: StorageEvent) => {
@@ -105,12 +160,14 @@ const MuradianAIModal = ({ open, onOpenChange }: MuradianAIModalProps) => {
       setEditName("");
       setEditDescription("");
       setEditRules("");
+      setEditVisibility("private");
       return;
     }
 
     setEditName(agentToEdit.name);
     setEditDescription(agentToEdit.description);
     setEditRules(agentToEdit.systemInstruction);
+    setEditVisibility(agentToEdit.visibility ?? "private");
   }, [agentToEdit]);
 
   const handleSend = async () => {
@@ -195,6 +252,7 @@ const MuradianAIModal = ({ open, onOpenChange }: MuradianAIModalProps) => {
     setEditName("");
     setEditDescription("");
     setEditRules("");
+    setEditVisibility("private");
     setIsAgentEditorOpen(true);
   };
 
@@ -227,12 +285,14 @@ const MuradianAIModal = ({ open, onOpenChange }: MuradianAIModalProps) => {
           name: editName.trim(),
           description: editDescription.trim(),
           systemInstruction: editRules.trim(),
+          visibility: editVisibility,
         });
       } else {
         const nextAgent = await createAgent({
           name: editName.trim(),
           description: editDescription.trim(),
           systemInstruction: editRules.trim(),
+          visibility: editVisibility,
         });
         setSelectedAgentId(nextAgent.id);
       }
@@ -294,6 +354,9 @@ const MuradianAIModal = ({ open, onOpenChange }: MuradianAIModalProps) => {
                       <span className="hidden max-w-28 truncate text-xs font-medium sm:inline">
                         {selectedAgent?.name ?? "Agent"}
                       </span>
+                      {selectedAgent?.visibility === "public" ? (
+                        <Globe2 className="h-3.5 w-3.5 text-primary" />
+                      ) : null}
                       <ChevronDown className="h-3.5 w-3.5 opacity-70" />
                     </Button>
                   </DropdownMenuTrigger>
@@ -326,12 +389,21 @@ const MuradianAIModal = ({ open, onOpenChange }: MuradianAIModalProps) => {
                         Add agent
                       </Button>
                     </div>
-                    {filteredAgents.length === 0 ? (
+                    {filteredAgents.length === 0 &&
+                    filteredPublicAgents.length === 0 &&
+                    !isPublicSearchLoading ? (
                       <div className="px-3 py-4 text-sm text-muted-foreground">
                         {agents.length === 0
                           ? "No agents yet. Add your first preference."
-                          : "No agent found."}
+                          : agentSearch.trim().length < 2
+                            ? "No private agent found. Type 2+ letters to search public agents."
+                            : "No agent found."}
                       </div>
+                    ) : null}
+                    {filteredAgents.length > 0 ? (
+                      <DropdownMenuLabel className="px-2 py-1 text-[0.65rem] uppercase tracking-[0.16em] text-muted-foreground">
+                        Your agents
+                      </DropdownMenuLabel>
                     ) : null}
                     {filteredAgents.map((agent) => (
                       <DropdownMenuItem
@@ -346,9 +418,21 @@ const MuradianAIModal = ({ open, onOpenChange }: MuradianAIModalProps) => {
                           <div className="rounded-lg bg-primary/10 p-1.5 text-primary">
                             <Bot className="h-4 w-4" />
                           </div>
-                          <p className="min-w-0 flex-1 truncate text-sm font-medium text-foreground">
-                            {agent.name}
-                          </p>
+                          <div className="min-w-0 flex-1">
+                            <p className="truncate text-sm font-medium text-foreground">
+                              {agent.name}
+                            </p>
+                            <p className="flex items-center gap-1 text-[0.7rem] text-muted-foreground">
+                              {(agent.visibility ?? "private") === "public" ? (
+                                <Globe2 className="h-3 w-3" />
+                              ) : (
+                                <Lock className="h-3 w-3" />
+                              )}
+                              {(agent.visibility ?? "private") === "public"
+                                ? "Public"
+                                : "Private"}
+                            </p>
+                          </div>
                           <div className="ml-2 flex shrink-0 items-center gap-1">
                             {selectedAgentId === agent.id ? (
                               <Check className="h-4 w-4 shrink-0 text-primary" />
@@ -386,6 +470,44 @@ const MuradianAIModal = ({ open, onOpenChange }: MuradianAIModalProps) => {
                               <Trash2 className="h-3.5 w-3.5" />
                             </button>
                           </div>
+                        </div>
+                      </DropdownMenuItem>
+                    ))}
+                    {isPublicSearchLoading ? (
+                      <div className="flex items-center gap-2 px-3 py-3 text-sm text-muted-foreground">
+                        <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                        Searching public agents...
+                      </div>
+                    ) : null}
+                    {filteredPublicAgents.length > 0 ? (
+                      <DropdownMenuLabel className="px-2 py-1 text-[0.65rem] uppercase tracking-[0.16em] text-muted-foreground">
+                        Public agents
+                      </DropdownMenuLabel>
+                    ) : null}
+                    {filteredPublicAgents.map((agent) => (
+                      <DropdownMenuItem
+                        key={agent.id}
+                        onSelect={() => setSelectedAgentId(agent.id)}
+                        className={cn(
+                          "group cursor-pointer rounded-xl px-3 py-2 focus:bg-accent",
+                          selectedAgentId === agent.id && "bg-primary/10",
+                        )}
+                      >
+                        <div className="flex w-full items-center gap-3">
+                          <div className="rounded-lg bg-primary/10 p-1.5 text-primary">
+                            <Globe2 className="h-4 w-4" />
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <p className="truncate text-sm font-medium text-foreground">
+                              {agent.name}
+                            </p>
+                            <p className="truncate text-[0.7rem] text-muted-foreground">
+                              {agent.description || "Public agent"}
+                            </p>
+                          </div>
+                          {selectedAgentId === agent.id ? (
+                            <Check className="h-4 w-4 shrink-0 text-primary" />
+                          ) : null}
                         </div>
                       </DropdownMenuItem>
                     ))}
@@ -486,6 +608,35 @@ const MuradianAIModal = ({ open, onOpenChange }: MuradianAIModalProps) => {
                 className="h-12 rounded-2xl bg-background"
               />
             </label>
+
+            <div className="grid gap-2">
+              <span className="text-sm font-medium text-muted-foreground">
+                Visibility
+              </span>
+              <div className="grid grid-cols-2 gap-2 rounded-2xl border border-border/60 bg-background p-1">
+                <Button
+                  type="button"
+                  variant={editVisibility === "private" ? "default" : "ghost"}
+                  className="h-11 rounded-xl"
+                  onClick={() => setEditVisibility("private")}
+                >
+                  <Lock className="h-4 w-4" />
+                  Private
+                </Button>
+                <Button
+                  type="button"
+                  variant={editVisibility === "public" ? "default" : "ghost"}
+                  className="h-11 rounded-xl"
+                  onClick={() => setEditVisibility("public")}
+                >
+                  <Globe2 className="h-4 w-4" />
+                  Public
+                </Button>
+              </div>
+              <p className="text-xs leading-5 text-muted-foreground">
+                Public agents can be found in search and used by other users.
+              </p>
+            </div>
 
             <label className="grid gap-2">
               <span className="text-sm font-medium text-muted-foreground">

@@ -132,12 +132,14 @@ export default function MainContent({
           name: editName.trim(),
           description: editDescription.trim(),
           systemInstruction: editRules.trim(),
+          visibility: agentToEdit.visibility ?? "private",
         });
       } else {
         const nextAgent = await createAgent({
           name: editName.trim(),
           description: editDescription.trim(),
           systemInstruction: editRules.trim(),
+          visibility: "private",
         });
         onSelectedAgentChange(nextAgent.id);
       }

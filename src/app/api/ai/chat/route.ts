@@ -7,7 +7,7 @@ import {
   incrementTokenUsage,
   upsertUserMemoryProfile,
 } from "@/lib/auth/db";
-import { getMuradianAskAgentById } from "@/lib/muradian-ask/db";
+import { getMuradianAskAgentForUse } from "@/lib/muradian-ask/db";
 
 const TOKEN_LIMIT = 100000;
 const DEEPSEEK_ENDPOINT = "https://api.deepseek.com/chat/completions";
@@ -225,7 +225,7 @@ export async function POST(req: NextRequest) {
 
     const persistedMemory = await getUserMemoryProfile(userId);
     const selectedAgent = requestPayload.agentId
-      ? await getMuradianAskAgentById(userId, requestPayload.agentId)
+      ? await getMuradianAskAgentForUse(userId, requestPayload.agentId)
       : null;
     const effectiveMemory = persistedMemory?.memory ?? null;
     const trimmedMessages = buildChatMessages({

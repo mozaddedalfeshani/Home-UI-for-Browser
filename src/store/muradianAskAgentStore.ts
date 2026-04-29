@@ -4,19 +4,21 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
 export type MuradianAskAgentId = string;
+export type MuradianAskAgentVisibility = "private" | "public";
 
 export interface MuradianAskAgent {
   id: MuradianAskAgentId;
   name: string;
   description: string;
   systemInstruction: string;
+  visibility: MuradianAskAgentVisibility;
   createdAt: string;
   updatedAt: string;
 }
 
 export type MuradianAskAgentInput = Pick<
   MuradianAskAgent,
-  "name" | "description" | "systemInstruction"
+  "name" | "description" | "systemInstruction" | "visibility"
 >;
 
 interface MuradianAskAgentState {

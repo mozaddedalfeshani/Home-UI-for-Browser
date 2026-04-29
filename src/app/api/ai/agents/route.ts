@@ -7,6 +7,7 @@ import {
   createMuradianAskAgent,
   getMuradianAskAgents,
   MuradianAskAgentPayload,
+  MuradianAskAgentVisibility,
 } from "@/lib/muradian-ask/db";
 
 export async function OPTIONS(request: NextRequest) {
@@ -22,11 +23,21 @@ const getUserId = async () => {
   return payload?.userId ?? null;
 };
 
-const cleanPayload = (payload: Partial<MuradianAskAgentPayload>) => ({
-  name: payload.name?.trim() ?? "",
-  description: payload.description?.trim() ?? "",
-  systemInstruction: payload.systemInstruction?.trim() ?? "",
-});
+const cleanVisibility = (
+  visibility?: MuradianAskAgentVisibility,
+): MuradianAskAgentVisibility =>
+  visibility === "public" ? "public" : "private";
+
+const cleanPayload = (payload: Partial<MuradianAskAgentPayload>) => {
+  const visibility = cleanVisibility(payload.visibility);
+
+  return {
+    name: payload.name?.trim() ?? "",
+    description: payload.description?.trim() ?? "",
+    systemInstruction: payload.systemInstruction?.trim() ?? "",
+    visibility,
+  };
+};
 
 export async function GET(request: NextRequest) {
   const guard = corsGuard(request);
@@ -50,6 +61,7 @@ export async function GET(request: NextRequest) {
           name: agent.name,
           description: agent.description,
           systemInstruction: agent.systemInstruction,
+          visibility: agent.visibility ?? "private",
           createdAt: agent.createdAt.toISOString(),
           updatedAt: agent.updatedAt.toISOString(),
         })),

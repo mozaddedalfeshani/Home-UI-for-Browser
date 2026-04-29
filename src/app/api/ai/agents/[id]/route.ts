@@ -6,6 +6,7 @@ import { corsGuard, handleCorsOptions, withCorsHeaders } from "@/lib/auth/cors";
 import {
   deleteMuradianAskAgent,
   MuradianAskAgentPayload,
+  MuradianAskAgentVisibility,
   updateMuradianAskAgent,
 } from "@/lib/muradian-ask/db";
 
@@ -22,11 +23,21 @@ const getUserId = async () => {
   return payload?.userId ?? null;
 };
 
-const cleanPayload = (payload: Partial<MuradianAskAgentPayload>) => ({
-  name: payload.name?.trim() ?? "",
-  description: payload.description?.trim() ?? "",
-  systemInstruction: payload.systemInstruction?.trim() ?? "",
-});
+const cleanVisibility = (
+  visibility?: MuradianAskAgentVisibility,
+): MuradianAskAgentVisibility =>
+  visibility === "public" ? "public" : "private";
+
+const cleanPayload = (payload: Partial<MuradianAskAgentPayload>) => {
+  const visibility = cleanVisibility(payload.visibility);
+
+  return {
+    name: payload.name?.trim() ?? "",
+    description: payload.description?.trim() ?? "",
+    systemInstruction: payload.systemInstruction?.trim() ?? "",
+    visibility,
+  };
+};
 
 export async function PUT(
   request: NextRequest,
