@@ -43,6 +43,32 @@ export async function getUserByEmail(email: string): Promise<User | null> {
   return db.collection<User>("users").findOne({ email });
 }
 
+export async function getUserById(userId: string): Promise<User | null> {
+  if (!ObjectId.isValid(userId)) {
+    return null;
+  }
+
+  const db = await getMongoDb();
+  return db.collection<User>("users").findOne({ _id: new ObjectId(userId) });
+}
+
+export async function updateUserProfile(
+  userId: string,
+  updates: { name?: string; passwordHash?: string },
+): Promise<void> {
+  if (!ObjectId.isValid(userId)) {
+    return;
+  }
+
+  const db = await getMongoDb();
+  await db.collection<User>("users").updateOne(
+    { _id: new ObjectId(userId) },
+    {
+      $set: updates,
+    },
+  );
+}
+
 export async function createUser(
   name: string,
   email: string,

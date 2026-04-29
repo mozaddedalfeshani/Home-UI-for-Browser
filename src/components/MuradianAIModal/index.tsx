@@ -44,6 +44,8 @@ import {
   MuradianAskAgentVisibility,
   useMuradianAskAgentStore,
 } from "@/store/muradianAskAgentStore";
+import { useSettingsStore } from "@/store/settingsStore";
+import { useAuthStore } from "@/store/authStore";
 
 interface MuradianAIModalProps {
   open: boolean;
@@ -73,6 +75,11 @@ const MuradianAIModal = ({ open, onOpenChange }: MuradianAIModalProps) => {
   const [isCopied, setIsCopied] = useState(false);
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
+  const language = useSettingsStore((state) => state.language);
+  const userName = useAuthStore((state) => {
+    const name = state.user?.name?.trim() ?? "";
+    return name.includes("@") ? "" : name;
+  });
   const agents = useMuradianAskAgentStore((state) => state.agents);
   const fetchAgents = useMuradianAskAgentStore((state) => state.fetchAgents);
   const createAgent = useMuradianAskAgentStore((state) => state.createAgent);
@@ -184,6 +191,8 @@ const MuradianAIModal = ({ open, onOpenChange }: MuradianAIModalProps) => {
         body: JSON.stringify({
           message: trimmedQuery,
           agentId: selectedAgentId || undefined,
+          uiLanguage: language,
+          userName,
         }),
       });
 
@@ -325,8 +334,8 @@ const MuradianAIModal = ({ open, onOpenChange }: MuradianAIModalProps) => {
         >
           <DialogTitle className="sr-only">MuradianAsk AI</DialogTitle>
           <div className="mx-auto w-full max-w-2xl">
-            <div className="overflow-hidden rounded-[20px] bg-background/78 backdrop-blur-sm">
-              <div className="flex items-center gap-1.5 p-1.5">
+            <div className="flex max-h-[min(760px,calc(100vh-5rem))] flex-col overflow-hidden rounded-[20px] bg-background/78 backdrop-blur-sm">
+              <div className="flex shrink-0 items-center gap-1.5 p-1.5">
                 <Textarea
                   ref={inputRef}
                   value={query}
@@ -554,16 +563,16 @@ const MuradianAIModal = ({ open, onOpenChange }: MuradianAIModalProps) => {
               </div>
 
               {(answer || isLoading) && (
-                <div className="px-5 py-4">
+                <div className="min-h-0 px-5 py-4">
                   {answer ? (
-                    <div className="space-y-3">
-                      <div className="prose max-w-none text-sm leading-6 dark:prose-invert prose-p:my-2 prose-ul:my-2 prose-ol:my-2">
+                    <div className="flex min-h-0 flex-col gap-3">
+                      <div className="prose max-h-[calc(100vh-13rem)] max-w-none overflow-y-auto pr-2 text-sm leading-6 dark:prose-invert prose-p:my-2 prose-ul:my-2 prose-ol:my-2">
                         <ReactMarkdown remarkPlugins={[remarkGfm]}>
                           {answer}
                         </ReactMarkdown>
                       </div>
 
-                      <div className="flex justify-end">
+                      <div className="flex shrink-0 justify-end border-t border-border/50 pt-2">
                         <Button
                           type="button"
                           variant="ghost"

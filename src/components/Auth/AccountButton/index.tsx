@@ -19,6 +19,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Input } from "@/components/ui/input";
 import { HugeiconsIcon } from "@hugeicons/react";
 import {
   UserIcon,
@@ -38,19 +39,38 @@ interface MemoryResponse {
   error?: string;
 }
 
+interface ProfileResponse extends MemoryResponse {
+  user?: { id: string; name: string; email: string };
+}
+
 const MAX_MEMORY_LENGTH = 200;
+const MAX_NAME_LENGTH = 80;
 
 export function AccountButton() {
-  const { user, isAuthenticated, logout, pushSync, pullSync, lastSynced } =
-    useAuthStore();
+  const {
+    user,
+    isAuthenticated,
+    logout,
+    pushSync,
+    pullSync,
+    lastSynced,
+    setUser,
+  } = useAuthStore();
   const [isAuthOpen, setIsAuthOpen] = useState(false);
   const [isSyncing, setIsSyncing] = useState(false);
   const [isPushConfirmOpen, setIsPushConfirmOpen] = useState(false);
+  const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const [isProfileLoading, setIsProfileLoading] = useState(false);
+  const [isProfileSaving, setIsProfileSaving] = useState(false);
   const [isMemoryOpen, setIsMemoryOpen] = useState(false);
   const [isMemoryLoading, setIsMemoryLoading] = useState(false);
   const [isMemorySaving, setIsMemorySaving] = useState(false);
   const [memory, setMemory] = useState("");
   const [memoryDraft, setMemoryDraft] = useState("");
+  const [profileName, setProfileName] = useState("");
+  const [profileMemory, setProfileMemory] = useState("");
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
 
   const handleLogout = async () => {
     await logout();
@@ -94,6 +114,88 @@ export function AccountButton() {
       setMemoryDraft("");
     } finally {
       setIsMemoryLoading(false);
+    }
+  };
+
+  const handleOpenProfile = async () => {
+    setIsProfileOpen(true);
+    setIsProfileLoading(true);
+    setProfileName(user?.name ?? "");
+    setProfileMemory("");
+    setCurrentPassword("");
+    setNewPassword("");
+
+    try {
+      const response = await fetch("/api/auth/profile");
+      const data = (await response.json().catch(() => ({}))) as ProfileResponse;
+
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to load profile");
+      }
+
+      setProfileName(data.user?.name?.trim() ?? user?.name ?? "");
+      setProfileMemory(data.memory?.trim() ?? "");
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : "Failed to load profile";
+      toast.error(message);
+    } finally {
+      setIsProfileLoading(false);
+    }
+  };
+
+  const handleSaveProfile = async () => {
+    const nextName = profileName.trim();
+    const nextMemory = profileMemory.trim();
+
+    if (!nextName) {
+      toast.error("Name is required.");
+      return;
+    }
+
+    if (nextName.length > MAX_NAME_LENGTH) {
+      toast.error(`Name must be ${MAX_NAME_LENGTH} characters or less.`);
+      return;
+    }
+
+    if (nextMemory.length > MAX_MEMORY_LENGTH) {
+      toast.error(`Memory must be ${MAX_MEMORY_LENGTH} characters or less.`);
+      return;
+    }
+
+    setIsProfileSaving(true);
+
+    try {
+      const response = await fetch("/api/auth/profile", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: nextName,
+          memory: nextMemory,
+          currentPassword,
+          newPassword,
+        }),
+      });
+      const data = (await response.json().catch(() => ({}))) as ProfileResponse;
+
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to update profile");
+      }
+
+      if (data.user) {
+        setUser(data.user);
+      }
+      setMemory(nextMemory);
+      setMemoryDraft(nextMemory);
+      setCurrentPassword("");
+      setNewPassword("");
+      toast.success("Profile updated");
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : "Failed to update profile";
+      toast.error(message);
+    } finally {
+      setIsProfileSaving(false);
     }
   };
 
@@ -187,6 +289,10 @@ export function AccountButton() {
             />
             <span>Pull from cloud</span>
           </DropdownMenuItem>
+          <DropdownMenuItem onClick={handleOpenProfile}>
+            <HugeiconsIcon icon={UserIcon} size={16} className="mr-2" />
+            <span>Profile</span>
+          </DropdownMenuItem>
           <DropdownMenuItem onClick={handleOpenMemory}>
             <HugeiconsIcon icon={AiBrain01Icon} size={16} className="mr-2" />
             <span>Memory</span>
@@ -211,6 +317,113 @@ export function AccountButton() {
         variant="warning"
         onConfirm={handlePushConfirm}
       />
+
+      <Dialog open={isProfileOpen} onOpenChange={setIsProfileOpen}>
+        <DialogContent className="max-w-xl rounded-2xl p-5">
+          <div className="space-y-5">
+            <div>
+              <h2 className="text-base font-semibold text-foreground">
+                Profile
+              </h2>
+              <p className="mt-1 text-sm text-muted-foreground">
+                Update your name, MuradianAsk memory, and password.
+              </p>
+            </div>
+
+            {isProfileLoading ? (
+              <div className="min-h-[220px] rounded-xl border border-border/70 bg-muted/30 p-3 text-sm text-muted-foreground">
+                Loading profile...
+              </div>
+            ) : (
+              <>
+                <div className="space-y-2">
+                  <p className="text-xs font-medium text-muted-foreground">
+                    Display name
+                  </p>
+                  <Input
+                    value={profileName}
+                    onChange={(event) => setProfileName(event.target.value)}
+                    maxLength={MAX_NAME_LENGTH}
+                    placeholder="Your name"
+                    disabled={isProfileSaving}
+                    className="rounded-xl bg-muted/30"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <p className="text-xs font-medium text-muted-foreground">
+                    Memory
+                  </p>
+                  <Textarea
+                    value={profileMemory}
+                    onChange={(event) => setProfileMemory(event.target.value)}
+                    placeholder="What should MuradianAsk remember?"
+                    className="min-h-[120px] resize-none rounded-xl bg-muted/30 text-sm leading-6"
+                    maxLength={MAX_MEMORY_LENGTH}
+                    disabled={isProfileSaving}
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    {profileMemory.trim().length}/{MAX_MEMORY_LENGTH}
+                  </p>
+                </div>
+
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <div className="space-y-2">
+                    <p className="text-xs font-medium text-muted-foreground">
+                      Current password
+                    </p>
+                    <Input
+                      type="password"
+                      value={currentPassword}
+                      onChange={(event) =>
+                        setCurrentPassword(event.target.value)
+                      }
+                      placeholder="Required to change password"
+                      disabled={isProfileSaving}
+                      className="rounded-xl bg-muted/30"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <p className="text-xs font-medium text-muted-foreground">
+                      New password
+                    </p>
+                    <Input
+                      type="password"
+                      value={newPassword}
+                      onChange={(event) => setNewPassword(event.target.value)}
+                      placeholder="Leave blank to keep current"
+                      disabled={isProfileSaving}
+                      className="rounded-xl bg-muted/30"
+                    />
+                  </div>
+                </div>
+
+                <div className="flex justify-end gap-2 border-t border-border/60 pt-3">
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="rounded-full"
+                    onClick={() => setIsProfileOpen(false)}
+                    disabled={isProfileSaving}
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    type="button"
+                    size="sm"
+                    className="rounded-full"
+                    onClick={handleSaveProfile}
+                    disabled={isProfileSaving}
+                  >
+                    {isProfileSaving ? "Saving..." : "Save profile"}
+                  </Button>
+                </div>
+              </>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
 
       <Dialog open={isMemoryOpen} onOpenChange={setIsMemoryOpen}>
         <DialogContent className="max-w-xl rounded-2xl p-5">

@@ -57,7 +57,7 @@ export async function POST(request: NextRequest) {
       NextResponse.json({
         message: "Logged in successfully",
         token,
-        user: { name: user.name, email: user.email },
+        user: { name: user.name, email: user.email, id: user._id!.toString() },
       }),
       request,
     );

@@ -39,11 +39,11 @@ export async function GET(request: NextRequest) {
     return withCorsHeaders(
       NextResponse.json<{
         authenticated: boolean;
-        user: { email: string; id: string };
+        user: { name: string; email: string; id: string };
         data: UserData | null;
       }>({
         authenticated: true,
-        user: { email: payload.email, id: payload.userId },
+        user: { name: payload.name, email: payload.email, id: payload.userId },
         data: userData,
       }),
       request,

@@ -14,7 +14,7 @@ const DEEPSEEK_ENDPOINT = "https://api.deepseek.com/chat/completions";
 const DEEPSEEK_MODEL = "deepseek-v4-flash";
 const MEMORY_MAX_WORDS = 200;
 const BASE_SYSTEM_PROMPT =
-  "You are MuradianAsk AI, a simple asking assistant. Answer as simply as you can while keeping the answer accurate, useful, and high quality. If the user does not ask for another language, reply in Bangla. Be direct, practical, and friendly. Before answering, silently check that the answer is correct and clear. Do not expose hidden chain-of-thought.";
+  "You are MuradianAsk AI, a simple asking assistant. Answer as simply as you can while keeping the answer accurate, useful, and high quality. Be direct, practical, and friendly. Before answering, silently check that the answer is correct and clear. Do not expose hidden chain-of-thought.";
 
 interface ChatMessage {
   role: "system" | "user" | "assistant";
@@ -24,6 +24,8 @@ interface ChatMessage {
 interface ChatRequestPayload {
   message?: string;
   agentId?: string;
+  uiLanguage?: "en" | "bn";
+  userName?: string;
 }
 
 function shouldEnableThinking(message: string) {
@@ -60,8 +62,20 @@ function buildChatMessages(params: {
   message: string;
   memory: string | null;
   agentRules: string | null;
+  uiLanguage: "en" | "bn";
+  userName: string | null;
 }): ChatMessage[] {
-  const systemParts = [BASE_SYSTEM_PROMPT];
+  const languageInstruction =
+    params.uiLanguage === "bn"
+      ? "If the user does not ask for another language, reply in Bangla."
+      : "If the user does not ask for another language, reply in English.";
+  const systemParts = [BASE_SYSTEM_PROMPT, languageInstruction];
+
+  if (params.userName?.trim()) {
+    systemParts.push(
+      `The current user's name is ${params.userName.trim()}. Use it only when it naturally improves the answer.`,
+    );
+  }
 
   if (params.agentRules?.trim()) {
     systemParts.push(
@@ -207,6 +221,8 @@ export async function POST(req: NextRequest) {
 
     const requestPayload = (await req.json()) as ChatRequestPayload;
     const message = requestPayload.message?.trim() ?? "";
+    const uiLanguage = requestPayload.uiLanguage === "bn" ? "bn" : "en";
+    const userName = requestPayload.userName?.trim().slice(0, 80) ?? null;
 
     if (!message) {
       return NextResponse.json(
@@ -237,6 +253,8 @@ export async function POST(req: NextRequest) {
       message,
       memory: effectiveMemory,
       agentRules: selectedAgent?.systemInstruction ?? null,
+      uiLanguage,
+      userName,
     });
     const enableThinking = shouldEnableThinking(message);
 
