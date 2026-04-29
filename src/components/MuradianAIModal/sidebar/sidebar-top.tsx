@@ -8,7 +8,10 @@ interface SidebarTopProps {
   setIsCollapsed: (v: boolean) => void;
 }
 
-export const SidebarTop = ({ isCollapsed, setIsCollapsed }: SidebarTopProps) => {
+export const SidebarTop = ({
+  isCollapsed,
+  setIsCollapsed,
+}: SidebarTopProps) => {
   void isCollapsed;
   return (
     <div className="p-6 pb-2 flex items-center justify-between">
@@ -20,8 +23,8 @@ export const SidebarTop = ({ isCollapsed, setIsCollapsed }: SidebarTopProps) => 
           Muradian <span className="text-muted-foreground font-medium">AI</span>
         </h1>
       </div>
-      
-      <button 
+
+      <button
         onClick={() => setIsCollapsed(true)}
         className="p-1.5 rounded-md hover:bg-zinc-200 dark:hover:bg-zinc-800 text-muted-foreground transition-colors"
         title="Collapse Sidebar"
