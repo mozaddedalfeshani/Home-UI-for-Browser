@@ -24,7 +24,7 @@ interface MuradianAiState {
   isLoading: boolean;
   activeAgentId: string | null;
   activeView: "chat" | "agents" | "settings";
-  
+
   // Actions
   setCurrentSessionId: (id: string | null) => void;
   setMessages: (messages: Message[]) => void;
@@ -32,7 +32,7 @@ interface MuradianAiState {
   setLoading: (loading: boolean) => void;
   setActiveAgentId: (id: string | null) => void;
   setActiveView: (view: "chat" | "agents" | "settings") => void;
-  
+
   // Async Actions
   fetchSessions: () => Promise<void>;
   saveCurrentSession: (title?: string) => Promise<void>;
@@ -53,7 +53,8 @@ export const useMuradianAiStore = create<MuradianAiState>()(
 
       setCurrentSessionId: (id) => set({ currentSessionId: id }),
       setMessages: (messages) => set({ messages }),
-      addMessage: (message) => set((state) => ({ messages: [...state.messages, message] })),
+      addMessage: (message) =>
+        set((state) => ({ messages: [...state.messages, message] })),
       setLoading: (loading) => set({ isLoading: loading }),
       setActiveAgentId: (id) => set({ activeAgentId: id }),
       setActiveView: (view) => set({ activeView: view }),
@@ -62,7 +63,7 @@ export const useMuradianAiStore = create<MuradianAiState>()(
         try {
           const res = await fetch("/api/ai/sessions");
           if (res.ok) {
-            const data = await res.ok ? await res.json() : { sessions: [] };
+            const data = (await res.ok) ? await res.json() : { sessions: [] };
             set({ sessions: data.sessions || [] });
           }
         } catch (error) {
@@ -74,17 +75,21 @@ export const useMuradianAiStore = create<MuradianAiState>()(
         const { currentSessionId, messages, sessions } = get();
         if (messages.length === 0) return;
 
-        const existingSession = sessions.find(s => s._id === currentSessionId);
+        const existingSession = sessions.find(
+          (s) => s._id === currentSessionId,
+        );
         const finalTitle = title || existingSession?.title || "Chat Session";
 
         try {
-          const url = currentSessionId ? `/api/ai/sessions/${currentSessionId}` : "/api/ai/sessions";
+          const url = currentSessionId
+            ? `/api/ai/sessions/${currentSessionId}`
+            : "/api/ai/sessions";
           const method = currentSessionId ? "PUT" : "POST";
-          
+
           const res = await fetch(url, {
             method,
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ title: finalTitle, messages })
+            body: JSON.stringify({ title: finalTitle, messages }),
           });
 
           if (res.ok) {
@@ -109,9 +114,9 @@ export const useMuradianAiStore = create<MuradianAiState>()(
           const res = await fetch(`/api/ai/sessions/${sessionId}`);
           if (res.ok) {
             const data = await res.json();
-            set({ 
-              currentSessionId: sessionId, 
-              messages: data.session.messages || [] 
+            set({
+              currentSessionId: sessionId,
+              messages: data.session.messages || [],
             });
           }
         } catch (error) {
@@ -123,7 +128,9 @@ export const useMuradianAiStore = create<MuradianAiState>()(
 
       deleteSession: async (sessionId: string) => {
         try {
-          const res = await fetch(`/api/ai/sessions/${sessionId}`, { method: "DELETE" });
+          const res = await fetch(`/api/ai/sessions/${sessionId}`, {
+            method: "DELETE",
+          });
           if (res.ok) {
             if (get().currentSessionId === sessionId) {
               get().createNewChat();
@@ -133,11 +140,11 @@ export const useMuradianAiStore = create<MuradianAiState>()(
         } catch (error) {
           console.error("Failed to delete session", error);
         }
-      }
+      },
     }),
     {
       name: "muradian-ai-storage",
-      partialize: (state) => ({ sessions: state.sessions })
-    }
-  )
+      partialize: (state) => ({ sessions: state.sessions }),
+    },
+  ),
 );
