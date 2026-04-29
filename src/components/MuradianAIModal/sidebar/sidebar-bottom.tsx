@@ -31,17 +31,25 @@ export const SidebarBottom = () => {
               <span className="text-sm font-bold text-foreground leading-tight truncate capitalize">
                 {user.name || "User"}
               </span>
-              <span className="text-[11px] text-muted-foreground truncate">{user.email}</span>
+              <span className="text-[11px] text-muted-foreground truncate">
+                {user.email}
+              </span>
             </div>
           </div>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="start" className="w-56 mb-2">
-          <DropdownMenuItem onClick={() => setActiveView("settings")} className="cursor-pointer">
+          <DropdownMenuItem
+            onClick={() => setActiveView("settings")}
+            className="cursor-pointer"
+          >
             <Settings className="mr-2 h-4 w-4" />
             <span>Settings & Usage</span>
           </DropdownMenuItem>
           <DropdownMenuSeparator />
-          <DropdownMenuItem onClick={logout} className="cursor-pointer text-destructive focus:text-destructive">
+          <DropdownMenuItem
+            onClick={logout}
+            className="cursor-pointer text-destructive focus:text-destructive"
+          >
             <LogOut className="mr-2 h-4 w-4" />
             <span>Log out</span>
           </DropdownMenuItem>
@@ -50,4 +58,3 @@ export const SidebarBottom = () => {
     </div>
   );
 };
-
