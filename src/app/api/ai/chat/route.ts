@@ -26,6 +26,23 @@ interface ChatRequestPayload {
   agentId?: string;
 }
 
+function shouldEnableThinking(message: string) {
+  const normalizedMessage = message.toLowerCase();
+  const complexPattern =
+    /code|coding|debug|bug|error|fix|algorithm|architecture|refactor|optimize|sql|query|regex|typescript|javascript|react|nextjs|api|math|equation|calculate|analyze|analysis|compare|tradeoff|plan|strategy|step by step|why|reason/i;
+
+  if (message.length > 280) {
+    return true;
+  }
+
+  if (complexPattern.test(normalizedMessage)) {
+    return true;
+  }
+
+  const questionCount = (message.match(/\?/g) || []).length;
+  return questionCount >= 2;
+}
+
 function getDeepSeekHeaders() {
   const authorization = `Bearer ${process.env.DEEPSEEK_API}`;
 
@@ -201,13 +218,15 @@ export async function POST(req: NextRequest) {
       memory: effectiveMemory,
       agentRules: selectedAgent?.systemInstruction ?? null,
     });
+    const enableThinking = shouldEnableThinking(message);
 
     const response = await fetch(DEEPSEEK_ENDPOINT, {
       method: "POST",
       headers,
       body: JSON.stringify({
         model: DEEPSEEK_MODEL,
-        thinking: { type: "disabled" },
+        thinking: { type: enableThinking ? "enabled" : "disabled" },
+        ...(enableThinking ? { reasoning_effort: "low" } : {}),
         messages: trimmedMessages,
         stream: true,
         stream_options: { include_usage: true },
