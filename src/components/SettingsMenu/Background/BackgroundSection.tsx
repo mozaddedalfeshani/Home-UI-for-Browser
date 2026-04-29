@@ -6,6 +6,7 @@ import Image from "next/image";
 import {
   useSettingsStore,
   DEFAULT_DYNAMIC_WALLPAPERS,
+  normalizeDynamicWallpaper,
 } from "@/store/settingsStore";
 import { useTranslation } from "@/constants/languages";
 import { cn } from "@/lib/utils";
@@ -94,26 +95,33 @@ export const BackgroundSection = () => {
           <Plus className="h-3.5 w-3.5 text-muted-foreground" />
         </button>
 
-        {DEFAULT_DYNAMIC_WALLPAPERS.map((url, idx) => (
-          <button
-            key={url}
-            onClick={() => handleWallpaperClick(url)}
-            className={cn(
-              "h-10 w-16 shrink-0 rounded-md border-2 overflow-hidden transition-all",
-              backgroundImage === url && !isDynamicWallpaper
-                ? "border-primary scale-[1.05] shadow-lg"
-                : "border-transparent opacity-60 hover:opacity-100",
-            )}
-          >
-            <Image
-              src={url}
-              alt={`Wallpaper ${idx}`}
-              width={64}
-              height={40}
-              className="h-full w-full object-cover"
-            />
-          </button>
-        ))}
+        {DEFAULT_DYNAMIC_WALLPAPERS.map((wallpaper, idx) => {
+          const { url, mode } = normalizeDynamicWallpaper(wallpaper);
+
+          return (
+            <button
+              key={url}
+              onClick={() => handleWallpaperClick(url)}
+              className={cn(
+                "relative h-10 w-16 shrink-0 overflow-hidden rounded-md border-2 transition-all",
+                backgroundImage === url && !isDynamicWallpaper
+                  ? "border-primary scale-[1.05] shadow-lg"
+                  : "border-transparent opacity-60 hover:opacity-100",
+              )}
+            >
+              <Image
+                src={url}
+                alt={`Wallpaper ${idx}`}
+                width={64}
+                height={40}
+                className="h-full w-full object-cover"
+              />
+              <span className="absolute bottom-0.5 right-0.5 rounded bg-black/55 px-1 text-[8px] font-semibold uppercase leading-3 text-white">
+                {mode === "both" ? "all" : mode.charAt(0)}
+              </span>
+            </button>
+          );
+        })}
       </div>
     </div>
   );

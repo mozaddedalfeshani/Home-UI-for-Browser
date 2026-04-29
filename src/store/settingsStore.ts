@@ -14,11 +14,72 @@ export type SearchEngine = "google" | "duckduckgo" | "bing" | "brave";
 export type LayoutPreset = "default" | "compact" | "focus";
 export type ClockStyle = "classic" | "modern";
 export type TabsPosition = "top" | "center";
+export type WallpaperMode = "light" | "dark" | "both";
 
-export const DEFAULT_DYNAMIC_WALLPAPERS = [
-  "https://homewalpaper.imurad.me/1362858.jpeg",
-  "https://homewalpaper.imurad.me/573653.jpg",
+export interface DynamicWallpaper {
+  url: string;
+  mode: WallpaperMode;
+}
+
+export const DEFAULT_DYNAMIC_WALLPAPERS: DynamicWallpaper[] = [
+  {
+    url: "https://homewalpaper.imurad.me/1341419.png",
+    mode: "dark",
+  },
+  {
+    url: "https://homewalpaper.imurad.me/573653.jpg",
+    mode: "dark",
+  },
+  {
+    url: "https://homewalpaper.imurad.me/1043977.jpg",
+    mode: "dark",
+  },
+  {
+    url: "https://homewalpaper.imurad.me/1351306.png",
+    mode: "light",
+  },
+  {
+    url: "https://homewalpaper.imurad.me/323869.jpg",
+    mode: "light",
+  },
+  {
+    url: "https://homewalpaper.imurad.me/594870.jpg",
+    mode: "light",
+  },
+  {
+    url: "https://homewalpaper.imurad.me/356154.jpg",
+    mode: "both",
+  },
+  {
+    url: "https://homewalpaper.imurad.me/1362858.jpeg",
+    mode: "both",
+  },
+  {
+    url: "https://homewalpaper.imurad.me/97548.jpg",
+    mode: "both",
+  },
 ];
+
+export const normalizeDynamicWallpaper = (
+  wallpaper: DynamicWallpaper | string,
+): DynamicWallpaper => {
+  if (typeof wallpaper === "string") {
+    const defaultWallpaper = DEFAULT_DYNAMIC_WALLPAPERS.find(
+      (candidate) => candidate.url === wallpaper,
+    );
+
+    if (defaultWallpaper) {
+      return defaultWallpaper;
+    }
+
+    return {
+      url: wallpaper,
+      mode: "both",
+    };
+  }
+
+  return wallpaper;
+};
 
 interface SettingsState {
   theme: Theme;
@@ -46,7 +107,7 @@ interface SettingsState {
   isBackgroundDialogOpen: boolean;
   isResizeDialogOpen: boolean;
   isDynamicWallpaper: boolean;
-  dynamicWallpapers: string[];
+  dynamicWallpapers: Array<DynamicWallpaper | string>;
   alarmSoundRef: string | null;
   autoFocusSearch: boolean;
   setTheme: (theme: Theme) => void;

@@ -3,7 +3,7 @@
 import { useEffect } from "react";
 import { useSettingsStore } from "@/store/settingsStore";
 
-const DEFAULT_WALLPAPER_URL = "https://homewalpaper.imurad.me/1341419.png";
+const DEFAULT_WALLPAPER_URL = "https://homewalpaper.imurad.me/97548.jpg";
 
 export const useDefaultAssets = () => {
   const { setBackgroundImage, backgroundImage, isHydrated } =

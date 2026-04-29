@@ -7,7 +7,10 @@ import SettingsMenu from "@/components/SettingsMenu";
 import Notepad from "@/components/Notepad";
 import SearchModal from "@/components/SearchModal";
 import MuradianAIModal from "@/components/MuradianAIModal";
-import { useSettingsStore } from "@/store/settingsStore";
+import {
+  normalizeDynamicWallpaper,
+  useSettingsStore,
+} from "@/store/settingsStore";
 import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
 import { useMediaUrl } from "@/hooks/useMediaUrl";
 import { useDefaultAssets } from "@/hooks/useDefaultAssets";
@@ -18,6 +21,7 @@ import { cn } from "@/lib/utils";
 import StickyAlarmDialog from "@/components/Notepad/StickyAlarmDialog";
 import { useAuthStore } from "@/store/authStore";
 import { AuthDialog } from "@/components/Auth/AuthDialog";
+import { useTheme } from "next-themes";
 
 type SearchOpenRequest = {
   id: number;
@@ -38,6 +42,8 @@ export function PageClient() {
     autoFocusSearch,
     setBackgroundImage,
   } = useSettingsStore();
+  const { resolvedTheme } = useTheme();
+  const activeWallpaperTheme = resolvedTheme === "dark" ? "dark" : "light";
 
   const { url: backgroundImageUrl } = useMediaUrl(backgroundImage);
   const [bgOpacity, setBgOpacity] = useState(0);
@@ -62,6 +68,7 @@ export function PageClient() {
   const [isMuradianModalOpen, setIsMuradianModalOpen] = useState(false);
   const [isAuthDialogOpen, setIsAuthDialogOpen] = useState(false);
   const hasPickedDynamicWallpaperRef = useRef(false);
+  const lastDynamicWallpaperThemeRef = useRef<string | null>(null);
   const isSearchModalOpenRef = useRef(false);
   const isMuradianModalOpenRef = useRef(false);
   const isAuthDialogOpenRef = useRef(false);
@@ -100,17 +107,33 @@ export function PageClient() {
 
     if (!isDynamicWallpaper) {
       hasPickedDynamicWallpaperRef.current = false;
+      lastDynamicWallpaperThemeRef.current = null;
       return;
     }
 
     if (
-      hasPickedDynamicWallpaperRef.current ||
-      dynamicWallpapers.length === 0
+      hasPickedDynamicWallpaperRef.current &&
+      lastDynamicWallpaperThemeRef.current === activeWallpaperTheme
     ) {
       return;
     }
 
+    const normalizedWallpapers = dynamicWallpapers.map(
+      normalizeDynamicWallpaper,
+    );
+    const themeWallpapers = normalizedWallpapers.filter(
+      (wallpaper) =>
+        wallpaper.mode === "both" || wallpaper.mode === activeWallpaperTheme,
+    );
+    const availableWallpapers =
+      themeWallpapers.length > 0 ? themeWallpapers : normalizedWallpapers;
+
+    if (availableWallpapers.length === 0) {
+      return;
+    }
+
     hasPickedDynamicWallpaperRef.current = true;
+    lastDynamicWallpaperThemeRef.current = activeWallpaperTheme;
 
     const fetchNewWallpaper = async () => {
       try {
@@ -119,26 +142,28 @@ export function PageClient() {
         const lastIndex = lastIndexStr ? parseInt(lastIndexStr, 10) : -1;
 
         let randomIndex;
-        if (dynamicWallpapers.length > 1) {
+        if (availableWallpapers.length > 1) {
           // Ensure we pick a DIFFERENT index than the last one if possible
           do {
-            randomIndex = Math.floor(Math.random() * dynamicWallpapers.length);
+            randomIndex = Math.floor(Math.random() * availableWallpapers.length);
           } while (randomIndex === lastIndex);
         } else {
           randomIndex = 0;
         }
 
         sessionStorage.setItem("lastWallpaperIndex", randomIndex.toString());
-        const selectedUrl = dynamicWallpapers[randomIndex];
+        const selectedUrl = availableWallpapers[randomIndex].url;
 
         await setBackgroundImage(selectedUrl);
       } catch {
         hasPickedDynamicWallpaperRef.current = false;
+        lastDynamicWallpaperThemeRef.current = null;
       }
     };
 
     fetchNewWallpaper();
   }, [
+    activeWallpaperTheme,
     dynamicWallpapers,
     isDynamicWallpaper,
     isHydrated,
