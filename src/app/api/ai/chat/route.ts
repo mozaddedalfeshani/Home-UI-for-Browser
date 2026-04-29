@@ -223,11 +223,16 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const persistedMemory = await getUserMemoryProfile(userId);
+    const isAgentMode = Boolean(requestPayload.agentId?.trim());
     const selectedAgent = requestPayload.agentId
       ? await getMuradianAskAgentForUse(userId, requestPayload.agentId)
       : null;
-    const effectiveMemory = persistedMemory?.memory ?? null;
+    const persistedMemory = isAgentMode
+      ? null
+      : await getUserMemoryProfile(userId);
+    const effectiveMemory = isAgentMode
+      ? null
+      : (persistedMemory?.memory ?? null);
     const trimmedMessages = buildChatMessages({
       message,
       memory: effectiveMemory,
@@ -326,17 +331,19 @@ export async function POST(req: NextRequest) {
           // Ignore trailing chunk parsing failures.
         }
 
-        try {
-          await updateMemoryProfile({
-            headers,
-            userId,
-            currentMonth,
-            previousMemory: effectiveMemory,
-            userMessage: message,
-            assistantAnswer,
-          });
-        } catch (error) {
-          console.error("Failed to save user memory profile:", error);
+        if (!isAgentMode) {
+          try {
+            await updateMemoryProfile({
+              headers,
+              userId,
+              currentMonth,
+              previousMemory: effectiveMemory,
+              userMessage: message,
+              assistantAnswer,
+            });
+          } catch (error) {
+            console.error("Failed to save user memory profile:", error);
+          }
         }
       },
     });

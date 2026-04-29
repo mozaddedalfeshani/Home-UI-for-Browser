@@ -165,11 +165,11 @@ export default function MainContent({
                   <Button
                     type="button"
                     variant="ghost"
-                    className="h-10 rounded-full border border-border/40 bg-background/35 px-3 text-muted-foreground shadow-sm backdrop-blur-md hover:bg-accent/60 hover:text-foreground"
+                    className="h-10 gap-1.5 rounded-full border border-border/50 bg-background/55 px-3 text-muted-foreground shadow-sm backdrop-blur-md hover:bg-accent/60 hover:text-foreground"
                   >
                     <Bot className="h-4 w-4 text-primary" />
                     <span className="text-sm font-medium">
-                      {selectedAgent?.name ?? "Agents"}
+                      {selectedAgent?.name ?? "Normal ask"}
                     </span>
                     <ChevronDown className="h-4 w-4 opacity-70" />
                   </Button>
@@ -177,31 +177,65 @@ export default function MainContent({
                 <DropdownMenuContent
                   align="start"
                   sideOffset={10}
-                  className="z-[150] w-72 rounded-2xl border-border/60 bg-background/95 p-2 shadow-2xl backdrop-blur-xl"
+                  className="z-[150] w-[21rem] rounded-2xl border-border/60 bg-background/95 p-2.5 shadow-2xl backdrop-blur-xl"
                 >
-                  <DropdownMenuLabel className="px-2 pb-1 pt-0 text-xs uppercase tracking-[0.16em] text-muted-foreground">
-                    Agent selection
-                  </DropdownMenuLabel>
-                  <div className="px-1 pb-2">
-                    <Input
-                      value={agentSearch}
-                      onChange={(event) => setAgentSearch(event.target.value)}
-                      placeholder="Search agents..."
-                      className="h-9 rounded-xl bg-background/70 text-sm"
-                    />
+                  <div className="flex items-start justify-between gap-3 px-2 pb-2 pt-1">
+                    <div>
+                      <DropdownMenuLabel className="px-0 py-0 text-xs uppercase tracking-[0.16em] text-muted-foreground">
+                        Ask mode
+                      </DropdownMenuLabel>
+                      <p className="mt-1 text-sm font-medium text-foreground">
+                        {selectedAgent?.name ?? "Normal ask"}
+                      </p>
+                    </div>
                     <Button
                       type="button"
                       variant="ghost"
-                      className="mt-2 h-9 w-full justify-start rounded-xl text-sm"
+                      size="sm"
+                      className="h-8 shrink-0 rounded-xl px-2.5 text-xs"
                       onClick={(event) => {
                         event.preventDefault();
                         event.stopPropagation();
                         handleAddAgent();
                       }}
                     >
-                      <Bot className="h-4 w-4 text-primary" />
-                      Add agent
+                      <Bot className="h-3.5 w-3.5" />
+                      New
                     </Button>
+                  </div>
+                  <DropdownMenuItem
+                    onSelect={() => onSelectedAgentChange("")}
+                    className={cn(
+                      "mb-2 cursor-pointer rounded-xl border border-transparent px-3 py-2.5 focus:bg-accent",
+                      !selectedAgentId && "border-primary/20 bg-primary/10",
+                    )}
+                  >
+                    <div className="flex w-full items-start gap-3">
+                      <div className="mt-0.5 rounded-lg bg-primary/10 p-1.5 text-primary">
+                        <Bot className="h-4 w-4" />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center justify-between gap-2">
+                          <p className="truncate text-sm font-medium text-foreground">
+                            Normal ask
+                          </p>
+                          {!selectedAgentId ? (
+                            <Check className="h-4 w-4 shrink-0 text-primary" />
+                          ) : null}
+                        </div>
+                        <p className="truncate text-xs text-muted-foreground">
+                          Use regular MuradianAsk memory
+                        </p>
+                      </div>
+                    </div>
+                  </DropdownMenuItem>
+                  <div className="border-t border-border/50 px-1 pb-2 pt-2">
+                    <Input
+                      value={agentSearch}
+                      onChange={(event) => setAgentSearch(event.target.value)}
+                      placeholder="Search agents..."
+                      className="h-9 rounded-xl border-border/70 bg-muted/35 text-sm"
+                    />
                   </div>
                   {filteredAgents.length === 0 ? (
                     <div className="px-3 py-4 text-sm text-muted-foreground">
@@ -215,12 +249,13 @@ export default function MainContent({
                       key={agent.id}
                       onSelect={() => onSelectedAgentChange(agent.id)}
                       className={cn(
-                        "group cursor-pointer rounded-xl px-3 py-2 focus:bg-accent",
-                        selectedAgentId === agent.id && "bg-primary/10",
+                        "group cursor-pointer rounded-xl border border-transparent px-3 py-2.5 focus:bg-accent",
+                        selectedAgentId === agent.id &&
+                          "border-primary/20 bg-primary/10",
                       )}
                     >
                       <div className="flex w-full items-start gap-3">
-                        <div className="mt-0.5 rounded-lg bg-primary/10 p-1.5 text-primary">
+                        <div className="mt-0.5 rounded-lg bg-muted p-1.5 text-primary transition-colors group-hover:bg-primary/10">
                           <Bot className="h-4 w-4" />
                         </div>
                         <div className="min-w-0 flex-1">
@@ -243,7 +278,7 @@ export default function MainContent({
                                   event.stopPropagation();
                                   handleEditAgent(agent);
                                 }}
-                                className="rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+                                className="rounded-md p-1.5 text-muted-foreground opacity-70 transition-colors hover:bg-muted hover:text-foreground group-hover:opacity-100"
                                 aria-label={`Edit ${agent.name}`}
                               >
                                 <Pencil className="h-3.5 w-3.5" />
@@ -259,7 +294,7 @@ export default function MainContent({
                                   event.stopPropagation();
                                   setAgentToDelete(agent);
                                 }}
-                                className="rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive disabled:pointer-events-none disabled:opacity-35"
+                                className="rounded-md p-1.5 text-muted-foreground opacity-70 transition-colors hover:bg-destructive/10 hover:text-destructive group-hover:opacity-100 disabled:pointer-events-none disabled:opacity-35"
                                 aria-label={`Delete ${agent.name}`}
                                 disabled={agents.length <= 1}
                               >

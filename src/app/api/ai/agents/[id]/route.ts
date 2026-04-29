@@ -67,7 +67,16 @@ export async function PUT(
       );
     }
 
-    await updateMuradianAskAgent(userId, id, payload);
+    const result = await updateMuradianAskAgent(userId, id, payload);
+    if (result.matchedCount === 0) {
+      return withCorsHeaders(
+        NextResponse.json(
+          { error: "Agent not found or you cannot manage this agent." },
+          { status: 404 },
+        ),
+        request,
+      );
+    }
 
     return withCorsHeaders(
       NextResponse.json({
@@ -105,7 +114,16 @@ export async function DELETE(
     }
 
     const { id } = await params;
-    await deleteMuradianAskAgent(userId, id);
+    const result = await deleteMuradianAskAgent(userId, id);
+    if (result.deletedCount === 0) {
+      return withCorsHeaders(
+        NextResponse.json(
+          { error: "Agent not found or you cannot manage this agent." },
+          { status: 404 },
+        ),
+        request,
+      );
+    }
 
     return withCorsHeaders(NextResponse.json({ success: true }), request);
   } catch (error) {
