@@ -82,6 +82,18 @@ export async function searchPublicMuradianAskAgents(
     .toArray();
 }
 
+export async function getRandomPublicMuradianAskAgents(limit = 5) {
+  const db = await getMongoDb();
+
+  return db
+    .collection<MuradianAskAgentDocument>(collectionName)
+    .aggregate<MuradianAskAgentDocument>([
+      { $match: { visibility: "public" } },
+      { $sample: { size: limit } },
+    ])
+    .toArray();
+}
+
 export async function createMuradianAskAgent(
   userId: string,
   payload: MuradianAskAgentPayload,
