@@ -99,6 +99,21 @@ export function PageClient() {
     }
   };
 
+  // Drain keystrokes captured before React hydrated (pre-hydration gap)
+  useEffect(() => {
+    const w = window as typeof window & {
+      __drainPreLaunchKeys?: () => string[];
+    };
+    if (typeof w.__drainPreLaunchKeys !== "function") return;
+    const keys = w.__drainPreLaunchKeys();
+    if (keys.length === 0) return;
+    const seedText = keys.join("");
+    setSearchOpenRequest({ id: 1, seedText });
+    isSearchModalOpenRef.current = true;
+    isSearchInputReadyRef.current = false;
+    setIsSearchModalOpen(true);
+  }, []);
+
   // Dynamic Wallpaper Logic: Pick a new one on every refresh
   useEffect(() => {
     if (!isHydrated) {
@@ -145,7 +160,9 @@ export function PageClient() {
         if (availableWallpapers.length > 1) {
           // Ensure we pick a DIFFERENT index than the last one if possible
           do {
-            randomIndex = Math.floor(Math.random() * availableWallpapers.length);
+            randomIndex = Math.floor(
+              Math.random() * availableWallpapers.length,
+            );
           } while (randomIndex === lastIndex);
         } else {
           randomIndex = 0;
