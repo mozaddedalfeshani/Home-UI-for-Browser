@@ -99,6 +99,19 @@ export function PageClient() {
     }
   };
 
+  // Drain keystrokes captured before React hydrated (pre-hydration gap)
+  useEffect(() => {
+    const w = window as typeof window & { __drainPreLaunchKeys?: () => string[] };
+    if (typeof w.__drainPreLaunchKeys !== "function") return;
+    const keys = w.__drainPreLaunchKeys();
+    if (keys.length === 0) return;
+    const seedText = keys.join("");
+    setSearchOpenRequest({ id: 1, seedText });
+    isSearchModalOpenRef.current = true;
+    isSearchInputReadyRef.current = false;
+    setIsSearchModalOpen(true);
+  }, []);
+
   // Dynamic Wallpaper Logic: Pick a new one on every refresh
   useEffect(() => {
     if (!isHydrated) {

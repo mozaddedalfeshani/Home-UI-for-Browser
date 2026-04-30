@@ -60,7 +60,10 @@ export default function RootLayout({
         suppressHydrationWarning
         className={`${shareTech.variable} ${fredoka.variable}`}
       >
-        <head />
+        <head>
+          {/* Capture keystrokes typed before React hydrates so they aren't lost */}
+          <script dangerouslySetInnerHTML={{ __html: `window.__preLaunchKeys=[];(function(){function c(e){if(!e.ctrlKey&&!e.metaKey&&!e.altKey&&(e.key.length===1||e.key===' ')){window.__preLaunchKeys.push(e.key);}}document.addEventListener('keydown',c,true);window.__drainPreLaunchKeys=function(){document.removeEventListener('keydown',c,true);var k=window.__preLaunchKeys;window.__preLaunchKeys=[];return k;};})();` }} />
+        </head>
         <body>
           <ThemeProvider
             attribute="class"
