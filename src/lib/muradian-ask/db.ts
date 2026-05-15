@@ -1,8 +1,7 @@
-import { getMongoDb } from "@/lib/mongodb";
-import { ObjectId } from "mongodb";
+import sql from "@/lib/db";
 
 export interface MuradianAskAgentDocument {
-  _id?: ObjectId;
+  id: string;
   userId: string;
   name: string;
   description: string;
@@ -21,117 +20,120 @@ export interface MuradianAskAgentPayload {
   visibility: MuradianAskAgentVisibility;
 }
 
-const collectionName = "muradian_ask_agents";
-
-export async function getMuradianAskAgents(userId: string) {
-  const db = await getMongoDb();
-
-  return db
-    .collection<MuradianAskAgentDocument>(collectionName)
-    .find({ userId })
-    .sort({ updatedAt: -1 })
-    .toArray();
+export async function getMuradianAskAgents(
+  userId: string,
+): Promise<MuradianAskAgentDocument[]> {
+  const rows = await sql`
+    SELECT id, user_id AS "userId", name, description,
+           system_instruction AS "systemInstruction",
+           visibility, created_at AS "createdAt", updated_at AS "updatedAt"
+    FROM muradian_ask_agents WHERE user_id = ${userId}
+    ORDER BY updated_at DESC
+  `;
+  return rows as MuradianAskAgentDocument[];
 }
 
-export async function getMuradianAskAgentById(userId: string, agentId: string) {
-  if (!ObjectId.isValid(agentId)) {
-    return null;
-  }
-
-  const db = await getMongoDb();
-
-  return db.collection<MuradianAskAgentDocument>(collectionName).findOne({
-    _id: new ObjectId(agentId),
-    userId,
-  });
+export async function getMuradianAskAgentById(
+  userId: string,
+  agentId: string,
+): Promise<MuradianAskAgentDocument | null> {
+  const rows = await sql`
+    SELECT id, user_id AS "userId", name, description,
+           system_instruction AS "systemInstruction",
+           visibility, created_at AS "createdAt", updated_at AS "updatedAt"
+    FROM muradian_ask_agents WHERE id = ${agentId} AND user_id = ${userId}
+  `;
+  return (rows[0] as MuradianAskAgentDocument) ?? null;
 }
 
 export async function getMuradianAskAgentForUse(
   userId: string,
   agentId: string,
-) {
-  if (!ObjectId.isValid(agentId)) {
-    return null;
-  }
-
-  const db = await getMongoDb();
-
-  return db.collection<MuradianAskAgentDocument>(collectionName).findOne({
-    _id: new ObjectId(agentId),
-    $or: [{ userId }, { visibility: "public" }],
-  });
+): Promise<MuradianAskAgentDocument | null> {
+  const rows = await sql`
+    SELECT id, user_id AS "userId", name, description,
+           system_instruction AS "systemInstruction",
+           visibility, created_at AS "createdAt", updated_at AS "updatedAt"
+    FROM muradian_ask_agents
+    WHERE id = ${agentId} AND (user_id = ${userId} OR visibility = 'public')
+  `;
+  return (rows[0] as MuradianAskAgentDocument) ?? null;
 }
 
 export async function searchPublicMuradianAskAgents(
   userId: string,
   query: string,
-) {
-  const db = await getMongoDb();
-  const escapedQuery = query.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-  const searchRegex = new RegExp(escapedQuery, "i");
-
-  return db
-    .collection<MuradianAskAgentDocument>(collectionName)
-    .find({
-      userId: { $ne: userId },
-      visibility: "public",
-      $or: [{ name: searchRegex }, { description: searchRegex }],
-    })
-    .sort({ updatedAt: -1 })
-    .limit(8)
-    .toArray();
+): Promise<MuradianAskAgentDocument[]> {
+  const pattern = `%${query}%`;
+  const rows = await sql`
+    SELECT id, user_id AS "userId", name, description,
+           system_instruction AS "systemInstruction",
+           visibility, created_at AS "createdAt", updated_at AS "updatedAt"
+    FROM muradian_ask_agents
+    WHERE user_id != ${userId} AND visibility = 'public'
+      AND (name ILIKE ${pattern} OR description ILIKE ${pattern})
+    ORDER BY updated_at DESC
+    LIMIT 8
+  `;
+  return rows as MuradianAskAgentDocument[];
 }
 
-export async function getRandomPublicMuradianAskAgents(limit = 5) {
-  const db = await getMongoDb();
-
-  return db
-    .collection<MuradianAskAgentDocument>(collectionName)
-    .aggregate<MuradianAskAgentDocument>([
-      { $match: { visibility: "public" } },
-      { $sample: { size: limit } },
-    ])
-    .toArray();
+export async function getRandomPublicMuradianAskAgents(
+  limit = 5,
+): Promise<MuradianAskAgentDocument[]> {
+  const rows = await sql`
+    SELECT id, user_id AS "userId", name, description,
+           system_instruction AS "systemInstruction",
+           visibility, created_at AS "createdAt", updated_at AS "updatedAt"
+    FROM muradian_ask_agents
+    WHERE visibility = 'public'
+    ORDER BY RANDOM()
+    LIMIT ${limit}
+  `;
+  return rows as MuradianAskAgentDocument[];
 }
 
 export async function createMuradianAskAgent(
   userId: string,
   payload: MuradianAskAgentPayload,
-) {
-  const db = await getMongoDb();
-  const now = new Date();
-
-  return db.collection<MuradianAskAgentDocument>(collectionName).insertOne({
-    userId,
-    ...payload,
-    createdAt: now,
-    updatedAt: now,
-  });
+): Promise<{ insertedId: string }> {
+  const rows = await sql`
+    INSERT INTO muradian_ask_agents
+      (user_id, name, description, system_instruction, visibility, created_at, updated_at)
+    VALUES
+      (${userId}, ${payload.name}, ${payload.description},
+       ${payload.systemInstruction}, ${payload.visibility}, NOW(), NOW())
+    RETURNING id
+  `;
+  return { insertedId: (rows[0] as { id: string }).id };
 }
 
 export async function updateMuradianAskAgent(
   userId: string,
   agentId: string,
   payload: MuradianAskAgentPayload,
-) {
-  const db = await getMongoDb();
-
-  return db.collection<MuradianAskAgentDocument>(collectionName).updateOne(
-    { _id: new ObjectId(agentId), userId },
-    {
-      $set: {
-        ...payload,
-        updatedAt: new Date(),
-      },
-    },
-  );
+): Promise<{ matchedCount: number }> {
+  const rows = await sql`
+    UPDATE muradian_ask_agents SET
+      name = ${payload.name},
+      description = ${payload.description},
+      system_instruction = ${payload.systemInstruction},
+      visibility = ${payload.visibility},
+      updated_at = NOW()
+    WHERE id = ${agentId} AND user_id = ${userId}
+    RETURNING id
+  `;
+  return { matchedCount: rows.length };
 }
 
-export async function deleteMuradianAskAgent(userId: string, agentId: string) {
-  const db = await getMongoDb();
-
-  return db.collection<MuradianAskAgentDocument>(collectionName).deleteOne({
-    _id: new ObjectId(agentId),
-    userId,
-  });
+export async function deleteMuradianAskAgent(
+  userId: string,
+  agentId: string,
+): Promise<{ deletedCount: number }> {
+  const rows = await sql`
+    DELETE FROM muradian_ask_agents
+    WHERE id = ${agentId} AND user_id = ${userId}
+    RETURNING id
+  `;
+  return { deletedCount: rows.length };
 }
