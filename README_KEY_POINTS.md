@@ -9,8 +9,9 @@
 ### Main Value Proposition
 
 Transform browser's boring new tab page into a **personal productivity command center**:
+
 - Customizable shortcut tiles with drag-drop + auto-sorting
-- AI assistant sidebar with multiple agent profiles  
+- AI assistant sidebar with multiple agent profiles
 - Built-in sticky notes + task reminders
 - Dynamic wallpapers + granular theme controls
 - Fast search bar with history tracking
@@ -20,12 +21,14 @@ Transform browser's boring new tab page into a **personal productivity command c
 ## Key Technical Accomplishments
 
 ### 1. **Privacy-First Architecture**
+
 - No backend proxy for AI chat — direct browser-to-provider API calls
 - All user data stays in browser (localStorage + IndexedDB)
 - No server-side analytics on sensitive data
 - Optional anonymous MongoDB for non-sensitive visit metrics only
 
 ### 2. **AI Agent System**
+
 - Multiple AI providers supported (OpenAI, DeepSeek, Google Gemini, Anthropic Claude)
 - Per-agent configuration: separate API key, model, system rules, tone presets
 - Instant agent switching without re-entering prompts
@@ -33,6 +36,7 @@ Transform browser's boring new tab page into a **personal productivity command c
 - Save AI outputs directly to notes (one-click)
 
 ### 3. **Shortcut Intelligence**
+
 - Visit tracking per shortcut
 - Auto-ordering by frequency (keep used links on top)
 - Drag-drop reordering for manual control
@@ -40,6 +44,7 @@ Transform browser's boring new tab page into a **personal productivity command c
 - Optional open-in-new-window behavior
 
 ### 4. **Flexible UI/UX**
+
 - 3 layout presets: default (full), compact, focus (minimal)
 - Dynamic wallpaper rotation with caching
 - Clock customization (position, style, color, glow)
@@ -47,12 +52,14 @@ Transform browser's boring new tab page into a **personal productivity command c
 - Fully responsive design
 
 ### 5. **State Management Scale**
+
 - Zustand stores with persist middleware
 - Modular stores: settings, AI config, notes, shortcuts
 - LocalStorage + IndexedDB for different data types
 - No external backend needed for core features
 
 ### 6. **Modern Frontend Stack**
+
 - Next.js 16 (App Router) + React 19
 - TypeScript strict mode
 - Radix UI primitives (accessible components)
@@ -63,18 +70,21 @@ Transform browser's boring new tab page into a **personal productivity command c
 ## Productivity Contributions
 
 ### User Efficiency Gains
+
 - **One-screen workflow**: Open tab → access shortcuts + AI → no context switch
 - **Keyboard-first**: Shortcuts + search modal accessible via keybinds
 - **Auto-ordering**: Frequently used links bubble to top (no manual re-arrangement)
 - **Agent presets**: Switch between writing/coding/research personas instantly
 
 ### Knowledge Management
+
 - **Quick note capture**: Save AI responses + manual notes from single place
 - **Search within notes**: Find past ideas without leaving tab
 - **Sticky alarms**: Reminders pop up when tab opened
 - **Copy-paste optimization**: Save AI output to notes instead of juggling tabs
 
 ### Context & Focus
+
 - **Layout modes**: Compact view for distraction-free work
 - **Agent history toggle**: Keep AI context or clear for fresh start
 - **Multiple agents**: Switch personas by task (dev agent ≠ writing agent)
@@ -83,6 +93,7 @@ Transform browser's boring new tab page into a **personal productivity command c
 ## Tech Stack Highlights
 
 ### Frontend Excellence
+
 - **Next.js 16**: Server components ready, modern bundling
 - **React 19**: Latest hooks, experimental features
 - **TypeScript 5**: Strict types across codebase
@@ -90,12 +101,14 @@ Transform browser's boring new tab page into a **personal productivity command c
 - **TailwindCSS 4**: CSS runtime capabilities
 
 ### State & Storage
+
 - **Zustand 5**: Lightweight store with auto-persistence
 - **LocalStorage**: User preferences (JSON-serializable)
 - **IndexedDB**: Large media files (wallpapers, images)
 - **No backend**: Privacy guarantee + instant dev iteration
 
 ### Integrations
+
 - **4 AI Providers**: OpenAI, DeepSeek, Google Gemini, Anthropic
 - **Nodemailer**: Email capability for future features
 - **Redis**: Optional real-time features
@@ -107,7 +120,7 @@ Transform browser's boring new tab page into a **personal productivity command c
 ✅ **Type-safe** — full TypeScript coverage  
 ✅ **ESLint + Prettier** — code quality enforced  
 ✅ **Modular components** — easy to extend  
-✅ **MIT licensed** — fully open source  
+✅ **MIT licensed** — fully open source
 
 ## What's Production-Ready
 
@@ -120,7 +133,7 @@ Transform browser's boring new tab page into a **personal productivity command c
 ✅ Search modal with history  
 ✅ Layout presets (default/compact/focus)  
 ✅ Import/export settings  
-✅ Reset & recovery options  
+✅ Reset & recovery options
 
 ## Impact on Productivity Market
 
