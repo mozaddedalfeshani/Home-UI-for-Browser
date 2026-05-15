@@ -34,7 +34,11 @@ import {
 import { useAuthStore } from "@/store/authStore";
 import { useSearchHistoryStore } from "@/store/searchHistoryStore";
 import { useTabClickHistoryStore } from "@/store/tabClickHistoryStore";
-import { Language, useTranslation, getTranslation } from "@/constants/languages";
+import {
+  Language,
+  useTranslation,
+  getTranslation,
+} from "@/constants/languages";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { HugeiconsIcon } from "@hugeicons/react";
@@ -120,8 +124,14 @@ import {
 import { TokenUsageSection } from "../Auth/AccountButton/TokenUsageSection";
 
 const CLOCK_COLORS = [
-  "#eab308","#22c55e","#3b82f6","#8b5cf6",
-  "#ef4444","#06b6d4","#ffffff","#f97316",
+  "#eab308",
+  "#22c55e",
+  "#3b82f6",
+  "#8b5cf6",
+  "#ef4444",
+  "#06b6d4",
+  "#ffffff",
+  "#f97316",
 ];
 
 const CLOCK_POSITIONS: { value: ClockPosition; label: string }[] = [
@@ -217,8 +227,11 @@ const SettingsMenu = () => {
   const [tempClockGlow, setTempClockGlow] = useState(false);
   const [tempClockFormat, setTempClockFormat] = useState<"12h" | "24h">("12h");
   const [tempClockSeconds, setTempClockSeconds] = useState(false);
-  const [tempClockPosition, setTempClockPosition] = useState<ClockPosition>("top-left");
-  const [tempClockStyle, setTempClockStyle] = useState<"classic" | "modern">("classic");
+  const [tempClockPosition, setTempClockPosition] =
+    useState<ClockPosition>("top-left");
+  const [tempClockStyle, setTempClockStyle] = useState<"classic" | "modern">(
+    "classic",
+  );
 
   const [isMobileProfileDialogOpen, setIsMobileProfileDialogOpen] =
     useState(false);
@@ -262,9 +275,13 @@ const SettingsMenu = () => {
 
   // History stores
   const searchEntries = useSearchHistoryStore((s) => s.entries);
-  const removeSearchEntry = useSearchHistoryStore((s) => s.removeSearchHistoryEntry);
+  const removeSearchEntry = useSearchHistoryStore(
+    (s) => s.removeSearchHistoryEntry,
+  );
   const tabEntries = useTabClickHistoryStore((s) => s.entries);
-  const removeTabEntry = useTabClickHistoryStore((s) => s.removeTabClickHistoryEntry);
+  const removeTabEntry = useTabClickHistoryStore(
+    (s) => s.removeTabClickHistoryEntry,
+  );
 
   const {
     language,
@@ -317,7 +334,10 @@ const SettingsMenu = () => {
 
   const { setTheme } = useTheme();
   const t = useTranslation(language);
-  const tClock = useMemo(() => (key: string) => getTranslation(language, key), [language]);
+  const tClock = useMemo(
+    () => (key: string) => getTranslation(language, key),
+    [language],
+  );
 
   // Sync temp state when entering sub-sections
   useEffect(() => {
@@ -864,7 +884,12 @@ const SettingsMenu = () => {
                 className="text-muted-foreground shrink-0"
               />
               <span className="flex-1 text-left font-medium">{item.label}</span>
-              <HugeiconsIcon icon={ArrowRight01Icon} size={14} strokeWidth={1.5} className="text-muted-foreground/50 shrink-0" />
+              <HugeiconsIcon
+                icon={ArrowRight01Icon}
+                size={14}
+                strokeWidth={1.5}
+                className="text-muted-foreground/50 shrink-0"
+              />
             </button>
           ))}
         </div>
@@ -929,7 +954,14 @@ const SettingsMenu = () => {
           </p>
           <div className="grid grid-cols-2 gap-3">
             {/* Lite card */}
-            <div className={cn("flex flex-col rounded-2xl border p-5 gap-3 relative overflow-hidden", userRole === "lite" ? "border-amber-400/60 bg-amber-400/5" : "border-border/50 bg-muted/10")}>
+            <div
+              className={cn(
+                "flex flex-col rounded-2xl border p-5 gap-3 relative overflow-hidden",
+                userRole === "lite"
+                  ? "border-amber-400/60 bg-amber-400/5"
+                  : "border-border/50 bg-muted/10",
+              )}
+            >
               {userRole === "lite" && (
                 <div className="absolute top-2 right-2 rounded-full bg-amber-400 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-black">
                   Active
@@ -992,7 +1024,14 @@ const SettingsMenu = () => {
             </div>
 
             {/* Plus card */}
-            <div className={cn("flex flex-col rounded-2xl border p-5 gap-3 relative overflow-hidden", userRole === "plus" ? "border-violet-500/60 bg-violet-500/5" : "border-primary/30 bg-primary/5")}>
+            <div
+              className={cn(
+                "flex flex-col rounded-2xl border p-5 gap-3 relative overflow-hidden",
+                userRole === "plus"
+                  ? "border-violet-500/60 bg-violet-500/5"
+                  : "border-primary/30 bg-primary/5",
+              )}
+            >
               <div className="absolute top-2 right-2 rounded-full bg-primary px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-primary-foreground">
                 {userRole === "plus" ? "Active" : "Best"}
               </div>

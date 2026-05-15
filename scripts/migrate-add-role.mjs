@@ -9,7 +9,10 @@ for (const envFile of [".env.local", ".env"]) {
     const content = readFileSync(resolve(__dirname, "..", envFile), "utf-8");
     for (const line of content.split("\n")) {
       const match = line.match(/^([^#=]+)=(.*)$/);
-      if (match) process.env[match[1].trim()] = match[2].trim().replace(/^["']|["']$/g, "");
+      if (match)
+        process.env[match[1].trim()] = match[2]
+          .trim()
+          .replace(/^["']|["']$/g, "");
     }
     console.log(`Loaded ${envFile}`);
     break;
@@ -43,4 +46,6 @@ await sql`
   UPDATE users SET role = 'free' WHERE role = 'lite'
 `;
 
-console.log("Migration complete: users.role = free/lite/plus, default 'free', existing users reset to 'free'");
+console.log(
+  "Migration complete: users.role = free/lite/plus, default 'free', existing users reset to 'free'",
+);

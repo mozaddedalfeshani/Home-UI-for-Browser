@@ -68,7 +68,7 @@ export function useSuggestions({
       .filter((tab) =>
         [tab.title, tab.url, tab.shortcut]
           .filter(Boolean)
-          .some((v) => v!.toLowerCase().includes(normalizedQuery))
+          .some((v) => v!.toLowerCase().includes(normalizedQuery)),
       )
       .filter((tab) => !historyItems.some((h) => h.value === tab.url))
       .slice(0, 3)
@@ -102,24 +102,32 @@ export function useSuggestions({
     const allItems = [...localItems, ...apiItems].slice(0, 9);
 
     // Inline completion: history first, then API fallback
-    const historyInline = historyEntries.find(
-      (e) =>
-        e.normalizedValue.startsWith(normalizedQuery) &&
-        e.normalizedValue !== normalizedQuery
-    ) ?? null;
+    const historyInline =
+      historyEntries.find(
+        (e) =>
+          e.normalizedValue.startsWith(normalizedQuery) &&
+          e.normalizedValue !== normalizedQuery,
+      ) ?? null;
 
-    const apiInline =
-      !historyInline
-        ? (apiSuggestions.find((s) => {
-            const lower = s.trim().toLowerCase();
-            return lower.startsWith(normalizedQuery) && lower !== normalizedQuery;
-          }) ?? null)
-        : null;
+    const apiInline = !historyInline
+      ? (apiSuggestions.find((s) => {
+          const lower = s.trim().toLowerCase();
+          return lower.startsWith(normalizedQuery) && lower !== normalizedQuery;
+        }) ?? null)
+      : null;
 
     const inlineValue = historyInline?.value ?? apiInline ?? null;
     const inlineIsHistory = !!historyInline;
-    const inlineSuffix = inlineValue ? inlineValue.slice(query.trim().length) : "";
+    const inlineSuffix = inlineValue
+      ? inlineValue.slice(query.trim().length)
+      : "";
 
-    return { allItems, localCount: localItems.length, inlineValue, inlineIsHistory, inlineSuffix };
+    return {
+      allItems,
+      localCount: localItems.length,
+      inlineValue,
+      inlineIsHistory,
+      inlineSuffix,
+    };
   }, [normalizedQuery, historyEntries, tabs, apiSuggestions, t, query]);
 }

@@ -22,7 +22,8 @@ interface SuggestionListProps {
 
 function getIcon(item: SuggestionItem) {
   if (item.type === "tab") return Globe02Icon;
-  if (item.type === "history") return isUrl(item.value) ? Globe02Icon : TimeScheduleIcon;
+  if (item.type === "history")
+    return isUrl(item.value) ? Globe02Icon : TimeScheduleIcon;
   return Search01Icon;
 }
 
@@ -34,7 +35,13 @@ interface SuggestionRowProps {
   onSelect: () => void;
 }
 
-function SuggestionRow({ item, isActive, query, onHover, onSelect }: SuggestionRowProps) {
+function SuggestionRow({
+  item,
+  isActive,
+  query,
+  onHover,
+  onSelect,
+}: SuggestionRowProps) {
   const icon = getIcon(item);
   const sublabel = "sublabel" in item ? item.sublabel : undefined;
 
@@ -55,14 +62,19 @@ function SuggestionRow({ item, isActive, query, onHover, onSelect }: SuggestionR
         icon={icon}
         size={14}
         strokeWidth={2}
-        className={cn("shrink-0", isActive ? "text-primary" : "text-muted-foreground/50")}
+        className={cn(
+          "shrink-0",
+          isActive ? "text-primary" : "text-muted-foreground/50",
+        )}
       />
       <div className="min-w-0 flex-1">
         <span className="block truncate font-medium">
           {renderHighlightedMatch(
             item.label,
             query,
-            isActive ? "font-semibold text-primary" : "font-semibold text-primary/90",
+            isActive
+              ? "font-semibold text-primary"
+              : "font-semibold text-primary/90",
           )}
         </span>
         {sublabel && (
@@ -70,7 +82,9 @@ function SuggestionRow({ item, isActive, query, onHover, onSelect }: SuggestionR
             {renderHighlightedMatch(
               sublabel,
               query,
-              isActive ? "font-semibold text-primary" : "font-semibold text-primary/80",
+              isActive
+                ? "font-semibold text-primary"
+                : "font-semibold text-primary/80",
             )}
           </span>
         )}

@@ -28,7 +28,12 @@ interface SearchModalProps {
   onInputReady?: () => void;
 }
 
-const SearchModal = ({ open, onOpenChange, openRequest, onInputReady }: SearchModalProps) => {
+const SearchModal = ({
+  open,
+  onOpenChange,
+  openRequest,
+  onInputReady,
+}: SearchModalProps) => {
   const [query, setQuery] = useState("");
   const [apiSuggestions, setApiSuggestions] = useState<string[]>([]);
   const [activeIndex, setActiveIndex] = useState(-1);
@@ -36,17 +41,22 @@ const SearchModal = ({ open, onOpenChange, openRequest, onInputReady }: SearchMo
   const lastAppliedRequestIdRef = useRef(0);
 
   const { searchEngine, language } = useSettingsStore();
-  const addSearchHistoryEntry = useSearchHistoryStore((s) => s.addSearchHistoryEntry);
-  const addTabClickHistoryEntry = useTabClickHistoryStore((s) => s.addTabClickHistoryEntry);
+  const addSearchHistoryEntry = useSearchHistoryStore(
+    (s) => s.addSearchHistoryEntry,
+  );
+  const addTabClickHistoryEntry = useTabClickHistoryStore(
+    (s) => s.addTabClickHistoryEntry,
+  );
   const tabs = useTabsStore((s) => s.tabs);
   const incrementVisitCount = useTabsStore((s) => s.incrementVisitCount);
   const t = useTranslation(language);
 
-  const { allItems, localCount, inlineValue, inlineIsHistory, inlineSuffix } = useSuggestions({
-    query,
-    apiSuggestions,
-    language,
-  });
+  const { allItems, localCount, inlineValue, inlineIsHistory, inlineSuffix } =
+    useSuggestions({
+      query,
+      apiSuggestions,
+      language,
+    });
 
   // Focus management
   useEffect(() => {
@@ -68,7 +78,11 @@ const SearchModal = ({ open, onOpenChange, openRequest, onInputReady }: SearchMo
       setActiveIndex(-1);
       return;
     }
-    if (openRequest.id === 0 || lastAppliedRequestIdRef.current === openRequest.id) return;
+    if (
+      openRequest.id === 0 ||
+      lastAppliedRequestIdRef.current === openRequest.id
+    )
+      return;
     lastAppliedRequestIdRef.current = openRequest.id;
     setQuery(openRequest.seedText);
     setActiveIndex(-1);
@@ -82,7 +96,9 @@ const SearchModal = ({ open, onOpenChange, openRequest, onInputReady }: SearchMo
   }, [open, openRequest, onInputReady]);
 
   // Reset active index on query change
-  useEffect(() => { setActiveIndex(-1); }, [query]);
+  useEffect(() => {
+    setActiveIndex(-1);
+  }, [query]);
 
   // Browser-style: when history inline completion is active, show the completion
   // as a real text selection in the input (typed part normal, completion = selected)
@@ -109,23 +125,33 @@ const SearchModal = ({ open, onOpenChange, openRequest, onInputReady }: SearchMo
       try {
         const res = await fetch(
           `/api/analytics/search?query=${encodeURIComponent(trimmed)}&suggestions=1`,
-          { headers: { "x-home-ui-request": "search-analytics" }, signal: controller.signal }
+          {
+            headers: { "x-home-ui-request": "search-analytics" },
+            signal: controller.signal,
+          },
         );
-        if (!res.ok) { setApiSuggestions([]); return; }
+        if (!res.ok) {
+          setApiSuggestions([]);
+          return;
+        }
         const payload = (await res.json()) as { data?: string[] };
         setApiSuggestions(payload.data ?? []);
       } catch (err) {
         if ((err as Error).name !== "AbortError") setApiSuggestions([]);
       }
     }, 180);
-    return () => { controller.abort(); window.clearTimeout(timeoutId); };
+    return () => {
+      controller.abort();
+      window.clearTimeout(timeoutId);
+    };
   }, [open, query]);
 
   const getSearchUrl = (text: string) => {
     const q = encodeURIComponent(text);
     if (searchEngine === "duckduckgo") return `https://duckduckgo.com/?q=${q}`;
     if (searchEngine === "bing") return `https://www.bing.com/search?q=${q}`;
-    if (searchEngine === "brave") return `https://search.brave.com/search?q=${q}`;
+    if (searchEngine === "brave")
+      return `https://search.brave.com/search?q=${q}`;
     return `https://www.google.com/search?q=${q}`;
   };
 
@@ -153,9 +179,18 @@ const SearchModal = ({ open, onOpenChange, openRequest, onInputReady }: SearchMo
       const matchingTab = tabs.find((tab) => tab.id === item.tabId);
       if (matchingTab) {
         addSearchHistoryEntry(matchingTab.url);
-        addTabClickHistoryEntry({ id: matchingTab.id, title: matchingTab.title, url: matchingTab.url });
+        addTabClickHistoryEntry({
+          id: matchingTab.id,
+          title: matchingTab.title,
+          url: matchingTab.url,
+        });
         incrementVisitCount(matchingTab.id);
-        trackVisit({ tabId: matchingTab.id, title: matchingTab.title, url: matchingTab.url, source: "search-suggestion" });
+        trackVisit({
+          tabId: matchingTab.id,
+          title: matchingTab.title,
+          url: matchingTab.url,
+          source: "search-suggestion",
+        });
       }
       if (item.openInNewWindow) {
         window.open(item.value, "_blank", "noopener,noreferrer");
@@ -172,7 +207,10 @@ const SearchModal = ({ open, onOpenChange, openRequest, onInputReady }: SearchMo
     setQuery(inlineValue);
     setActiveIndex(-1);
     requestAnimationFrame(() => {
-      inputRef.current?.setSelectionRange(inlineValue.length, inlineValue.length);
+      inputRef.current?.setSelectionRange(
+        inlineValue.length,
+        inlineValue.length,
+      );
     });
     return true;
   };
@@ -189,9 +227,15 @@ const SearchModal = ({ open, onOpenChange, openRequest, onInputReady }: SearchMo
     } else if (e.key === "Enter") {
       e.preventDefault();
       const active = activeIndex >= 0 ? allItems[activeIndex] : undefined;
-      if (active) { handleSuggestionSelect(active); return; }
+      if (active) {
+        handleSuggestionSelect(active);
+        return;
+      }
       // History inline completion → navigate directly on Enter
-      if (inlineValue && inlineIsHistory) { handleSearchValue(inlineValue); return; }
+      if (inlineValue && inlineIsHistory) {
+        handleSearchValue(inlineValue);
+        return;
+      }
       handleSearchValue(query);
     } else if (e.key === "Tab" || e.key === "ArrowRight") {
       if (acceptInlineCompletion()) e.preventDefault();
@@ -202,10 +246,13 @@ const SearchModal = ({ open, onOpenChange, openRequest, onInputReady }: SearchMo
   };
 
   const providerLabel =
-    searchEngine === "duckduckgo" ? t("duckduckgo")
-    : searchEngine === "bing" ? t("bing")
-    : searchEngine === "brave" ? t("brave")
-    : t("google");
+    searchEngine === "duckduckgo"
+      ? t("duckduckgo")
+      : searchEngine === "bing"
+        ? t("bing")
+        : searchEngine === "brave"
+          ? t("brave")
+          : t("google");
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -238,7 +285,8 @@ const SearchModal = ({ open, onOpenChange, openRequest, onInputReady }: SearchMo
               onChange={(e) => {
                 if (isHistoryComplete) {
                   // User typed/deleted over the selection — extract typed portion
-                  const cursorPos = e.target.selectionStart ?? e.target.value.length;
+                  const cursorPos =
+                    e.target.selectionStart ?? e.target.value.length;
                   setQuery(e.target.value.slice(0, cursorPos));
                 } else {
                   setQuery(e.target.value);
@@ -251,7 +299,9 @@ const SearchModal = ({ open, onOpenChange, openRequest, onInputReady }: SearchMo
             <Button
               type="button"
               size="sm"
-              onClick={() => handleSearchValue(isHistoryComplete ? inlineValue! : query)}
+              onClick={() =>
+                handleSearchValue(isHistoryComplete ? inlineValue! : query)
+              }
               aria-label={`Search with ${providerLabel}`}
               className="absolute right-3 top-1/2 h-9 w-9 -translate-y-1/2 rounded-full border border-border/50 bg-background/90 p-0 text-muted-foreground shadow-none hover:bg-accent hover:text-foreground"
               disabled={!query.trim()}
