@@ -140,14 +140,14 @@ export const SidebarBody = () => {
         ) : (
           sessions.map((session) => (
             <div
-              key={session._id}
+              key={session.id}
               className={cn(
                 "group relative w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium transition-all hover:bg-accent/50 cursor-pointer",
-                currentSessionId === session._id
+                currentSessionId === session.id
                   ? "bg-accent text-accent-foreground"
                   : "text-muted-foreground",
               )}
-              onClick={() => loadSession(session._id)}
+              onClick={() => loadSession(session.id)}
             >
               <HugeiconsIcon
                 icon={AiChat02Icon}
@@ -161,7 +161,7 @@ export const SidebarBody = () => {
               <button
                 onClick={(e) => {
                   e.stopPropagation();
-                  deleteSession(session._id);
+                  deleteSession(session.id);
                 }}
                 className="opacity-0 group-hover:opacity-100 p-1 hover:bg-destructive/10 hover:text-destructive rounded-md transition-all"
               >
