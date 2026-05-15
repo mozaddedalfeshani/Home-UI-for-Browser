@@ -36,7 +36,7 @@ export async function GET(request: NextRequest) {
     return withCorsHeaders(
       NextResponse.json({
         agents: agents.map((agent) => ({
-          id: agent._id?.toString(),
+          id: agent.id,
           name: agent.name,
           description: agent.description,
           visibility: "public",

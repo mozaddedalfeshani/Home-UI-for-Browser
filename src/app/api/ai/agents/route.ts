@@ -57,7 +57,7 @@ export async function GET(request: NextRequest) {
     return withCorsHeaders(
       NextResponse.json({
         agents: agents.map((agent) => ({
-          id: agent._id?.toString(),
+          id: agent.id,
           name: agent.name,
           description: agent.description,
           systemInstruction: agent.systemInstruction,
@@ -106,7 +106,7 @@ export async function POST(request: NextRequest) {
     return withCorsHeaders(
       NextResponse.json({
         agent: {
-          id: result.insertedId.toString(),
+          id: result.insertedId,
           ...payload,
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString(),
