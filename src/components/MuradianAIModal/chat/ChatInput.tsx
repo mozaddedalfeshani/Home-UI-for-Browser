@@ -213,13 +213,9 @@ export function ChatInput({
         </div>
       </div>
 
-      {tokenUsage ? (
-        <TokenUsageBar usage={tokenUsage} />
-      ) : (
-        <p className="mt-1 text-center text-[10px] text-muted-foreground/50">
-          AI-generated content may not be accurate.
-        </p>
-      )}
+      {tokenUsage !== null && tokenUsage?.tokenLimit !== null ? (
+        <TokenUsageBar usage={tokenUsage!} />
+      ) : null}
     </div>
   );
 }

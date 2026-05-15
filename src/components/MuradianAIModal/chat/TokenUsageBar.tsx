@@ -14,15 +14,7 @@ function formatTimeUntil(resetAt: string | null): string {
 }
 
 export function TokenUsageBar({ usage }: { usage: TokenUsage }) {
-  if (usage.tokenLimit === null) {
-    return (
-      <div className="mt-1.5 px-1">
-        <span className="text-[10px] font-medium text-muted-foreground/60">
-          Unlimited tokens
-        </span>
-      </div>
-    );
-  }
+  if (usage.tokenLimit === null) return null;
 
   const pct = Math.min((usage.tokensUsed / usage.tokenLimit) * 100, 100);
   const remaining = Math.max(usage.tokenLimit - usage.tokensUsed, 0);
