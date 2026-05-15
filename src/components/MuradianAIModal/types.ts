@@ -6,8 +6,8 @@ export interface Message {
 
 export interface TokenUsage {
   tokensUsed: number;
-  tokenLimit: number;
-  resetAt: string;
+  tokenLimit: number | null;
+  resetAt: string | null;
 }
 
 export interface MuradianAIModalProps {

@@ -107,7 +107,7 @@ export function useChatSession({ open, language, userName }: UseChatSessionParam
           if (errorData.tokensUsed !== undefined) {
             setTokenUsage({
               tokensUsed: errorData.tokensUsed,
-              tokenLimit: errorData.tokenLimit ?? 3_000,
+              tokenLimit: errorData.tokenLimit !== undefined ? errorData.tokenLimit : 3_000,
               resetAt: errorData.resetAt ?? "",
             });
           }
@@ -138,8 +138,8 @@ export function useChatSession({ open, language, userName }: UseChatSessionParam
               t?: string;
               v?: string;
               tokensUsed?: number;
-              tokenLimit?: number;
-              resetAt?: string;
+              tokenLimit?: number | null;
+              resetAt?: string | null;
               choices?: Array<{ delta?: { content?: string } }>;
             };
 
@@ -152,8 +152,8 @@ export function useChatSession({ open, language, userName }: UseChatSessionParam
             if (parsed.t === "usage") {
               setTokenUsage({
                 tokensUsed: parsed.tokensUsed ?? 0,
-                tokenLimit: parsed.tokenLimit ?? 3_000,
-                resetAt: parsed.resetAt ?? "",
+                tokenLimit: parsed.tokenLimit !== undefined ? parsed.tokenLimit : 3_000,
+                resetAt: parsed.resetAt !== undefined ? parsed.resetAt : "",
               });
               continue;
             }

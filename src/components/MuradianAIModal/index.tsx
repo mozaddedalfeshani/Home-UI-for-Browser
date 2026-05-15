@@ -16,9 +16,18 @@ import { MarketplaceView } from "./marketplace/MarketplaceView";
 import { AgentFormView } from "./agent/AgentFormView";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { HugeiconsIcon } from "@hugeicons/react";
-import { AiChipIcon } from "@hugeicons/core-free-icons";
-import { ChevronDown, Globe2 } from "lucide-react";
+import { AiChipIcon, AiNetworkIcon, ArrowDown01Icon, Globe02Icon } from "@hugeicons/core-free-icons";
 import { Button } from "@/components/ui/button";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { toast } from "sonner";
 import type { MuradianAIModalProps } from "./types";
 
 type ModalView = "chat" | "marketplace" | "agent-form";
@@ -29,6 +38,7 @@ export default function MuradianAIModal({ open, onOpenChange }: MuradianAIModalP
     const name = state.user?.name?.trim() ?? "";
     return name.includes("@") ? "" : name;
   });
+  const userRole = useAuthStore((state) => state.user?.role ?? "free");
 
   const [view, setView] = useState<ModalView>("chat");
 
@@ -120,23 +130,89 @@ export default function MuradianAIModal({ open, onOpenChange }: MuradianAIModalP
                     onQueryChange={chat.setQuery}
                     onSend={() => chat.handleSend(agentMgr.selectedAgentId)}
                     onClear={chat.handleClearChat}
+                    userRole={userRole}
                     agentPickerSlot={
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        onClick={handleOpenMarketplace}
-                        className="h-9 shrink-0 gap-1.5 rounded-full border border-border/50 bg-background/55 px-2.5 text-muted-foreground shadow-sm backdrop-blur-md transition-colors hover:bg-accent hover:text-foreground"
-                        aria-label="Open agent marketplace"
-                      >
-                        <HugeiconsIcon icon={AiChipIcon} size={15} strokeWidth={2} />
-                        <span className="hidden max-w-28 truncate text-xs font-medium sm:inline">
-                          {agentMgr.selectedAgent?.name ?? "Normal ask"}
-                        </span>
-                        {agentMgr.selectedAgent?.visibility === "public" ? (
-                          <Globe2 className="h-3.5 w-3.5 text-primary" />
-                        ) : null}
-                        <ChevronDown className="h-3.5 w-3.5 opacity-70" />
-                      </Button>
+                      <>
+                        {/* Model picker — lite/plus only */}
+                        {(userRole === "lite" || userRole === "plus") && (
+                          <DropdownMenu>
+                            <TooltipProvider>
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <DropdownMenuTrigger asChild>
+                                    <Button
+                                      type="button"
+                                      variant="ghost"
+                                      className="h-9 w-9 shrink-0 rounded-full border border-border/50 bg-background/55 text-muted-foreground shadow-sm backdrop-blur-md transition-colors hover:bg-accent hover:text-foreground"
+                                      aria-label="Select AI model"
+                                    >
+                                      <HugeiconsIcon icon={AiNetworkIcon} size={15} strokeWidth={2} />
+                                    </Button>
+                                  </DropdownMenuTrigger>
+                                </TooltipTrigger>
+                                <TooltipContent>AI Models</TooltipContent>
+                              </Tooltip>
+                            </TooltipProvider>
+                            <DropdownMenuContent align="end" className="w-52">
+                              <DropdownMenuLabel className="text-xs text-muted-foreground">AI Models</DropdownMenuLabel>
+                              <DropdownMenuSeparator />
+                              {[
+                                { name: "GPT 5.5", provider: "OpenAI" },
+                                { name: "Gemini 3.1 Flash", provider: "Google" },
+                                { name: "DeepSeek V4 Pro", provider: "DeepSeek" },
+                                { name: "DeepSeek V4 Flash", provider: "DeepSeek" },
+                              ].map((m) => (
+                                <DropdownMenuItem
+                                  key={m.name}
+                                  onSelect={(e) => {
+                                    e.preventDefault();
+                                    if (userRole === "lite") {
+                                      toast.info("Please upgrade to Premium");
+                                    }
+                                  }}
+                                  className="flex items-center justify-between gap-2 opacity-60 cursor-not-allowed"
+                                >
+                                  <div>
+                                    <p className="text-sm font-medium">{m.name}</p>
+                                    <p className="text-[10px] text-muted-foreground">{m.provider}</p>
+                                  </div>
+                                  <span className="text-[9px] font-semibold uppercase tracking-wide px-1.5 py-0.5 rounded-full border border-border/40 text-muted-foreground">
+                                    {userRole === "lite" ? "Plus" : "Soon"}
+                                  </span>
+                                </DropdownMenuItem>
+                              ))}
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        )}
+
+                        {/* Agent picker */}
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Button
+                                type="button"
+                                variant="ghost"
+                                onClick={handleOpenMarketplace}
+                                className="h-9 w-9 shrink-0 rounded-full border border-border/50 bg-background/55 text-muted-foreground shadow-sm backdrop-blur-md transition-colors hover:bg-accent hover:text-foreground"
+                                aria-label="Open agent marketplace"
+                              >
+                                <HugeiconsIcon
+                                  icon={AiChipIcon}
+                                  size={15}
+                                  strokeWidth={2}
+                                  className={agentMgr.selectedAgent ? "text-primary" : ""}
+                                />
+                              </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              {agentMgr.selectedAgent?.name ?? "Normal ask"}
+                              {agentMgr.selectedAgent?.visibility === "public" && (
+                                <HugeiconsIcon icon={Globe02Icon} size={11} className="ml-1 inline text-primary" />
+                              )}
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                      </>
                     }
                   />
                 </>
