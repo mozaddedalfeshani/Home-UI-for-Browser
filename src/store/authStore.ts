@@ -12,7 +12,9 @@ interface AuthState {
   isLoading: boolean;
   lastSynced: number | null;
 
-  setUser: (user: { email: string; id: string; name: string; role?: UserRole } | null) => void;
+  setUser: (
+    user: { email: string; id: string; name: string; role?: UserRole } | null,
+  ) => void;
   setLoading: (loading: boolean) => void;
 
   login: (
@@ -45,14 +47,19 @@ function setupAutoSync(pushSync: () => Promise<void>) {
   tabsAutoSyncUnsub = useTabsStore.subscribe((state, prev) => {
     if (state.tabs === prev.tabs) return;
     if (autoSyncTimer) clearTimeout(autoSyncTimer);
-    autoSyncTimer = setTimeout(() => { void pushSync(); }, 2000);
+    autoSyncTimer = setTimeout(() => {
+      void pushSync();
+    }, 2000);
   });
 }
 
 function teardownAutoSync() {
   tabsAutoSyncUnsub?.();
   tabsAutoSyncUnsub = null;
-  if (autoSyncTimer) { clearTimeout(autoSyncTimer); autoSyncTimer = null; }
+  if (autoSyncTimer) {
+    clearTimeout(autoSyncTimer);
+    autoSyncTimer = null;
+  }
 }
 
 export const useAuthStore = create<AuthState>()(
@@ -63,10 +70,11 @@ export const useAuthStore = create<AuthState>()(
       isLoading: false,
       lastSynced: null,
 
-      setUser: (user) => set({
-        user: user ? { ...user, role: user.role ?? "free" } : null,
-        isAuthenticated: !!user,
-      }),
+      setUser: (user) =>
+        set({
+          user: user ? { ...user, role: user.role ?? "free" } : null,
+          isAuthenticated: !!user,
+        }),
       setLoading: (loading) => set({ isLoading: loading }),
 
       login: async (email, password) => {
@@ -78,9 +86,13 @@ export const useAuthStore = create<AuthState>()(
           });
           const data = await res.json();
           if (res.ok) {
-            const user = { ...data.user, role: (data.user?.role ?? "free") as UserRole };
+            const user = {
+              ...data.user,
+              role: (data.user?.role ?? "free") as UserRole,
+            };
             set({ user, isAuthenticated: true, isLoading: false });
-            if (user.role === "lite" || user.role === "plus") setupAutoSync(get().pushSync);
+            if (user.role === "lite" || user.role === "plus")
+              setupAutoSync(get().pushSync);
             return { success: true };
           }
           set({ isLoading: false });
@@ -117,9 +129,13 @@ export const useAuthStore = create<AuthState>()(
           });
           const data = await res.json();
           if (res.ok) {
-            const user = { ...data.user, role: (data.user?.role ?? "free") as UserRole };
+            const user = {
+              ...data.user,
+              role: (data.user?.role ?? "free") as UserRole,
+            };
             set({ user, isAuthenticated: true, isLoading: false });
-            if (user.role === "lite" || user.role === "plus") setupAutoSync(get().pushSync);
+            if (user.role === "lite" || user.role === "plus")
+              setupAutoSync(get().pushSync);
             return { success: true };
           }
           set({ isLoading: false });
@@ -141,7 +157,10 @@ export const useAuthStore = create<AuthState>()(
           const res = await fetch("/api/auth/me");
           if (res.ok) {
             const data = await res.json();
-            const user = { ...data.user, role: (data.user?.role ?? "free") as UserRole };
+            const user = {
+              ...data.user,
+              role: (data.user?.role ?? "free") as UserRole,
+            };
             set({ user, isAuthenticated: true });
           } else {
             set({ user: null, isAuthenticated: false });
@@ -157,7 +176,10 @@ export const useAuthStore = create<AuthState>()(
           if (res.ok) {
             const data = await res.json();
             if (data.authenticated) {
-              const user = { ...data.user, role: (data.user?.role ?? "free") as UserRole };
+              const user = {
+                ...data.user,
+                role: (data.user?.role ?? "free") as UserRole,
+              };
               set({ user, isAuthenticated: true });
               if (data.data) {
                 set({
@@ -166,7 +188,8 @@ export const useAuthStore = create<AuthState>()(
                     : Date.now(),
                 });
               }
-              if (user.role === "lite" || user.role === "plus") setupAutoSync(get().pushSync);
+              if (user.role === "lite" || user.role === "plus")
+                setupAutoSync(get().pushSync);
             } else {
               set({ user: null, isAuthenticated: false });
             }

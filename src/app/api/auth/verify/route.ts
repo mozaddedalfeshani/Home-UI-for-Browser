@@ -74,7 +74,12 @@ export async function POST(request: NextRequest) {
       NextResponse.json({
         message: "Verified successfully",
         token,
-        user: { name: user.name, email: user.email, id: user.id, role: user.role },
+        user: {
+          name: user.name,
+          email: user.email,
+          id: user.id,
+          role: user.role,
+        },
       }),
       request,
     );

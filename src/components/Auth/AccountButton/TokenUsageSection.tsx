@@ -16,17 +16,26 @@ export function TokenUsageSection({ tokenInfo }: { tokenInfo: TokenInfo }) {
         <span
           className={cn(
             "text-[11px] font-semibold tabular-nums",
-            pct >= 0.9 ? "text-destructive" : pct >= 0.7 ? "text-amber-500" : "text-foreground",
+            pct >= 0.9
+              ? "text-destructive"
+              : pct >= 0.7
+                ? "text-amber-500"
+                : "text-foreground",
           )}
         >
-          {tokenInfo.tokensUsed.toLocaleString()} / {tokenInfo.tokenLimit.toLocaleString()}
+          {tokenInfo.tokensUsed.toLocaleString()} /{" "}
+          {tokenInfo.tokenLimit.toLocaleString()}
         </span>
       </div>
       <div className="h-1 w-full rounded-full bg-muted overflow-hidden">
         <div
           className={cn(
             "h-full rounded-full transition-all",
-            pct >= 0.9 ? "bg-destructive" : pct >= 0.7 ? "bg-amber-500" : "bg-primary",
+            pct >= 0.9
+              ? "bg-destructive"
+              : pct >= 0.7
+                ? "bg-amber-500"
+                : "bg-primary",
           )}
           style={{ width: `${Math.min(pct * 100, 100)}%` }}
         />

@@ -75,9 +75,7 @@ export const useMuradianAiStore = create<MuradianAiState>()(
         const { currentSessionId, messages, sessions } = get();
         if (messages.length === 0) return;
 
-        const existingSession = sessions.find(
-          (s) => s.id === currentSessionId,
-        );
+        const existingSession = sessions.find((s) => s.id === currentSessionId);
         const finalTitle = title || existingSession?.title || "Chat Session";
 
         try {

@@ -41,9 +41,10 @@ export async function GET(request: NextRequest) {
     ]);
     const freshRole = dbUser?.role ?? payload.role ?? "free";
     const isFreeInit = freshRole === "free";
-    const userData = rawUserData && isFreeInit
-      ? { ...rawUserData, settings: null }
-      : rawUserData;
+    const userData =
+      rawUserData && isFreeInit
+        ? { ...rawUserData, settings: null }
+        : rawUserData;
 
     const freshToken = signToken({
       userId: payload.userId,
@@ -59,7 +60,12 @@ export async function GET(request: NextRequest) {
         data: UserData | null;
       }>({
         authenticated: true,
-        user: { name: payload.name, email: payload.email, id: payload.userId, role: freshRole },
+        user: {
+          name: payload.name,
+          email: payload.email,
+          id: payload.userId,
+          role: freshRole,
+        },
         data: userData,
       }),
       request,

@@ -57,7 +57,15 @@ function useIsDesktop() {
 }
 
 export function AccountButton() {
-  const { user, isAuthenticated, logout, pushSync, pullSync, lastSynced, setUser } = useAuthStore();
+  const {
+    user,
+    isAuthenticated,
+    logout,
+    pushSync,
+    pullSync,
+    lastSynced,
+    setUser,
+  } = useAuthStore();
   const isDesktop = useIsDesktop();
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -92,7 +100,9 @@ export function AccountButton() {
       setProfileName(data.user?.name?.trim() ?? user?.name ?? "");
       setProfileMemory(data.memory?.trim() ?? "");
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Failed to load profile");
+      toast.error(
+        error instanceof Error ? error.message : "Failed to load profile",
+      );
     } finally {
       setIsProfileLoading(false);
     }
@@ -108,7 +118,9 @@ export function AccountButton() {
       setMemory(nextMemory);
       setMemoryDraft(nextMemory);
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Failed to load memory");
+      toast.error(
+        error instanceof Error ? error.message : "Failed to load memory",
+      );
       setMemory("");
       setMemoryDraft("");
     } finally {
@@ -121,7 +133,9 @@ export function AccountButton() {
     setIsDialogOpen(true);
     fetch("/api/ai/usage")
       .then((r) => (r.ok ? r.json() : null))
-      .then((data: TokenInfo | null) => { if (data) setTokenInfo(data); })
+      .then((data: TokenInfo | null) => {
+        if (data) setTokenInfo(data);
+      })
       .catch(() => {});
     if (s === "profile" || s === "sync") void loadProfile();
     if (s === "memory") void loadMemory();
@@ -163,19 +177,34 @@ export function AccountButton() {
   const handleSaveProfile = async () => {
     const nextName = profileName.trim();
     const nextMemory = profileMemory.trim();
-    if (!nextName) { toast.error("Name is required."); return; }
-    if (nextName.length > MAX_NAME_LENGTH) { toast.error(`Name must be ${MAX_NAME_LENGTH} characters or less.`); return; }
-    if (nextMemory.length > MAX_MEMORY_LENGTH) { toast.error(`Memory must be ${MAX_MEMORY_LENGTH} characters or less.`); return; }
+    if (!nextName) {
+      toast.error("Name is required.");
+      return;
+    }
+    if (nextName.length > MAX_NAME_LENGTH) {
+      toast.error(`Name must be ${MAX_NAME_LENGTH} characters or less.`);
+      return;
+    }
+    if (nextMemory.length > MAX_MEMORY_LENGTH) {
+      toast.error(`Memory must be ${MAX_MEMORY_LENGTH} characters or less.`);
+      return;
+    }
 
     setIsProfileSaving(true);
     try {
       const response = await fetch("/api/auth/profile", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: nextName, memory: nextMemory, currentPassword, newPassword }),
+        body: JSON.stringify({
+          name: nextName,
+          memory: nextMemory,
+          currentPassword,
+          newPassword,
+        }),
       });
       const data = (await response.json().catch(() => ({}))) as ProfileResponse;
-      if (!response.ok) throw new Error(data.error || "Failed to update profile");
+      if (!response.ok)
+        throw new Error(data.error || "Failed to update profile");
       if (data.user) setUser(data.user);
       setMemory(nextMemory);
       setMemoryDraft(nextMemory);
@@ -183,7 +212,9 @@ export function AccountButton() {
       setNewPassword("");
       toast.success("Profile updated");
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Failed to update profile");
+      toast.error(
+        error instanceof Error ? error.message : "Failed to update profile",
+      );
     } finally {
       setIsProfileSaving(false);
     }
@@ -191,7 +222,10 @@ export function AccountButton() {
 
   const handleSaveMemory = async () => {
     const nextMemory = memoryDraft.trim();
-    if (nextMemory.length > MAX_MEMORY_LENGTH) { toast.error(`Memory must be ${MAX_MEMORY_LENGTH} characters or less.`); return; }
+    if (nextMemory.length > MAX_MEMORY_LENGTH) {
+      toast.error(`Memory must be ${MAX_MEMORY_LENGTH} characters or less.`);
+      return;
+    }
 
     setIsMemorySaving(true);
     try {
@@ -207,7 +241,9 @@ export function AccountButton() {
       setMemoryDraft(savedMemory);
       toast.success("Memory updated");
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Failed to save memory");
+      toast.error(
+        error instanceof Error ? error.message : "Failed to save memory",
+      );
     } finally {
       setIsMemorySaving(false);
     }
@@ -216,7 +252,12 @@ export function AccountButton() {
   if (!isAuthenticated) {
     return (
       <>
-        <Button variant="outline" size="sm" onClick={() => setIsAuthOpen(true)} className="gap-2 rounded-full px-4">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => setIsAuthOpen(true)}
+          className="gap-2 rounded-full px-4"
+        >
           <HugeiconsIcon icon={UserIcon} size={16} />
           <span>Login / Sync</span>
         </Button>
@@ -228,9 +269,15 @@ export function AccountButton() {
   const initials = user?.email?.substring(0, 2).toUpperCase() || "??";
 
   const avatarButton = (
-    <Button variant="ghost" className="relative h-8 w-8 rounded-full" onClick={handleAvatarClick}>
+    <Button
+      variant="ghost"
+      className="relative h-8 w-8 rounded-full"
+      onClick={handleAvatarClick}
+    >
       <Avatar className="h-8 w-8">
-        <AvatarFallback className="bg-primary/10 text-primary text-xs">{initials}</AvatarFallback>
+        <AvatarFallback className="bg-primary/10 text-primary text-xs">
+          {initials}
+        </AvatarFallback>
       </Avatar>
     </Button>
   );
@@ -244,8 +291,12 @@ export function AccountButton() {
           <DropdownMenuContent className="w-56" align="end" forceMount>
             <DropdownMenuLabel className="font-normal">
               <div className="flex flex-col space-y-1">
-                <p className="text-sm font-medium leading-none">{user?.name || "Account"}</p>
-                <p className="text-xs leading-none text-muted-foreground">{user?.email}</p>
+                <p className="text-sm font-medium leading-none">
+                  {user?.name || "Account"}
+                </p>
+                <p className="text-xs leading-none text-muted-foreground">
+                  {user?.email}
+                </p>
               </div>
             </DropdownMenuLabel>
 
@@ -259,11 +310,18 @@ export function AccountButton() {
               <span>Memory</span>
             </DropdownMenuItem>
             <DropdownMenuItem onClick={() => openDialog("sync")}>
-              <HugeiconsIcon icon={CloudUploadIcon} size={16} className="mr-2" />
+              <HugeiconsIcon
+                icon={CloudUploadIcon}
+                size={16}
+                className="mr-2"
+              />
               <span>Cloud Sync</span>
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem className="text-red-500 focus:text-red-500" onClick={handleLogout}>
+            <DropdownMenuItem
+              className="text-red-500 focus:text-red-500"
+              onClick={handleLogout}
+            >
               <HugeiconsIcon icon={Logout01Icon} size={16} className="mr-2" />
               <span>Log out</span>
             </DropdownMenuItem>
@@ -287,34 +345,64 @@ export function AccountButton() {
               <div className="px-4 py-4 border-b border-border/20">
                 <div className="flex items-center gap-2.5">
                   <Avatar className="h-9 w-9 shrink-0">
-                    <AvatarFallback className="bg-primary/10 text-primary text-xs font-semibold">{initials}</AvatarFallback>
+                    <AvatarFallback className="bg-primary/10 text-primary text-xs font-semibold">
+                      {initials}
+                    </AvatarFallback>
                   </Avatar>
                   <div className="min-w-0">
-                    <p className="text-sm font-semibold text-foreground truncate">{user?.name || "Account"}</p>
-                    <p className="text-[10px] text-muted-foreground truncate">{user?.email}</p>
+                    <p className="text-sm font-semibold text-foreground truncate">
+                      {user?.name || "Account"}
+                    </p>
+                    <p className="text-[10px] text-muted-foreground truncate">
+                      {user?.email}
+                    </p>
                   </div>
                 </div>
               </div>
 
               <nav className="flex-1 py-2">
-                {(["profile", "memory", "sync"] as AccountSection[]).map((id) => (
-                  <button
-                    key={id}
-                    type="button"
-                    onClick={() => handleSectionChange(id)}
-                    className={cn(
-                      "flex w-full items-center gap-2.5 px-4 py-2 text-sm transition-colors",
-                      section === id
-                        ? "bg-accent text-foreground font-medium"
-                        : "text-muted-foreground hover:bg-accent/60 hover:text-foreground",
-                    )}
-                  >
-                    {id === "profile" && <HugeiconsIcon icon={UserIcon} size={14} className="shrink-0" />}
-                    {id === "memory" && <HugeiconsIcon icon={AiBrain01Icon} size={14} className="shrink-0" />}
-                    {id === "sync" && <HugeiconsIcon icon={CloudUploadIcon} size={14} className="shrink-0" />}
-                    {id === "profile" ? "Profile" : id === "memory" ? "Memory" : "Cloud Sync"}
-                  </button>
-                ))}
+                {(["profile", "memory", "sync"] as AccountSection[]).map(
+                  (id) => (
+                    <button
+                      key={id}
+                      type="button"
+                      onClick={() => handleSectionChange(id)}
+                      className={cn(
+                        "flex w-full items-center gap-2.5 px-4 py-2 text-sm transition-colors",
+                        section === id
+                          ? "bg-accent text-foreground font-medium"
+                          : "text-muted-foreground hover:bg-accent/60 hover:text-foreground",
+                      )}
+                    >
+                      {id === "profile" && (
+                        <HugeiconsIcon
+                          icon={UserIcon}
+                          size={14}
+                          className="shrink-0"
+                        />
+                      )}
+                      {id === "memory" && (
+                        <HugeiconsIcon
+                          icon={AiBrain01Icon}
+                          size={14}
+                          className="shrink-0"
+                        />
+                      )}
+                      {id === "sync" && (
+                        <HugeiconsIcon
+                          icon={CloudUploadIcon}
+                          size={14}
+                          className="shrink-0"
+                        />
+                      )}
+                      {id === "profile"
+                        ? "Profile"
+                        : id === "memory"
+                          ? "Memory"
+                          : "Cloud Sync"}
+                    </button>
+                  ),
+                )}
               </nav>
 
               <div className="border-t border-border/20 p-2">
@@ -323,7 +411,11 @@ export function AccountButton() {
                   onClick={handleLogout}
                   className="flex w-full items-center gap-2.5 px-3 py-2 rounded-lg text-sm text-red-500 hover:bg-accent transition-colors"
                 >
-                  <HugeiconsIcon icon={Logout01Icon} size={14} className="shrink-0" />
+                  <HugeiconsIcon
+                    icon={Logout01Icon}
+                    size={14}
+                    className="shrink-0"
+                  />
                   Log out
                 </button>
               </div>
@@ -377,17 +469,25 @@ export function AccountButton() {
                     )}
 
                     <div className="space-y-2">
-                      <p className="text-xs font-medium text-muted-foreground">Sync data</p>
+                      <p className="text-xs font-medium text-muted-foreground">
+                        Sync data
+                      </p>
                       <button
                         type="button"
                         onClick={() => setIsPushConfirmOpen(true)}
                         disabled={isSyncing}
                         className="flex w-full items-center gap-3 px-4 py-3 rounded-xl border border-border/40 bg-muted/10 text-sm text-foreground hover:bg-accent transition-colors disabled:opacity-50"
                       >
-                        <HugeiconsIcon icon={CloudUploadIcon} size={16} className="text-muted-foreground shrink-0" />
+                        <HugeiconsIcon
+                          icon={CloudUploadIcon}
+                          size={16}
+                          className="text-muted-foreground shrink-0"
+                        />
                         <div className="flex-1 text-left">
                           <p className="font-medium">Push local to cloud</p>
-                          <p className="text-xs text-muted-foreground">Overwrite cloud with current local data</p>
+                          <p className="text-xs text-muted-foreground">
+                            Overwrite cloud with current local data
+                          </p>
                         </div>
                       </button>
                       <button
@@ -396,18 +496,32 @@ export function AccountButton() {
                         disabled={isSyncing}
                         className="flex w-full items-center gap-3 px-4 py-3 rounded-xl border border-border/40 bg-muted/10 text-sm text-foreground hover:bg-accent transition-colors disabled:opacity-50"
                       >
-                        <HugeiconsIcon icon={RefreshIcon} size={16} className={`text-muted-foreground shrink-0 ${isSyncing ? "animate-spin" : ""}`} />
+                        <HugeiconsIcon
+                          icon={RefreshIcon}
+                          size={16}
+                          className={`text-muted-foreground shrink-0 ${isSyncing ? "animate-spin" : ""}`}
+                        />
                         <div className="flex-1 text-left">
                           <p className="font-medium">Pull from cloud</p>
-                          <p className="text-xs text-muted-foreground">Replace local data with cloud version</p>
+                          <p className="text-xs text-muted-foreground">
+                            Replace local data with cloud version
+                          </p>
                         </div>
                       </button>
                     </div>
 
                     {lastSynced && (
                       <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                        <HugeiconsIcon icon={Tick01Icon} size={12} className="text-green-500" />
-                        Last synced {new Date(lastSynced).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                        <HugeiconsIcon
+                          icon={Tick01Icon}
+                          size={12}
+                          className="text-green-500"
+                        />
+                        Last synced{" "}
+                        {new Date(lastSynced).toLocaleTimeString([], {
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })}
                       </div>
                     )}
                   </div>
@@ -430,7 +544,11 @@ export function AccountButton() {
 
       {lastSynced && (
         <div className="hidden md:flex items-center text-[10px] text-muted-foreground gap-1 bg-muted/50 px-2 py-1 rounded-full border border-border/50">
-          <HugeiconsIcon icon={Tick01Icon} size={12} className="text-green-500" />
+          <HugeiconsIcon
+            icon={Tick01Icon}
+            size={12}
+            className="text-green-500"
+          />
           <span>Synced</span>
         </div>
       )}

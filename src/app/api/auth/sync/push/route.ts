@@ -45,7 +45,10 @@ export async function POST(request: NextRequest) {
       settings: ShareProfileSettings;
     };
     const isFree = (payload.role ?? "free") === "free";
-    await pushUserData(payload.userId, { tabs, settings: isFree ? null : settings });
+    await pushUserData(payload.userId, {
+      tabs,
+      settings: isFree ? null : settings,
+    });
 
     return withCorsHeaders(
       NextResponse.json<{ ok: boolean }>({ ok: true }),

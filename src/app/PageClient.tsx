@@ -9,7 +9,10 @@ import MuradianAIModal from "@/components/MuradianAIModal";
 import StickyAlarmDialog from "@/components/Notepad/StickyAlarmDialog";
 import { AuthDialog } from "@/components/Auth/AuthDialog";
 import GithubLink from "@/components/Home/GithubLink";
-import { normalizeDynamicWallpaper, useSettingsStore } from "@/store/settingsStore";
+import {
+  normalizeDynamicWallpaper,
+  useSettingsStore,
+} from "@/store/settingsStore";
 import { useAuthStore } from "@/store/authStore";
 import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
 import { useMediaUrl } from "@/hooks/useMediaUrl";
@@ -55,7 +58,9 @@ export function PageClient() {
   }, [backgroundImageUrl]);
 
   const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
-  const [searchOpenRequest, setSearchOpenRequest] = useState<SearchOpenRequest>({ id: 0, seedText: "" });
+  const [searchOpenRequest, setSearchOpenRequest] = useState<SearchOpenRequest>(
+    { id: 0, seedText: "" },
+  );
   const [isSidebarVisible, setIsSidebarVisible] = useState(false);
   const [isMuradianModalOpen, setIsMuradianModalOpen] = useState(false);
   const [isAuthDialogOpen, setIsAuthDialogOpen] = useState(false);
@@ -67,9 +72,15 @@ export function PageClient() {
   const isAuthDialogOpenRef = useRef(false);
   const isSearchInputReadyRef = useRef(false);
 
-  useEffect(() => { isSearchModalOpenRef.current = isSearchModalOpen; }, [isSearchModalOpen]);
-  useEffect(() => { isMuradianModalOpenRef.current = isMuradianModalOpen; }, [isMuradianModalOpen]);
-  useEffect(() => { isAuthDialogOpenRef.current = isAuthDialogOpen; }, [isAuthDialogOpen]);
+  useEffect(() => {
+    isSearchModalOpenRef.current = isSearchModalOpen;
+  }, [isSearchModalOpen]);
+  useEffect(() => {
+    isMuradianModalOpenRef.current = isMuradianModalOpen;
+  }, [isMuradianModalOpen]);
+  useEffect(() => {
+    isAuthDialogOpenRef.current = isAuthDialogOpen;
+  }, [isAuthDialogOpen]);
 
   const handleSearchModalOpenChange = (nextOpen: boolean) => {
     isSearchModalOpenRef.current = nextOpen;
@@ -89,13 +100,20 @@ export function PageClient() {
       return;
     }
 
-    if (hasPickedDynamicWallpaperRef.current && lastDynamicWallpaperThemeRef.current === activeWallpaperTheme) return;
+    if (
+      hasPickedDynamicWallpaperRef.current &&
+      lastDynamicWallpaperThemeRef.current === activeWallpaperTheme
+    )
+      return;
 
-    const normalizedWallpapers = dynamicWallpapers.map(normalizeDynamicWallpaper);
+    const normalizedWallpapers = dynamicWallpapers.map(
+      normalizeDynamicWallpaper,
+    );
     const themeWallpapers = normalizedWallpapers.filter(
       (w) => w.mode === "both" || w.mode === activeWallpaperTheme,
     );
-    const available = themeWallpapers.length > 0 ? themeWallpapers : normalizedWallpapers;
+    const available =
+      themeWallpapers.length > 0 ? themeWallpapers : normalizedWallpapers;
     if (available.length === 0) return;
 
     hasPickedDynamicWallpaperRef.current = true;
@@ -107,7 +125,9 @@ export function PageClient() {
         const lastIndex = lastIndexStr ? parseInt(lastIndexStr, 10) : -1;
         let randomIndex = 0;
         if (available.length > 1) {
-          do { randomIndex = Math.floor(Math.random() * available.length); } while (randomIndex === lastIndex);
+          do {
+            randomIndex = Math.floor(Math.random() * available.length);
+          } while (randomIndex === lastIndex);
         }
         sessionStorage.setItem("lastWallpaperIndex", randomIndex.toString());
         await setBackgroundImage(available[randomIndex].url);
@@ -118,7 +138,13 @@ export function PageClient() {
     };
 
     fetchNewWallpaper();
-  }, [activeWallpaperTheme, dynamicWallpapers, isDynamicWallpaper, isHydrated, setBackgroundImage]);
+  }, [
+    activeWallpaperTheme,
+    dynamicWallpapers,
+    isDynamicWallpaper,
+    isHydrated,
+    setBackgroundImage,
+  ]);
 
   const shouldShowRightSidebar = showRightSidebar && layoutPreset !== "focus";
 
@@ -176,7 +202,10 @@ export function PageClient() {
       <div className="relative z-10 flex flex-col h-screen overflow-hidden">
         <div className="flex-1 flex flex-col overflow-hidden">
           {showClock && (
-            <ClockSection clockPosition={clockPosition} layoutPreset={layoutPreset} />
+            <ClockSection
+              clockPosition={clockPosition}
+              layoutPreset={layoutPreset}
+            />
           )}
           <TabsZone />
         </div>
@@ -193,7 +222,12 @@ export function PageClient() {
       {enableSearchHoverZone && (
         <SearchHoverZone
           onEnter={() => {
-            if (isSearchModalOpenRef.current || isMuradianModalOpenRef.current || isAuthDialogOpenRef.current) return;
+            if (
+              isSearchModalOpenRef.current ||
+              isMuradianModalOpenRef.current ||
+              isAuthDialogOpenRef.current
+            )
+              return;
             setSearchOpenRequest((r) => ({ id: r.id + 1, seedText: "" }));
             isSearchModalOpenRef.current = true;
             isSearchInputReadyRef.current = false;
@@ -209,7 +243,9 @@ export function PageClient() {
         open={isSearchModalOpen}
         onOpenChange={handleSearchModalOpenChange}
         openRequest={searchOpenRequest}
-        onInputReady={() => { isSearchInputReadyRef.current = true; }}
+        onInputReady={() => {
+          isSearchInputReadyRef.current = true;
+        }}
       />
       <MuradianAIModal
         open={isAuthenticated && isMuradianModalOpen}

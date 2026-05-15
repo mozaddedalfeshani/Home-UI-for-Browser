@@ -37,9 +37,8 @@ export async function GET(request: NextRequest) {
     const userData = await pullUserData(payload.userId);
     const isFree = (payload.role ?? "free") === "free";
 
-    const responseData = userData && isFree
-      ? { ...userData, settings: null }
-      : userData;
+    const responseData =
+      userData && isFree ? { ...userData, settings: null } : userData;
 
     return withCorsHeaders(
       NextResponse.json<{ data: UserData | null }>({ data: responseData }),

@@ -34,7 +34,9 @@ export function ChatMessage({ msg, copiedId, onCopy }: ChatMessageProps) {
           )}
         >
           {msg.content ? (
-            <ReactMarkdown remarkPlugins={[remarkGfm]}>{msg.content}</ReactMarkdown>
+            <ReactMarkdown remarkPlugins={[remarkGfm]}>
+              {msg.content}
+            </ReactMarkdown>
           ) : (
             <span>Thinking...</span>
           )}

@@ -9,7 +9,11 @@ interface SidebarOverlayProps {
   onMouseLeave: () => void;
 }
 
-export function SidebarOverlay({ isVisible, onMouseEnter, onMouseLeave }: SidebarOverlayProps) {
+export function SidebarOverlay({
+  isVisible,
+  onMouseEnter,
+  onMouseLeave,
+}: SidebarOverlayProps) {
   return (
     <>
       {!isVisible && (

@@ -60,15 +60,25 @@ export function MarketplaceView({
     const loading = append ? setIsLoadingMore : setIsLoading;
     loading(true);
     try {
-      const params = new URLSearchParams({ limit: String(PAGE_SIZE), offset: String(off) });
+      const params = new URLSearchParams({
+        limit: String(PAGE_SIZE),
+        offset: String(off),
+      });
       if (q.length >= 2) params.set("query", q);
       const res = await fetch(`/api/ai/agents/public?${params}`);
       if (!res.ok) return;
-      const data = (await res.json()) as { agents: Partial<MuradianAskAgent>[]; total: number };
+      const data = (await res.json()) as {
+        agents: Partial<MuradianAskAgent>[];
+        total: number;
+      };
       const mapped = data.agents
         .filter((a) => !ownIds.has(a.id!))
-        .map((a) => ({ ...a, systemInstruction: "", visibility: "public" as const })) as MuradianAskAgent[];
-      setPublicAgents((prev) => append ? [...prev, ...mapped] : mapped);
+        .map((a) => ({
+          ...a,
+          systemInstruction: "",
+          visibility: "public" as const,
+        })) as MuradianAskAgent[];
+      setPublicAgents((prev) => (append ? [...prev, ...mapped] : mapped));
       setTotal(data.total);
     } catch {
       if (!append) setPublicAgents([]);
@@ -82,7 +92,7 @@ export function MarketplaceView({
     setOffset(0);
     const timer = setTimeout(() => fetchAgents(q, 0, false), q ? 300 : 0);
     return () => clearTimeout(timer);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [search]);
 
   const handleLoadMore = () => {
@@ -91,8 +101,10 @@ export function MarketplaceView({
     fetchAgents(search.trim(), next, true);
   };
 
-  const filteredOwn = agents.filter((a) =>
-    !search.trim() || a.name.toLowerCase().includes(search.trim().toLowerCase()),
+  const filteredOwn = agents.filter(
+    (a) =>
+      !search.trim() ||
+      a.name.toLowerCase().includes(search.trim().toLowerCase()),
   );
 
   const hasMore = offset + PAGE_SIZE < total;
@@ -103,7 +115,12 @@ export function MarketplaceView({
     if (!el) return;
     const observer = new IntersectionObserver(
       (entries) => {
-        if (entries[0].isIntersecting && hasMore && !isLoadingMore && !isLoading) {
+        if (
+          entries[0].isIntersecting &&
+          hasMore &&
+          !isLoadingMore &&
+          !isLoading
+        ) {
           handleLoadMore();
         }
       },
@@ -111,7 +128,7 @@ export function MarketplaceView({
     );
     observer.observe(el);
     return () => observer.disconnect();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [hasMore, isLoadingMore, isLoading, offset]);
 
   const isInstalled = (id: MuradianAskAgentId) =>
@@ -129,8 +146,12 @@ export function MarketplaceView({
           <ArrowLeft className="h-4 w-4" />
         </button>
         <div className="flex-1">
-          <p className="text-sm font-semibold text-foreground">Agent Marketplace</p>
-          <p className="text-[11px] text-muted-foreground">Browse and install agents</p>
+          <p className="text-sm font-semibold text-foreground">
+            Agent Marketplace
+          </p>
+          <p className="text-[11px] text-muted-foreground">
+            Browse and install agents
+          </p>
         </div>
         <Button
           type="button"
@@ -212,11 +233,15 @@ export function MarketplaceView({
                       <Button
                         type="button"
                         size="sm"
-                        variant={selectedAgentId === agent.id ? "default" : "outline"}
+                        variant={
+                          selectedAgentId === agent.id ? "default" : "outline"
+                        }
                         className="h-7 rounded-lg px-3 text-xs"
                         onClick={() => onUseAgent(agent.id)}
                       >
-                        {selectedAgentId === agent.id ? <Check className="h-3 w-3" /> : null}
+                        {selectedAgentId === agent.id ? (
+                          <Check className="h-3 w-3" />
+                        ) : null}
                         {selectedAgentId === agent.id ? "Active" : "Use"}
                       </Button>
                       <button
@@ -267,11 +292,15 @@ export function MarketplaceView({
                         <Button
                           type="button"
                           size="sm"
-                          variant={selectedAgentId === agent.id ? "default" : "outline"}
+                          variant={
+                            selectedAgentId === agent.id ? "default" : "outline"
+                          }
                           className="h-7 rounded-lg px-3 text-xs"
                           onClick={() => onUseAgent(agent.id)}
                         >
-                          {selectedAgentId === agent.id ? <Check className="h-3 w-3" /> : null}
+                          {selectedAgentId === agent.id ? (
+                            <Check className="h-3 w-3" />
+                          ) : null}
                           {selectedAgentId === agent.id ? "Active" : "Use"}
                         </Button>
                         <button
@@ -297,7 +326,9 @@ export function MarketplaceView({
               {search.trim() ? "Search results" : "All public agents"}
             </p>
             {total > 0 && (
-              <span className="text-[10px] text-muted-foreground/60">{total} agents</span>
+              <span className="text-[10px] text-muted-foreground/60">
+                {total} agents
+              </span>
             )}
           </div>
 
@@ -308,7 +339,9 @@ export function MarketplaceView({
             </div>
           ) : publicAgents.length === 0 ? (
             <p className="py-6 text-center text-sm text-muted-foreground">
-              {search.trim() ? "No agents found." : "No public agents available."}
+              {search.trim()
+                ? "No agents found."
+                : "No public agents available."}
             </p>
           ) : (
             <>
@@ -334,11 +367,17 @@ export function MarketplaceView({
                           <Button
                             type="button"
                             size="sm"
-                            variant={selectedAgentId === agent.id ? "default" : "outline"}
+                            variant={
+                              selectedAgentId === agent.id
+                                ? "default"
+                                : "outline"
+                            }
                             className="h-7 rounded-lg px-3 text-xs"
                             onClick={() => onUseAgent(agent.id)}
                           >
-                            {selectedAgentId === agent.id ? <Check className="h-3 w-3" /> : null}
+                            {selectedAgentId === agent.id ? (
+                              <Check className="h-3 w-3" />
+                            ) : null}
                             {selectedAgentId === agent.id ? "Active" : "Use"}
                           </Button>
                           {installed ? (
@@ -367,8 +406,13 @@ export function MarketplaceView({
                 })}
               </div>
 
-              <div ref={sentinelRef} className="mt-2 flex h-8 items-center justify-center">
-                {isLoadingMore && <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />}
+              <div
+                ref={sentinelRef}
+                className="mt-2 flex h-8 items-center justify-center"
+              >
+                {isLoadingMore && (
+                  <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+                )}
               </div>
             </>
           )}
@@ -397,19 +441,32 @@ function AgentCard({
     <div
       className={cn(
         "flex flex-col gap-2.5 rounded-2xl border p-3 transition-colors",
-        isSelected ? "border-primary/30 bg-primary/8" : "border-border/40 bg-muted/20",
+        isSelected
+          ? "border-primary/30 bg-primary/8"
+          : "border-border/40 bg-muted/20",
       )}
     >
       <div className="flex items-start gap-2.5">
-        <div className={cn("shrink-0 rounded-xl p-1.5", isSelected ? "bg-primary/15 text-primary" : "bg-muted text-muted-foreground")}>
+        <div
+          className={cn(
+            "shrink-0 rounded-xl p-1.5",
+            isSelected
+              ? "bg-primary/15 text-primary"
+              : "bg-muted text-muted-foreground",
+          )}
+        >
           {icon}
         </div>
         <div className="min-w-0 flex-1">
-          <p className="truncate text-sm font-medium text-foreground leading-tight">{name}</p>
+          <p className="truncate text-sm font-medium text-foreground leading-tight">
+            {name}
+          </p>
           {badge && <div className="mt-0.5">{badge}</div>}
         </div>
       </div>
-      <p className="text-[11px] text-muted-foreground leading-relaxed line-clamp-2">{description}</p>
+      <p className="text-[11px] text-muted-foreground leading-relaxed line-clamp-2">
+        {description}
+      </p>
       <div className="flex items-center gap-1 mt-auto">{actions}</div>
     </div>
   );

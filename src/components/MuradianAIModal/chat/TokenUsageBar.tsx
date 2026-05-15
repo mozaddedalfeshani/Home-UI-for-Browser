@@ -34,7 +34,8 @@ export function TokenUsageBar({ usage }: { usage: TokenUsage }) {
                 : "text-muted-foreground/60",
           )}
         >
-          {usage.tokensUsed.toLocaleString()} / {usage.tokenLimit.toLocaleString()} tokens
+          {usage.tokensUsed.toLocaleString()} /{" "}
+          {usage.tokenLimit.toLocaleString()} tokens
         </span>
         {remaining === 0 ? (
           <span className="text-[10px] text-destructive">
@@ -42,7 +43,8 @@ export function TokenUsageBar({ usage }: { usage: TokenUsage }) {
           </span>
         ) : (
           <span className="text-[10px] text-muted-foreground/50">
-            {remaining.toLocaleString()} left · resets in {formatTimeUntil(usage.resetAt)}
+            {remaining.toLocaleString()} left · resets in{" "}
+            {formatTimeUntil(usage.resetAt)}
           </span>
         )}
       </div>
@@ -50,7 +52,11 @@ export function TokenUsageBar({ usage }: { usage: TokenUsage }) {
         <div
           className={cn(
             "h-full rounded-full transition-all duration-500",
-            isDanger ? "bg-destructive" : isWarning ? "bg-amber-500" : "bg-primary/50",
+            isDanger
+              ? "bg-destructive"
+              : isWarning
+                ? "bg-amber-500"
+                : "bg-primary/50",
           )}
           style={{ width: `${pct}%` }}
         />

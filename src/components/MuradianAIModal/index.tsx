@@ -16,7 +16,11 @@ import { MarketplaceView } from "./marketplace/MarketplaceView";
 import { AgentFormView } from "./agent/AgentFormView";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { HugeiconsIcon } from "@hugeicons/react";
-import { AiChipIcon, AiNetworkIcon, ArrowDown01Icon, Globe02Icon } from "@hugeicons/core-free-icons";
+import {
+  AiChipIcon,
+  AiNetworkIcon,
+  Globe02Icon,
+} from "@hugeicons/core-free-icons";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import {
@@ -32,7 +36,10 @@ import type { MuradianAIModalProps } from "./types";
 
 type ModalView = "chat" | "marketplace" | "agent-form";
 
-export default function MuradianAIModal({ open, onOpenChange }: MuradianAIModalProps) {
+export default function MuradianAIModal({
+  open,
+  onOpenChange,
+}: MuradianAIModalProps) {
   const language = useSettingsStore((state) => state.language);
   const userName = useAuthStore((state) => {
     const name = state.user?.name?.trim() ?? "";
@@ -49,7 +56,9 @@ export default function MuradianAIModal({ open, onOpenChange }: MuradianAIModalP
 
   const handleOpenAgentForm = () => setView("agent-form");
 
-  const handleEditAgent = (agent: Parameters<typeof agentMgr.handleEditAgent>[0]) => {
+  const handleEditAgent = (
+    agent: Parameters<typeof agentMgr.handleEditAgent>[0],
+  ) => {
     agentMgr.handleEditAgent(agent);
     setView("agent-form");
   };
@@ -61,7 +70,9 @@ export default function MuradianAIModal({ open, onOpenChange }: MuradianAIModalP
 
   const handleFormBack = () => setView("marketplace");
 
-  const handleFormSave = async (e: Parameters<typeof agentMgr.handleSaveAgent>[0]) => {
+  const handleFormSave = async (
+    e: Parameters<typeof agentMgr.handleSaveAgent>[0],
+  ) => {
     await agentMgr.handleSaveAgent(e);
     setView("marketplace");
   };
@@ -73,7 +84,13 @@ export default function MuradianAIModal({ open, onOpenChange }: MuradianAIModalP
 
   return (
     <>
-      <Dialog open={open} onOpenChange={(next) => { setView("chat"); onOpenChange(next); }}>
+      <Dialog
+        open={open}
+        onOpenChange={(next) => {
+          setView("chat");
+          onOpenChange(next);
+        }}
+      >
         <DialogContentBottom
           hideDefaultClose
           className="w-full border-0 bg-transparent p-2 shadow-none sm:bottom-8 sm:max-w-4xl"
@@ -141,32 +158,53 @@ export default function MuradianAIModal({ open, onOpenChange }: MuradianAIModalP
                                 className="group h-8 w-8 shrink-0 overflow-hidden rounded-full border border-border/50 bg-background/55 px-0 text-muted-foreground shadow-sm backdrop-blur-md transition-all duration-500 hover:w-auto hover:px-3 hover:bg-accent hover:text-foreground"
                                 aria-label="Select AI model"
                               >
-                                <HugeiconsIcon icon={AiNetworkIcon} size={14} strokeWidth={2} className="shrink-0" />
+                                <HugeiconsIcon
+                                  icon={AiNetworkIcon}
+                                  size={14}
+                                  strokeWidth={2}
+                                  className="shrink-0"
+                                />
                                 <span className="max-w-0 overflow-hidden whitespace-nowrap text-xs font-medium opacity-0 transition-all duration-500 group-hover:max-w-[80px] group-hover:ml-1.5 group-hover:opacity-100">
                                   AI Models
                                 </span>
                               </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end" className="w-52">
-                              <DropdownMenuLabel className="text-xs text-muted-foreground">AI Models</DropdownMenuLabel>
+                              <DropdownMenuLabel className="text-xs text-muted-foreground">
+                                AI Models
+                              </DropdownMenuLabel>
                               <DropdownMenuSeparator />
                               {[
                                 { name: "GPT 5.5", provider: "OpenAI" },
-                                { name: "Gemini 3.1 Flash", provider: "Google" },
-                                { name: "DeepSeek V4 Pro", provider: "DeepSeek" },
-                                { name: "DeepSeek V4 Flash", provider: "DeepSeek" },
+                                {
+                                  name: "Gemini 3.1 Flash",
+                                  provider: "Google",
+                                },
+                                {
+                                  name: "DeepSeek V4 Pro",
+                                  provider: "DeepSeek",
+                                },
+                                {
+                                  name: "DeepSeek V4 Flash",
+                                  provider: "DeepSeek",
+                                },
                               ].map((m) => (
                                 <DropdownMenuItem
                                   key={m.name}
                                   onSelect={(e) => {
                                     e.preventDefault();
-                                    if (userRole === "lite") toast.info("Please upgrade to Premium");
+                                    if (userRole === "lite")
+                                      toast.info("Please upgrade to Premium");
                                   }}
                                   className="flex items-center justify-between gap-2 cursor-not-allowed opacity-60"
                                 >
                                   <div>
-                                    <p className="text-sm font-medium">{m.name}</p>
-                                    <p className="text-[10px] text-muted-foreground">{m.provider}</p>
+                                    <p className="text-sm font-medium">
+                                      {m.name}
+                                    </p>
+                                    <p className="text-[10px] text-muted-foreground">
+                                      {m.provider}
+                                    </p>
                                   </div>
                                   <span className="text-[9px] font-semibold uppercase tracking-wide px-1.5 py-0.5 rounded-full border border-border/40 text-muted-foreground">
                                     {userRole === "lite" ? "Plus" : "Soon"}
@@ -189,13 +227,20 @@ export default function MuradianAIModal({ open, onOpenChange }: MuradianAIModalP
                             icon={AiChipIcon}
                             size={14}
                             strokeWidth={2}
-                            className={cn("shrink-0", agentMgr.selectedAgent ? "text-primary" : "")}
+                            className={cn(
+                              "shrink-0",
+                              agentMgr.selectedAgent ? "text-primary" : "",
+                            )}
                           />
                           <span className="max-w-0 overflow-hidden whitespace-nowrap text-xs font-medium opacity-0 transition-all duration-500 group-hover:max-w-[120px] group-hover:ml-1.5 group-hover:opacity-100">
                             {agentMgr.selectedAgent?.name ?? "Normal ask"}
                           </span>
                           {agentMgr.selectedAgent?.visibility === "public" && (
-                            <HugeiconsIcon icon={Globe02Icon} size={11} className="ml-1 shrink-0 text-primary opacity-0 transition-opacity duration-200 group-hover:opacity-100" />
+                            <HugeiconsIcon
+                              icon={Globe02Icon}
+                              size={11}
+                              className="ml-1 shrink-0 text-primary opacity-0 transition-opacity duration-200 group-hover:opacity-100"
+                            />
                           )}
                         </Button>
                       </>
@@ -210,7 +255,9 @@ export default function MuradianAIModal({ open, onOpenChange }: MuradianAIModalP
 
       <ConfirmDialog
         open={Boolean(agentMgr.agentToDelete)}
-        onOpenChange={(next) => { if (!next) agentMgr.setAgentToDelete(null); }}
+        onOpenChange={(next) => {
+          if (!next) agentMgr.setAgentToDelete(null);
+        }}
         title="Delete agent?"
         description={`This will remove "${agentMgr.agentToDelete?.name ?? "this agent"}" permanently.`}
         confirmText="Delete"

@@ -228,7 +228,8 @@ async function generateRollingSummary(params: {
   newlyEvicted: ChatMessage[];
   existingSummary: string;
 }): Promise<string> {
-  const { headers, userId, currentMonth, newlyEvicted, existingSummary } = params;
+  const { headers, userId, currentMonth, newlyEvicted, existingSummary } =
+    params;
 
   const historyText = newlyEvicted
     .map((m) => `${m.role === "user" ? "User" : "Assistant"}: ${m.content}`)
@@ -264,7 +265,11 @@ async function generateRollingSummary(params: {
   };
 
   if (data.usage?.completion_tokens) {
-    await incrementTokenUsage(userId, currentMonth, data.usage.completion_tokens).catch(() => {});
+    await incrementTokenUsage(
+      userId,
+      currentMonth,
+      data.usage.completion_tokens,
+    ).catch(() => {});
   }
 
   return data.choices?.[0]?.message?.content?.trim() ?? existingSummary;
@@ -286,15 +291,19 @@ export async function POST(req: NextRequest) {
     // 2. Check window token limit (free: 3k/10h, lite: 700k/5h, plus: unlimited)
     const userRole = authPayload.role ?? "free";
     const isPlus = userRole === "plus";
-    const windowTokenLimit = userRole === "lite" ? LITE_WINDOW_TOKEN_LIMIT : FREE_WINDOW_TOKEN_LIMIT;
-    const windowHours = userRole === "lite" ? LITE_WINDOW_HOURS : FREE_WINDOW_HOURS;
+    const windowTokenLimit =
+      userRole === "lite" ? LITE_WINDOW_TOKEN_LIMIT : FREE_WINDOW_TOKEN_LIMIT;
+    const windowHours =
+      userRole === "lite" ? LITE_WINDOW_HOURS : FREE_WINDOW_HOURS;
     const currentMonth = new Date().toISOString().slice(0, 7); // YYYY-MM (kept for history)
     const windowUsage = await getWindowTokenUsage(userId);
     const currentWindowTokens = windowUsage.tokensUsed;
     const windowStart = windowUsage.windowStart;
 
     if (!isPlus && currentWindowTokens >= windowTokenLimit) {
-      const resetAt = new Date(windowStart.getTime() + windowHours * 60 * 60 * 1000);
+      const resetAt = new Date(
+        windowStart.getTime() + windowHours * 60 * 60 * 1000,
+      );
       return NextResponse.json(
         {
           error: "out_of_context",
@@ -403,7 +412,9 @@ export async function POST(req: NextRequest) {
                   Promise.allSettled([
                     incrementTokenUsage(userId, currentMonth, tokens),
                     incrementWindowTokenUsage(userId, tokens),
-                  ]).catch((err) => console.error("Failed to increment tokens:", err));
+                  ]).catch((err) =>
+                    console.error("Failed to increment tokens:", err),
+                  );
                 }
 
                 const content = parsed.choices?.[0]?.delta?.content;
@@ -457,7 +468,9 @@ export async function POST(req: NextRequest) {
                 previousMemory: effectiveMemory,
                 userMessage: message,
                 assistantAnswer,
-              }).catch((err) => console.error("Failed to save user memory profile:", err)),
+              }).catch((err) =>
+                console.error("Failed to save user memory profile:", err),
+              ),
 
           (async () => {
             if (!newlyEvicted.length) return;

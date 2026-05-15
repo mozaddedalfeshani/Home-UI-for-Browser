@@ -120,7 +120,8 @@ export const useMuradianAskAgentStore = create<MuradianAskAgentState>()(
       getAgentById: (id) => get().agents.find((agent) => agent.id === id),
       installAgent: (agent) => {
         set((state) => {
-          if (state.installedAgents.some((a) => a.id === agent.id)) return state;
+          if (state.installedAgents.some((a) => a.id === agent.id))
+            return state;
           return { installedAgents: [agent, ...state.installedAgents] };
         });
       },
@@ -134,7 +135,10 @@ export const useMuradianAskAgentStore = create<MuradianAskAgentState>()(
       name: "muradian-ask-agent-store",
       version: 3,
       migrate: (persisted, version) => {
-        const state = persisted as { agents?: MuradianAskAgent[]; installedAgents?: MuradianAskAgent[] };
+        const state = persisted as {
+          agents?: MuradianAskAgent[];
+          installedAgents?: MuradianAskAgent[];
+        };
         return {
           agents: state.agents ?? [],
           installedAgents: version < 3 ? [] : (state.installedAgents ?? []),

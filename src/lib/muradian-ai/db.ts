@@ -41,7 +41,9 @@ export async function saveChatSession(
   return { insertedId: (rows[0] as { id: string }).id };
 }
 
-export async function getChatSessions(userId: string): Promise<AIChatSession[]> {
+export async function getChatSessions(
+  userId: string,
+): Promise<AIChatSession[]> {
   const rows = await sql`
     SELECT id, user_id AS "userId", title, messages,
            created_at AS "createdAt", updated_at AS "updatedAt"

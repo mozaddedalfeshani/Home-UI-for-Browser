@@ -107,7 +107,9 @@ export interface WindowUsage {
   isExpired: boolean;
 }
 
-export async function getWindowTokenUsage(userId: string): Promise<WindowUsage> {
+export async function getWindowTokenUsage(
+  userId: string,
+): Promise<WindowUsage> {
   const rows = await sql`
     SELECT tokens_used, window_start,
       window_start < NOW() - INTERVAL '10 hours' AS is_expired
@@ -116,7 +118,11 @@ export async function getWindowTokenUsage(userId: string): Promise<WindowUsage> 
   if (!rows[0]) {
     return { tokensUsed: 0, windowStart: new Date(), isExpired: false };
   }
-  const row = rows[0] as { tokens_used: number; window_start: Date; is_expired: boolean };
+  const row = rows[0] as {
+    tokens_used: number;
+    window_start: Date;
+    is_expired: boolean;
+  };
   return {
     tokensUsed: row.is_expired ? 0 : row.tokens_used,
     windowStart: row.is_expired ? new Date() : new Date(row.window_start),

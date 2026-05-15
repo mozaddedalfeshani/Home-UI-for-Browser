@@ -9,7 +9,11 @@ interface UseChatSessionParams {
   userName: string;
 }
 
-export function useChatSession({ open, language, userName }: UseChatSessionParams) {
+export function useChatSession({
+  open,
+  language,
+  userName,
+}: UseChatSessionParams) {
   const [query, setQuery] = useState("");
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -34,7 +38,8 @@ export function useChatSession({ open, language, userName }: UseChatSessionParam
     const trimmedQuery = query.trim();
     if (!trimmedQuery || isLoading) return;
 
-    const genId = () => `${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}`;
+    const genId = () =>
+      `${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}`;
 
     if (trimmedQuery === "/clear") {
       setQuery("");
@@ -45,19 +50,27 @@ export function useChatSession({ open, language, userName }: UseChatSessionParam
     if (trimmedQuery === "/compact") {
       setQuery("");
       if (messages.length === 0) return;
-      setMessages([{ id: genId(), role: "assistant", content: "Context compacted." }]);
+      setMessages([
+        { id: genId(), role: "assistant", content: "Context compacted." },
+      ]);
       summarizedCountRef.current = 0;
       setTimeout(() => inputRef.current?.focus(), 50);
       return;
     }
 
-    const userMsg: Message = { id: genId(), role: "user", content: trimmedQuery };
+    const userMsg: Message = {
+      id: genId(),
+      role: "user",
+      content: trimmedQuery,
+    };
     const newMessages = [...messages, userMsg];
     setMessages(newMessages);
     setQuery("");
     setIsLoading(true);
 
-    const recentHistory = messages.slice(-4).map((m) => ({ role: m.role, content: m.content }));
+    const recentHistory = messages
+      .slice(-4)
+      .map((m) => ({ role: m.role, content: m.content }));
     const olderThanWindow = messages.slice(0, -4);
     const newlyEvicted = olderThanWindow
       .slice(summarizedCountRef.current)
@@ -90,11 +103,14 @@ export function useChatSession({ open, language, userName }: UseChatSessionParam
           windowHours?: number;
         };
         if (errorData.error === "out_of_context") {
-          const resetAt = errorData.resetAt ? new Date(errorData.resetAt) : null;
+          const resetAt = errorData.resetAt
+            ? new Date(errorData.resetAt)
+            : null;
           const resetMsg = resetAt
             ? ` Resets at ${resetAt.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}.`
             : "";
-          const limitDisplay = errorData.tokenLimit?.toLocaleString() ?? "3,000";
+          const limitDisplay =
+            errorData.tokenLimit?.toLocaleString() ?? "3,000";
           const hoursDisplay = errorData.windowHours ?? 10;
           setMessages((prev) => [
             ...prev,
@@ -107,7 +123,10 @@ export function useChatSession({ open, language, userName }: UseChatSessionParam
           if (errorData.tokensUsed !== undefined) {
             setTokenUsage({
               tokensUsed: errorData.tokensUsed,
-              tokenLimit: errorData.tokenLimit !== undefined ? errorData.tokenLimit : 3_000,
+              tokenLimit:
+                errorData.tokenLimit !== undefined
+                  ? errorData.tokenLimit
+                  : 3_000,
               resetAt: errorData.resetAt ?? "",
             });
           }
@@ -119,7 +138,10 @@ export function useChatSession({ open, language, userName }: UseChatSessionParam
       const reader = response.body?.getReader();
       if (!reader) throw new Error("No reader");
 
-      setMessages((prev) => [...prev, { id: assistantMsgId, role: "assistant", content: "" }]);
+      setMessages((prev) => [
+        ...prev,
+        { id: assistantMsgId, role: "assistant", content: "" },
+      ]);
 
       const decoder = new TextDecoder();
       let accumulatedContent = "";
@@ -152,7 +174,8 @@ export function useChatSession({ open, language, userName }: UseChatSessionParam
             if (parsed.t === "usage") {
               setTokenUsage({
                 tokensUsed: parsed.tokensUsed ?? 0,
-                tokenLimit: parsed.tokenLimit !== undefined ? parsed.tokenLimit : 3_000,
+                tokenLimit:
+                  parsed.tokenLimit !== undefined ? parsed.tokenLimit : 3_000,
                 resetAt: parsed.resetAt !== undefined ? parsed.resetAt : "",
               });
               continue;
@@ -163,7 +186,9 @@ export function useChatSession({ open, language, userName }: UseChatSessionParam
             accumulatedContent += content;
             setMessages((prev) =>
               prev.map((m) =>
-                m.id === assistantMsgId ? { ...m, content: accumulatedContent } : m,
+                m.id === assistantMsgId
+                  ? { ...m, content: accumulatedContent }
+                  : m,
               ),
             );
           } catch {

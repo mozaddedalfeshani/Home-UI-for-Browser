@@ -1,12 +1,23 @@
 "use client";
 
-import { type KeyboardEvent, type RefObject, useEffect, useRef, useState } from "react";
+import {
+  type KeyboardEvent,
+  type RefObject,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import { Loader2 } from "lucide-react";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { SentIcon, Attachment01Icon } from "@hugeicons/core-free-icons";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 import { TokenUsageBar } from "./TokenUsageBar";
 import { toast } from "sonner";
@@ -19,8 +30,16 @@ interface SlashCommand {
 }
 
 const SLASH_COMMANDS: SlashCommand[] = [
-  { cmd: "/clear", label: "Clear", description: "Remove all messages and reset context" },
-  { cmd: "/compact", label: "Compact", description: "Compress history using existing summary" },
+  {
+    cmd: "/clear",
+    label: "Clear",
+    description: "Remove all messages and reset context",
+  },
+  {
+    cmd: "/compact",
+    label: "Compact",
+    description: "Compress history using existing summary",
+  },
 ];
 
 interface ChatInputProps {
@@ -82,7 +101,9 @@ export function ChatInput({
     if (filteredCommands.length > 0) {
       if (e.key === "ArrowUp") {
         e.preventDefault();
-        setActiveIndex((i) => (i - 1 + filteredCommands.length) % filteredCommands.length);
+        setActiveIndex(
+          (i) => (i - 1 + filteredCommands.length) % filteredCommands.length,
+        );
         return;
       }
       if (e.key === "ArrowDown") {
@@ -102,7 +123,10 @@ export function ChatInput({
     }
     if (e.key !== "Enter" || e.shiftKey) return;
     e.preventDefault();
-    if (filteredCommands.length > 0 && query !== filteredCommands[activeIndex].cmd) {
+    if (
+      filteredCommands.length > 0 &&
+      query !== filteredCommands[activeIndex].cmd
+    ) {
       onQueryChange(filteredCommands[activeIndex].cmd);
       return;
     }
@@ -127,7 +151,9 @@ export function ChatInput({
               <span className="min-w-[4.5rem] font-mono text-xs font-semibold text-primary">
                 {c.cmd}
               </span>
-              <span className="text-xs text-muted-foreground">{c.description}</span>
+              <span className="text-xs text-muted-foreground">
+                {c.description}
+              </span>
             </button>
           ))}
         </div>
@@ -160,7 +186,11 @@ export function ChatInput({
                       onClick={() => toast.info("File attachment coming soon")}
                       className="flex h-8 w-8 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
                     >
-                      <HugeiconsIcon icon={Attachment01Icon} size={15} strokeWidth={2} />
+                      <HugeiconsIcon
+                        icon={Attachment01Icon}
+                        size={15}
+                        strokeWidth={2}
+                      />
                     </button>
                   </TooltipTrigger>
                   <TooltipContent>Attach file</TooltipContent>
@@ -171,7 +201,7 @@ export function ChatInput({
 
           {/* Right — clear + agent/model + send */}
           <div className="flex items-center gap-1">
-{agentPickerSlot}
+            {agentPickerSlot}
 
             <Button
               type="button"

@@ -1,6 +1,16 @@
 "use client";
 
-import { Bot, Check, ChevronDown, Globe2, Loader2, Lock, Pencil, Plus, Trash2 } from "lucide-react";
+import {
+  Bot,
+  Check,
+  ChevronDown,
+  Globe2,
+  Loader2,
+  Lock,
+  Pencil,
+  Plus,
+  Trash2,
+} from "lucide-react";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { AiChipIcon } from "@hugeicons/core-free-icons";
 import {
@@ -13,7 +23,10 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
-import type { MuradianAskAgent, MuradianAskAgentId } from "@/store/muradianAskAgentStore";
+import type {
+  MuradianAskAgent,
+  MuradianAskAgentId,
+} from "@/store/muradianAskAgentStore";
 
 interface AgentPickerProps {
   selectedAgent: MuradianAskAgent | undefined;
@@ -106,12 +119,16 @@ export function AgentPicker({
               <HugeiconsIcon icon={AiChipIcon} size={16} strokeWidth={2} />
             </div>
             <div className="min-w-0 flex-1">
-              <p className="truncate text-sm font-medium text-foreground">Normal ask</p>
+              <p className="truncate text-sm font-medium text-foreground">
+                Normal ask
+              </p>
               <p className="truncate text-[0.7rem] text-muted-foreground">
                 Use regular MuradianAsk memory
               </p>
             </div>
-            {!selectedAgentId ? <Check className="h-4 w-4 shrink-0 text-primary" /> : null}
+            {!selectedAgentId ? (
+              <Check className="h-4 w-4 shrink-0 text-primary" />
+            ) : null}
           </div>
         </DropdownMenuItem>
 
@@ -124,7 +141,9 @@ export function AgentPicker({
           />
         </div>
 
-        {filteredAgents.length === 0 && filteredPublicAgents.length === 0 && !isPublicSearchLoading ? (
+        {filteredAgents.length === 0 &&
+        filteredPublicAgents.length === 0 &&
+        !isPublicSearchLoading ? (
           <div className="px-3 py-4 text-sm text-muted-foreground">
             {agents.length === 0
               ? "No agents yet. Add your first preference."
@@ -154,14 +173,18 @@ export function AgentPicker({
                 <Bot className="h-4 w-4" />
               </div>
               <div className="min-w-0 flex-1">
-                <p className="truncate text-sm font-medium text-foreground">{agent.name}</p>
+                <p className="truncate text-sm font-medium text-foreground">
+                  {agent.name}
+                </p>
                 <p className="mt-0.5 flex items-center gap-1 text-[0.7rem] text-muted-foreground">
                   {(agent.visibility ?? "private") === "public" ? (
                     <Globe2 className="h-3 w-3" />
                   ) : (
                     <Lock className="h-3 w-3" />
                   )}
-                  {(agent.visibility ?? "private") === "public" ? "Public" : "Private"}
+                  {(agent.visibility ?? "private") === "public"
+                    ? "Public"
+                    : "Private"}
                 </p>
               </div>
               <div className="ml-2 flex shrink-0 items-center gap-1">
@@ -170,8 +193,15 @@ export function AgentPicker({
                 ) : null}
                 <button
                   type="button"
-                  onPointerDown={(e) => { e.preventDefault(); e.stopPropagation(); }}
-                  onClick={(e) => { e.preventDefault(); e.stopPropagation(); onEdit(agent); }}
+                  onPointerDown={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                  }}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    onEdit(agent);
+                  }}
                   className="rounded-md p-1.5 text-muted-foreground opacity-70 transition-colors hover:bg-muted hover:text-foreground group-hover:opacity-100"
                   aria-label={`Edit ${agent.name}`}
                 >
@@ -179,8 +209,15 @@ export function AgentPicker({
                 </button>
                 <button
                   type="button"
-                  onPointerDown={(e) => { e.preventDefault(); e.stopPropagation(); }}
-                  onClick={(e) => { e.preventDefault(); e.stopPropagation(); onDelete(agent); }}
+                  onPointerDown={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                  }}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    onDelete(agent);
+                  }}
                   className="rounded-md p-1.5 text-muted-foreground opacity-70 transition-colors hover:bg-destructive/10 hover:text-destructive group-hover:opacity-100"
                   aria-label={`Delete ${agent.name}`}
                 >
@@ -218,7 +255,9 @@ export function AgentPicker({
                 <Globe2 className="h-4 w-4" />
               </div>
               <div className="min-w-0 flex-1">
-                <p className="truncate text-sm font-medium text-foreground">{agent.name}</p>
+                <p className="truncate text-sm font-medium text-foreground">
+                  {agent.name}
+                </p>
                 <p className="truncate text-[0.7rem] text-muted-foreground">
                   {agent.description || "Public agent"}
                 </p>

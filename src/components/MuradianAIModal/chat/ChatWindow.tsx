@@ -11,7 +11,12 @@ interface ChatWindowProps {
   onCopy: (msg: Message) => void;
 }
 
-export function ChatWindow({ messages, isLoading, copiedId, onCopy }: ChatWindowProps) {
+export function ChatWindow({
+  messages,
+  isLoading,
+  copiedId,
+  onCopy,
+}: ChatWindowProps) {
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -19,7 +24,9 @@ export function ChatWindow({ messages, isLoading, copiedId, onCopy }: ChatWindow
   }, [messages, isLoading]);
 
   const isTypingVisible =
-    isLoading && messages.length > 0 && messages[messages.length - 1]?.role === "user";
+    isLoading &&
+    messages.length > 0 &&
+    messages[messages.length - 1]?.role === "user";
 
   return (
     <div className="flex-1 min-h-0 overflow-y-auto px-4 pt-4 pb-2 scroll-smooth">
@@ -30,7 +37,12 @@ export function ChatWindow({ messages, isLoading, copiedId, onCopy }: ChatWindow
       ) : (
         <div className="space-y-4 pb-2">
           {messages.map((msg) => (
-            <ChatMessage key={msg.id} msg={msg} copiedId={copiedId} onCopy={onCopy} />
+            <ChatMessage
+              key={msg.id}
+              msg={msg}
+              copiedId={copiedId}
+              onCopy={onCopy}
+            />
           ))}
 
           {isTypingVisible && (

@@ -45,7 +45,9 @@ export function MemoryView({
       </div>
 
       <div className="shrink-0 border-t border-border/20 px-6 py-3 flex items-center justify-between">
-        <p className="text-xs text-muted-foreground">{memoryDraft.trim().length}/{MAX_MEMORY_LENGTH}</p>
+        <p className="text-xs text-muted-foreground">
+          {memoryDraft.trim().length}/{MAX_MEMORY_LENGTH}
+        </p>
         <div className="flex items-center gap-2">
           <Button
             type="button"

@@ -6,7 +6,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
-import type { MuradianAskAgent, MuradianAskAgentVisibility } from "@/store/muradianAskAgentStore";
+import type {
+  MuradianAskAgent,
+  MuradianAskAgentVisibility,
+} from "@/store/muradianAskAgentStore";
 
 interface AgentFormViewProps {
   agentToEdit: MuradianAskAgent | null;
@@ -60,7 +63,9 @@ export function AgentFormView({
       <div className="flex-1 min-h-0 overflow-y-auto px-4 py-4">
         <form id="agent-form" onSubmit={onSave} className="grid gap-4">
           <div className="grid gap-1.5">
-            <label className="text-xs font-medium text-muted-foreground">Agent name</label>
+            <label className="text-xs font-medium text-muted-foreground">
+              Agent name
+            </label>
             <Input
               value={editName}
               onChange={(e) => onNameChange(e.target.value)}
@@ -71,7 +76,9 @@ export function AgentFormView({
           </div>
 
           <div className="grid gap-1.5">
-            <label className="text-xs font-medium text-muted-foreground">Short description</label>
+            <label className="text-xs font-medium text-muted-foreground">
+              Short description
+            </label>
             <Input
               value={editDescription}
               onChange={(e) => onDescriptionChange(e.target.value)}
@@ -81,7 +88,9 @@ export function AgentFormView({
           </div>
 
           <div className="grid gap-1.5">
-            <label className="text-xs font-medium text-muted-foreground">Visibility</label>
+            <label className="text-xs font-medium text-muted-foreground">
+              Visibility
+            </label>
             <div className="grid grid-cols-2 gap-2 rounded-xl border border-border/50 bg-muted/20 p-1">
               <button
                 type="button"
@@ -118,7 +127,9 @@ export function AgentFormView({
           </div>
 
           <div className="grid gap-1.5">
-            <label className="text-xs font-medium text-muted-foreground">Agent rules</label>
+            <label className="text-xs font-medium text-muted-foreground">
+              Agent rules
+            </label>
             <Textarea
               value={editRules}
               onChange={(e) => onRulesChange(e.target.value)}
@@ -131,7 +142,13 @@ export function AgentFormView({
 
       {/* Footer */}
       <div className="shrink-0 border-t border-border/20 p-3 flex justify-end gap-2">
-        <Button type="button" variant="ghost" size="sm" className="rounded-full px-4" onClick={onBack}>
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          className="rounded-full px-4"
+          onClick={onBack}
+        >
           Cancel
         </Button>
         <Button

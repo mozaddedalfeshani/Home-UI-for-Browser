@@ -3,7 +3,10 @@ import type { NextRequest } from "next/server";
 import { cookies } from "next/headers";
 import { verifyToken } from "@/lib/auth/jwt";
 import { corsGuard, handleCorsOptions, withCorsHeaders } from "@/lib/auth/cors";
-import { searchPublicMuradianAskAgents, listPublicMuradianAskAgents } from "@/lib/muradian-ask/db";
+import {
+  searchPublicMuradianAskAgents,
+  listPublicMuradianAskAgents,
+} from "@/lib/muradian-ask/db";
 
 export async function OPTIONS(request: NextRequest) {
   return handleCorsOptions(request);
@@ -32,12 +35,19 @@ export async function GET(request: NextRequest) {
     }
 
     const query = request.nextUrl.searchParams.get("query")?.trim() ?? "";
-    const limit = Math.min(parseInt(request.nextUrl.searchParams.get("limit") ?? "12", 10), 50);
-    const offset = Math.max(parseInt(request.nextUrl.searchParams.get("offset") ?? "0", 10), 0);
+    const limit = Math.min(
+      parseInt(request.nextUrl.searchParams.get("limit") ?? "12", 10),
+      50,
+    );
+    const offset = Math.max(
+      parseInt(request.nextUrl.searchParams.get("offset") ?? "0", 10),
+      0,
+    );
 
-    const { agents, total } = query.length >= 2
-      ? await searchPublicMuradianAskAgents(userId, query, limit, offset)
-      : await listPublicMuradianAskAgents(userId, limit, offset);
+    const { agents, total } =
+      query.length >= 2
+        ? await searchPublicMuradianAskAgents(userId, query, limit, offset)
+        : await listPublicMuradianAskAgents(userId, limit, offset);
 
     return withCorsHeaders(
       NextResponse.json({

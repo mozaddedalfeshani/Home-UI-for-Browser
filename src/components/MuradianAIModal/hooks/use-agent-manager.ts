@@ -13,27 +13,35 @@ interface UseAgentManagerParams {
 }
 
 export function useAgentManager({ open }: UseAgentManagerParams) {
-  const [selectedAgentId, setSelectedAgentId] = useState<MuradianAskAgentId>("");
+  const [selectedAgentId, setSelectedAgentId] =
+    useState<MuradianAskAgentId>("");
   const [agentSearch, setAgentSearch] = useState("");
-  const [agentToDelete, setAgentToDelete] = useState<MuradianAskAgent | null>(null);
+  const [agentToDelete, setAgentToDelete] = useState<MuradianAskAgent | null>(
+    null,
+  );
   const [agentToEdit, setAgentToEdit] = useState<MuradianAskAgent | null>(null);
   const [isAgentEditorOpen, setIsAgentEditorOpen] = useState(false);
   const [editName, setEditName] = useState("");
   const [editDescription, setEditDescription] = useState("");
   const [editRules, setEditRules] = useState("");
-  const [editVisibility, setEditVisibility] = useState<MuradianAskAgentVisibility>("private");
+  const [editVisibility, setEditVisibility] =
+    useState<MuradianAskAgentVisibility>("private");
   const [publicAgents, setPublicAgents] = useState<MuradianAskAgent[]>([]);
   const [isPublicSearchLoading, setIsPublicSearchLoading] = useState(false);
   const [isSavingAgent, setIsSavingAgent] = useState(false);
 
   const agents = useMuradianAskAgentStore((state) => state.agents);
-  const installedAgents = useMuradianAskAgentStore((state) => state.installedAgents);
+  const installedAgents = useMuradianAskAgentStore(
+    (state) => state.installedAgents,
+  );
   const fetchAgents = useMuradianAskAgentStore((state) => state.fetchAgents);
   const createAgent = useMuradianAskAgentStore((state) => state.createAgent);
   const updateAgent = useMuradianAskAgentStore((state) => state.updateAgent);
   const deleteAgent = useMuradianAskAgentStore((state) => state.deleteAgent);
 
-  const selectedAgent = [...agents, ...installedAgents, ...publicAgents].find((a) => a.id === selectedAgentId);
+  const selectedAgent = [...agents, ...installedAgents, ...publicAgents].find(
+    (a) => a.id === selectedAgentId,
+  );
   const filteredAgents = agents.filter((a) =>
     a.name.toLowerCase().includes(agentSearch.trim().toLowerCase()),
   );
