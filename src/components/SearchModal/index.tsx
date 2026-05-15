@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
-import { Search, SearchCheck } from "lucide-react";
+import { useState, useEffect, useLayoutEffect, useRef } from "react";
+import { HugeiconsIcon } from "@hugeicons/react";
+import { Search01Icon } from "@hugeicons/core-free-icons";
 import {
   Dialog,
   DialogContentBottom,
@@ -15,418 +16,196 @@ import { useSearchHistoryStore } from "@/store/searchHistoryStore";
 import { useTabsStore } from "@/store/tabsStore";
 import { useTabClickHistoryStore } from "@/store/tabClickHistoryStore";
 import { trackSearch, trackVisit } from "@/lib/analyticsClient";
-import { cn } from "@/lib/utils";
-
-const escapeRegExp = (value: string) =>
-  value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-
-const renderHighlightedMatch = (
-  text: string,
-  searchText: string,
-  highlightClassName = "font-semibold text-primary",
-) => {
-  const trimmedSearchText = searchText.trim();
-
-  if (!trimmedSearchText) {
-    return text;
-  }
-
-  const matcher = new RegExp(`(${escapeRegExp(trimmedSearchText)})`, "ig");
-  const parts = text.split(matcher);
-
-  return parts.map((part, index) => {
-    if (!part) {
-      return null;
-    }
-
-    if (part.toLowerCase() !== trimmedSearchText.toLowerCase()) {
-      return part;
-    }
-
-    return (
-      <span key={`${part}-${index}`} className={highlightClassName}>
-        {part}
-      </span>
-    );
-  });
-};
+import { isUrl } from "./utils";
+import { useSuggestions } from "./useSuggestions";
+import { SuggestionList } from "./SuggestionList";
+import { SuggestionItem } from "./types";
 
 interface SearchModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  openRequest: {
-    id: number;
-    seedText: string;
-  };
+  openRequest: { id: number; seedText: string };
   onInputReady?: () => void;
 }
 
-const SearchModal = ({
-  open,
-  onOpenChange,
-  openRequest,
-  onInputReady,
-}: SearchModalProps) => {
+const SearchModal = ({ open, onOpenChange, openRequest, onInputReady }: SearchModalProps) => {
   const [query, setQuery] = useState("");
-  const [searchQuerySuggestions, setSearchQuerySuggestions] = useState<
-    string[]
-  >([]);
+  const [apiSuggestions, setApiSuggestions] = useState<string[]>([]);
   const [activeIndex, setActiveIndex] = useState(-1);
   const inputRef = useRef<HTMLInputElement>(null);
   const lastAppliedRequestIdRef = useRef(0);
+
   const { searchEngine, language } = useSettingsStore();
-  const historyEntries = useSearchHistoryStore((state) => state.entries);
-  const addSearchHistoryEntry = useSearchHistoryStore(
-    (state) => state.addSearchHistoryEntry,
-  );
-  const addTabClickHistoryEntry = useTabClickHistoryStore(
-    (state) => state.addTabClickHistoryEntry,
-  );
-  const tabs = useTabsStore((state) => state.tabs);
-  const incrementVisitCount = useTabsStore(
-    (state) => state.incrementVisitCount,
-  );
+  const addSearchHistoryEntry = useSearchHistoryStore((s) => s.addSearchHistoryEntry);
+  const addTabClickHistoryEntry = useTabClickHistoryStore((s) => s.addTabClickHistoryEntry);
+  const tabs = useTabsStore((s) => s.tabs);
+  const incrementVisitCount = useTabsStore((s) => s.incrementVisitCount);
   const t = useTranslation(language);
 
+  const { allItems, localCount, inlineValue, inlineIsHistory, inlineSuffix } = useSuggestions({
+    query,
+    apiSuggestions,
+    language,
+  });
+
+  // Focus management
   useEffect(() => {
     const handleFocus = () => {
-      if (open && inputRef.current) {
-        inputRef.current.focus();
-      }
+      if (open && inputRef.current) inputRef.current.focus();
     };
-
     if (open && inputRef.current) {
       inputRef.current.focus();
       onInputReady?.();
     }
-
     window.addEventListener("focus", handleFocus);
-    return () => {
-      window.removeEventListener("focus", handleFocus);
-    };
+    return () => window.removeEventListener("focus", handleFocus);
   }, [open, onInputReady]);
 
+  // Seed text from open request
   useEffect(() => {
     if (!open) {
       setQuery("");
       setActiveIndex(-1);
       return;
     }
-
-    if (
-      openRequest.id === 0 ||
-      lastAppliedRequestIdRef.current === openRequest.id
-    ) {
-      return;
-    }
-
+    if (openRequest.id === 0 || lastAppliedRequestIdRef.current === openRequest.id) return;
     lastAppliedRequestIdRef.current = openRequest.id;
     setQuery(openRequest.seedText);
     setActiveIndex(-1);
-
     requestAnimationFrame(() => {
-      if (!inputRef.current) {
-        return;
-      }
-
+      if (!inputRef.current) return;
       inputRef.current.focus();
-      const cursorPosition = openRequest.seedText.length;
-      inputRef.current.setSelectionRange(cursorPosition, cursorPosition);
+      const pos = openRequest.seedText.length;
+      inputRef.current.setSelectionRange(pos, pos);
       onInputReady?.();
     });
   }, [open, openRequest, onInputReady]);
 
-  useEffect(() => {
-    setActiveIndex(-1);
-  }, [query]);
+  // Reset active index on query change
+  useEffect(() => { setActiveIndex(-1); }, [query]);
 
-  useEffect(() => {
-    const trimmedQuery = query.trim();
+  // Browser-style: when history inline completion is active, show the completion
+  // as a real text selection in the input (typed part normal, completion = selected)
+  const isHistoryComplete = inlineIsHistory && !!inlineValue;
+  useLayoutEffect(() => {
+    if (!isHistoryComplete || !inputRef.current) return;
+    const el = inputRef.current;
+    const start = query.length;
+    const end = inlineValue!.length;
+    if (el.selectionStart !== start || el.selectionEnd !== end) {
+      el.setSelectionRange(start, end);
+    }
+  });
 
-    if (!open || !trimmedQuery) {
-      setSearchQuerySuggestions([]);
+  // Fetch API suggestions
+  useEffect(() => {
+    const trimmed = query.trim();
+    if (!open || !trimmed) {
+      setApiSuggestions([]);
       return;
     }
-
     const controller = new AbortController();
     const timeoutId = window.setTimeout(async () => {
       try {
-        const response = await fetch(
-          `/api/analytics/search?query=${encodeURIComponent(trimmedQuery)}&suggestions=1`,
-          {
-            headers: { "x-home-ui-request": "search-analytics" },
-            signal: controller.signal,
-          },
+        const res = await fetch(
+          `/api/analytics/search?query=${encodeURIComponent(trimmed)}&suggestions=1`,
+          { headers: { "x-home-ui-request": "search-analytics" }, signal: controller.signal }
         );
-
-        if (!response.ok) {
-          setSearchQuerySuggestions([]);
-          return;
-        }
-
-        const payload = (await response.json()) as {
-          data?: string[];
-        };
-        setSearchQuerySuggestions(payload.data ?? []);
-      } catch (error) {
-        if ((error as Error).name !== "AbortError") {
-          setSearchQuerySuggestions([]);
-        }
+        if (!res.ok) { setApiSuggestions([]); return; }
+        const payload = (await res.json()) as { data?: string[] };
+        setApiSuggestions(payload.data ?? []);
+      } catch (err) {
+        if ((err as Error).name !== "AbortError") setApiSuggestions([]);
       }
     }, 180);
-
-    return () => {
-      controller.abort();
-      window.clearTimeout(timeoutId);
-    };
+    return () => { controller.abort(); window.clearTimeout(timeoutId); };
   }, [open, query]);
 
-  const isUrl = (input: string): boolean => {
-    // Check if it starts with http:// or https://
-    if (input.startsWith("http://") || input.startsWith("https://")) {
-      return true;
-    }
-
-    // Check if it contains common domain extensions
-    const urlPattern =
-      /\.(com|org|net|io|dev|app|co|edu|gov|mil|int|biz|info|name|pro|aero|coop|museum|travel|jobs|mobi|asia|cat|tel|post|xxx|arpa|root|local|onion|bit|example|invalid|test|localhost)(\.[a-z]{2,})?(\/.*)?$/i;
-    return urlPattern.test(input);
-  };
-
-  const getSearchUrl = (searchText: string) => {
-    const encodedQuery = encodeURIComponent(searchText);
-
-    if (searchEngine === "duckduckgo") {
-      return `https://duckduckgo.com/?q=${encodedQuery}`;
-    }
-
-    if (searchEngine === "bing") {
-      return `https://www.bing.com/search?q=${encodedQuery}`;
-    }
-
-    if (searchEngine === "brave") {
-      return `https://search.brave.com/search?q=${encodedQuery}`;
-    }
-
-    return `https://www.google.com/search?q=${encodedQuery}`;
+  const getSearchUrl = (text: string) => {
+    const q = encodeURIComponent(text);
+    if (searchEngine === "duckduckgo") return `https://duckduckgo.com/?q=${q}`;
+    if (searchEngine === "bing") return `https://www.bing.com/search?q=${q}`;
+    if (searchEngine === "brave") return `https://search.brave.com/search?q=${q}`;
+    return `https://www.google.com/search?q=${q}`;
   };
 
   const handleSearchValue = (value: string) => {
-    const trimmedValue = value.trim();
-    if (!trimmedValue) return;
+    const trimmed = value.trim();
+    if (!trimmed) return;
 
-    let url: string;
-
-    addSearchHistoryEntry(trimmedValue);
-
-    if (isUrl(trimmedValue)) {
-      // Never save URLs as search queries
-      // It's a URL - add https:// if missing
-      if (
-        trimmedValue.startsWith("http://") ||
-        trimmedValue.startsWith("https://")
-      ) {
-        url = trimmedValue;
-      } else {
-        url = `https://${trimmedValue}`;
-      }
-    } else {
-      // It's a search query - use selected search engine
-      url = getSearchUrl(trimmedValue);
-      trackSearch(trimmedValue, searchEngine);
-    }
-
-    // Open in same tab
+    addSearchHistoryEntry(trimmed);
     onOpenChange(false);
-    window.location.href = url;
-  };
 
-  const handleSearch = () => {
-    handleSearchValue(query);
-  };
-
-  const normalizedQuery = query.trim().toLowerCase();
-
-  const suggestionItems = [
-    ...searchQuerySuggestions
-      .map((suggestion) => suggestion.trim())
-      .filter(Boolean)
-      .filter((suggestion) => suggestion.toLowerCase() !== normalizedQuery)
-      .slice(0, 6)
-      .map((suggestion) => ({
-        id: `search-query-${suggestion.toLowerCase()}`,
-        type: "search-query" as const,
-        label: suggestion,
-        value: suggestion,
-      })),
-    ...tabs
-      .filter((tab) => {
-        if (!normalizedQuery) {
-          return true;
-        }
-
-        return [tab.title, tab.url, tab.shortcut]
-          .filter(Boolean)
-          .some((value) => value!.toLowerCase().includes(normalizedQuery));
-      })
-      .slice(0, 5)
-      .map((tab) => ({
-        id: `tab-${tab.id}`,
-        type: "tab" as const,
-        tabId: tab.id,
-        label: tab.title,
-        sublabel: tab.url,
-        value: tab.url,
-        openInNewWindow: tab.openInNewWindow,
-      })),
-    ...historyEntries
-      .filter((entry) => {
-        if (!normalizedQuery) {
-          return true;
-        }
-
-        return entry.normalizedValue.includes(normalizedQuery);
-      })
-      .filter(
-        (entry) =>
-          !tabs.some(
-            (tab) =>
-              tab.url === entry.value ||
-              tab.title.trim().toLowerCase() === entry.normalizedValue,
-          ) &&
-          !searchQuerySuggestions.some(
-            (suggestion) =>
-              suggestion.trim().toLowerCase() === entry.normalizedValue,
-          ),
-      )
-      .slice(0, 5)
-      .map((entry) => ({
-        id: `history-${entry.id}`,
-        type: "history" as const,
-        label: entry.value,
-        sublabel: t("searchHistory"),
-        value: entry.value,
-      })),
-  ].slice(0, 6);
-
-  const activeSuggestion =
-    activeIndex >= 0 ? suggestionItems[activeIndex] : undefined;
-  const inlineCompletion = searchQuerySuggestions.find((suggestion) => {
-    const trimmedSuggestion = suggestion.trim();
-
-    return (
-      normalizedQuery &&
-      trimmedSuggestion.toLowerCase().startsWith(normalizedQuery) &&
-      trimmedSuggestion.toLowerCase() !== normalizedQuery
-    );
-  });
-  const inlineCompletionSuffix = inlineCompletion
-    ? inlineCompletion.slice(query.trim().length)
-    : "";
-
-  const acceptInlineCompletion = () => {
-    if (!inlineCompletion) {
-      return false;
+    if (isUrl(trimmed)) {
+      window.location.href =
+        trimmed.startsWith("http://") || trimmed.startsWith("https://")
+          ? trimmed
+          : `https://${trimmed}`;
+    } else {
+      trackSearch(trimmed, searchEngine);
+      window.location.href = getSearchUrl(trimmed);
     }
-
-    setQuery(inlineCompletion);
-    setActiveIndex(-1);
-
-    requestAnimationFrame(() => {
-      const cursorPosition = inlineCompletion.length;
-      inputRef.current?.setSelectionRange(cursorPosition, cursorPosition);
-    });
-
-    return true;
   };
 
-  const handleSuggestionSelect = (
-    suggestion: (typeof suggestionItems)[number],
-  ) => {
-    if (suggestion.type === "tab") {
+  const handleSuggestionSelect = (item: SuggestionItem) => {
+    if (item.type === "tab") {
       onOpenChange(false);
-      const matchingTab = tabs.find((tab) => tab.id === suggestion.tabId);
-
+      const matchingTab = tabs.find((tab) => tab.id === item.tabId);
       if (matchingTab) {
-        addTabClickHistoryEntry({
-          id: matchingTab.id,
-          title: matchingTab.title,
-          url: matchingTab.url,
-        });
+        addSearchHistoryEntry(matchingTab.url);
+        addTabClickHistoryEntry({ id: matchingTab.id, title: matchingTab.title, url: matchingTab.url });
         incrementVisitCount(matchingTab.id);
-        trackVisit({
-          tabId: matchingTab.id,
-          title: matchingTab.title,
-          url: matchingTab.url,
-          source: "search-suggestion",
-        });
+        trackVisit({ tabId: matchingTab.id, title: matchingTab.title, url: matchingTab.url, source: "search-suggestion" });
       }
-
-      if (suggestion.openInNewWindow) {
-        window.open(suggestion.value, "_blank", "noopener,noreferrer");
+      if (item.openInNewWindow) {
+        window.open(item.value, "_blank", "noopener,noreferrer");
       } else {
-        window.location.href = suggestion.value;
+        window.location.href = item.value;
       }
       return;
     }
+    handleSearchValue(item.value);
+  };
 
-    handleSearchValue(suggestion.value);
+  const acceptInlineCompletion = () => {
+    if (!inlineValue) return false;
+    setQuery(inlineValue);
+    setActiveIndex(-1);
+    requestAnimationFrame(() => {
+      inputRef.current?.setSelectionRange(inlineValue.length, inlineValue.length);
+    });
+    return true;
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "ArrowDown") {
-      if (!suggestionItems.length) {
-        return;
-      }
-
+      if (!allItems.length) return;
       e.preventDefault();
-      setActiveIndex((currentIndex) =>
-        currentIndex < 0
-          ? 0
-          : Math.min(currentIndex + 1, suggestionItems.length - 1),
-      );
+      setActiveIndex((i) => (i < 0 ? 0 : Math.min(i + 1, allItems.length - 1)));
     } else if (e.key === "ArrowUp") {
-      if (!suggestionItems.length) {
-        return;
-      }
-
+      if (!allItems.length) return;
       e.preventDefault();
-      setActiveIndex((currentIndex) =>
-        currentIndex < 0
-          ? suggestionItems.length - 1
-          : Math.max(currentIndex - 1, 0),
-      );
+      setActiveIndex((i) => (i < 0 ? allItems.length - 1 : Math.max(i - 1, 0)));
     } else if (e.key === "Enter") {
       e.preventDefault();
-      if (activeSuggestion) {
-        handleSuggestionSelect(activeSuggestion);
-        return;
-      }
-
-      handleSearch();
+      const active = activeIndex >= 0 ? allItems[activeIndex] : undefined;
+      if (active) { handleSuggestionSelect(active); return; }
+      // History inline completion → navigate directly on Enter
+      if (inlineValue && inlineIsHistory) { handleSearchValue(inlineValue); return; }
+      handleSearchValue(query);
     } else if (e.key === "Tab" || e.key === "ArrowRight") {
-      if (acceptInlineCompletion()) {
-        e.preventDefault();
-      }
+      if (acceptInlineCompletion()) e.preventDefault();
     } else if (e.key === "Escape") {
       e.preventDefault();
       onOpenChange(false);
     }
   };
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    setQuery(value);
-  };
-
   const providerLabel =
-    searchEngine === "duckduckgo"
-      ? t("duckduckgo")
-      : searchEngine === "bing"
-        ? t("bing")
-        : searchEngine === "brave"
-          ? t("brave")
-          : t("google");
+    searchEngine === "duckduckgo" ? t("duckduckgo")
+    : searchEngine === "bing" ? t("bing")
+    : searchEngine === "brave" ? t("brave")
+    : t("google");
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -434,25 +213,37 @@ const SearchModal = ({
         <DialogTitle className="sr-only">Search</DialogTitle>
         <div className="mx-auto w-full max-w-2xl">
           <div className="relative rounded-full border border-border/50 bg-background/92 backdrop-blur-md">
-            <Search className="pointer-events-none absolute left-5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground/70" />
+            <HugeiconsIcon
+              icon={Search01Icon}
+              size={16}
+              strokeWidth={2}
+              className="pointer-events-none absolute left-5 top-1/2 -translate-y-1/2 text-muted-foreground/70"
+            />
 
-            {inlineCompletionSuffix && (
+            {/* API suggestion ghost text — history uses real input selection instead */}
+            {inlineSuffix && !isHistoryComplete && (
               <div
                 aria-hidden="true"
                 className="pointer-events-none absolute inset-0 flex h-14 items-center overflow-hidden whitespace-pre rounded-full pl-12 pr-16 text-base"
               >
                 <span className="invisible">{query}</span>
-                <span className="text-muted-foreground/45">
-                  {inlineCompletionSuffix}
-                </span>
+                <span className="text-muted-foreground/45">{inlineSuffix}</span>
               </div>
             )}
 
             <Input
               ref={inputRef}
               placeholder={`${t("search")} ${providerLabel} or enter a URL...`}
-              value={query}
-              onChange={handleInputChange}
+              value={isHistoryComplete ? inlineValue! : query}
+              onChange={(e) => {
+                if (isHistoryComplete) {
+                  // User typed/deleted over the selection — extract typed portion
+                  const cursorPos = e.target.selectionStart ?? e.target.value.length;
+                  setQuery(e.target.value.slice(0, cursorPos));
+                } else {
+                  setQuery(e.target.value);
+                }
+              }}
               onKeyDown={handleKeyDown}
               className="relative h-14 rounded-full border-0 bg-transparent pl-12 pr-16 text-base shadow-none focus-visible:ring-0"
             />
@@ -460,63 +251,23 @@ const SearchModal = ({
             <Button
               type="button"
               size="sm"
-              onClick={handleSearch}
+              onClick={() => handleSearchValue(isHistoryComplete ? inlineValue! : query)}
               aria-label={`Search with ${providerLabel}`}
               className="absolute right-3 top-1/2 h-9 w-9 -translate-y-1/2 rounded-full border border-border/50 bg-background/90 p-0 text-muted-foreground shadow-none hover:bg-accent hover:text-foreground"
               disabled={!query.trim()}
             >
-              <SearchCheck aria-hidden="true" />
+              <HugeiconsIcon icon={Search01Icon} size={15} strokeWidth={2} />
             </Button>
           </div>
 
-          {suggestionItems.length > 0 && (
-            <div className="mt-2 overflow-hidden rounded-3xl border border-border/40 bg-background/88 p-2 backdrop-blur-md">
-              <div className="max-h-64 overflow-y-auto">
-                <div className="flex flex-col gap-1">
-                  {suggestionItems.map((suggestion, index) => {
-                    const isActive = index === activeIndex;
-
-                    return (
-                      <button
-                        key={suggestion.id}
-                        type="button"
-                        onMouseEnter={() => setActiveIndex(index)}
-                        onMouseDown={(event) => event.preventDefault()}
-                        onClick={() => handleSuggestionSelect(suggestion)}
-                        className={cn(
-                          "w-full rounded-2xl border border-transparent px-4 py-3 text-left text-sm text-foreground/90 transition-colors",
-                          isActive
-                            ? "border-primary/20 bg-primary/10 text-primary"
-                            : "hover:border-border/40 hover:bg-accent/40 hover:text-foreground",
-                        )}
-                      >
-                        <span className="block truncate font-medium">
-                          {renderHighlightedMatch(
-                            suggestion.label,
-                            query,
-                            isActive
-                              ? "font-semibold text-primary"
-                              : "font-semibold text-primary/90",
-                          )}
-                        </span>
-                        {"sublabel" in suggestion && (
-                          <span className="mt-0.5 block truncate text-xs text-muted-foreground">
-                            {renderHighlightedMatch(
-                              suggestion.sublabel,
-                              query,
-                              isActive
-                                ? "font-semibold text-primary"
-                                : "font-semibold text-primary/80",
-                            )}
-                          </span>
-                        )}
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-            </div>
-          )}
+          <SuggestionList
+            items={allItems}
+            localCount={localCount}
+            activeIndex={activeIndex}
+            query={query}
+            onHover={setActiveIndex}
+            onSelect={handleSuggestionSelect}
+          />
         </div>
       </DialogContentBottom>
     </Dialog>
