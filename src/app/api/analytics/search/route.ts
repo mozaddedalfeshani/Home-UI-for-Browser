@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getMongoDb } from "@/lib/mongodb";
+import sql from "@/lib/db";
 import { getRedisClient } from "@/lib/redis";
 import {
   getLocalSearchCount,
@@ -22,12 +22,6 @@ const SEARCH_API_RATE_LIMITS = {
   read: 120,
   write: 60,
 };
-
-const escapeRegex = (value: string) =>
-  value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-
-const getSearchSuggestionCacheKey = (normalizedQuery: string) =>
-  `search:suggestions:v1:${normalizedQuery}`;
 
 const getClientIp = (request: Request) => {
   const forwardedFor = request.headers.get("x-forwarded-for");
@@ -113,6 +107,9 @@ const enforceSearchApiRateLimit = async (
   return null;
 };
 
+const getSearchSuggestionCacheKey = (normalizedQuery: string) =>
+  `search:suggestions:v1:${normalizedQuery}`;
+
 const getCachedSearchSuggestions = async (normalizedQuery: string) => {
   const redis = await getRedisClient();
 
@@ -195,34 +192,26 @@ export async function POST(request: Request) {
     }
 
     normalizedQuery = query.toLowerCase();
-    const db = await getMongoDb();
-    const searchCollection = db.collection("search_queries");
 
-    const writeResult = await searchCollection.updateOne(
-      { normalizedQuery },
-      {
-        $setOnInsert: {
-          query,
-          normalizedQuery,
-          searchEngine,
-          count: 1,
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        },
-      },
-      { upsert: true },
-    );
+    const inserted = await sql`
+      INSERT INTO search_queries (normalized_query, query, search_engine, count, created_at, updated_at)
+      VALUES (${normalizedQuery}, ${query}, ${searchEngine}, 1, NOW(), NOW())
+      ON CONFLICT (normalized_query) DO NOTHING
+      RETURNING normalized_query
+    `;
 
-    const row = await searchCollection.findOne(
-      { normalizedQuery },
-      { projection: { _id: 0, query: 1, normalizedQuery: 1, count: 1 } },
-    );
+    const duplicate = inserted.length === 0;
+
+    const row = await sql`
+      SELECT normalized_query AS "normalizedQuery", query, count
+      FROM search_queries WHERE normalized_query = ${normalizedQuery}
+    `;
 
     return NextResponse.json({
       success: true,
-      source: "mongodb",
-      duplicate: writeResult.matchedCount > 0,
-      data: row,
+      source: "postgresql",
+      duplicate,
+      data: row[0],
     });
   } catch (error) {
     console.error("Failed to save search analytics", error);
@@ -238,7 +227,7 @@ export async function POST(request: Request) {
           normalizedQuery: existingFallbackRow.normalizedQuery,
           count: existingFallbackRow.count,
         },
-        error: "MongoDB save failed. Read local duplicate instead.",
+        error: "PostgreSQL save failed. Read local duplicate instead.",
       });
     }
 
@@ -257,7 +246,7 @@ export async function POST(request: Request) {
         normalizedQuery: fallbackRow.normalizedQuery,
         count: fallbackRow.count,
       },
-      error: "MongoDB save failed. Saved locally instead.",
+      error: "PostgreSQL save failed. Saved locally instead.",
     });
   }
 }
@@ -289,9 +278,6 @@ export async function GET(request: Request) {
   const normalizedQuery = query.toLowerCase();
 
   try {
-    const db = await getMongoDb();
-    const searchCollection = db.collection("search_queries");
-
     if (shouldReturnSuggestions) {
       const cachedSuggestions =
         await getCachedSearchSuggestions(normalizedQuery);
@@ -304,44 +290,38 @@ export async function GET(request: Request) {
         });
       }
 
-      const rows = await searchCollection
-        .find(
-          {
-            normalizedQuery: {
-              $regex: escapeRegex(normalizedQuery),
-              $options: "i",
-            },
-          },
-          { projection: { _id: 0, query: 1 } },
-        )
-        .sort({ updatedAt: -1 })
-        .limit(SEARCH_SUGGESTION_LIMIT)
-        .toArray();
+      const rows = await sql`
+        SELECT query FROM search_queries
+        WHERE normalized_query ILIKE ${`%${normalizedQuery}%`}
+        ORDER BY updated_at DESC
+        LIMIT ${SEARCH_SUGGESTION_LIMIT}
+      `;
+
       const suggestions = rows
-        .map((row) => row.query)
+        .map((row) => (row as { query: string }).query)
         .filter((value): value is string => typeof value === "string");
 
       void setCachedSearchSuggestions(normalizedQuery, suggestions);
 
       return NextResponse.json({
         success: true,
-        source: "mongodb",
+        source: "postgresql",
         data: suggestions,
       });
     }
 
-    const row = await searchCollection.findOne(
-      { normalizedQuery },
-      { projection: { _id: 0, query: 1, normalizedQuery: 1, count: 1 } },
-    );
+    const rows = await sql`
+      SELECT normalized_query AS "normalizedQuery", query, count
+      FROM search_queries WHERE normalized_query = ${normalizedQuery}
+    `;
 
     return NextResponse.json({
       success: true,
-      source: "mongodb",
+      source: "postgresql",
       data: {
         query,
         normalizedQuery,
-        count: row?.count ?? 0,
+        count: (rows[0] as { count: number } | undefined)?.count ?? 0,
       },
     });
   } catch (error) {
@@ -352,7 +332,7 @@ export async function GET(request: Request) {
         success: true,
         source: "local",
         data: [],
-        error: "MongoDB read failed. No local suggestions available.",
+        error: "PostgreSQL read failed. No local suggestions available.",
       });
     }
 
@@ -366,7 +346,7 @@ export async function GET(request: Request) {
         normalizedQuery,
         count: fallbackRow?.count ?? 0,
       },
-      error: "MongoDB read failed. Read local fallback instead.",
+      error: "PostgreSQL read failed. Read local fallback instead.",
     });
   }
 }
