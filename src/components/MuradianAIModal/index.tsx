@@ -54,8 +54,6 @@ export default function MuradianAIModal({
 
   const handleOpenMarketplace = () => setView("marketplace");
 
-  const handleOpenAgentForm = () => setView("agent-form");
-
   const handleEditAgent = (
     agent: Parameters<typeof agentMgr.handleEditAgent>[0],
   ) => {
