@@ -67,6 +67,7 @@ export async function POST(request: NextRequest) {
       userId: user.id,
       name: user.name,
       email: user.email,
+      role: user.role,
     });
 
     const response = withCorsHeaders(

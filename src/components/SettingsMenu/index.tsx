@@ -11,6 +11,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useSettingsStore, SearchEngine, Theme, DEFAULT_DYNAMIC_WALLPAPERS, normalizeDynamicWallpaper } from "@/store/settingsStore";
 import { useAuthStore } from "@/store/authStore";
 import { Language, useTranslation } from "@/constants/languages";
@@ -42,6 +43,7 @@ import {
   Logout01Icon,
   Tick01Icon,
   RotateRight01Icon,
+  Crown02Icon,
 } from "@hugeicons/core-free-icons";
 import { ChevronRight } from "lucide-react";
 
@@ -75,7 +77,7 @@ import { MAX_MEMORY_LENGTH, MAX_NAME_LENGTH } from "../Auth/AccountButton/types"
 import { TokenUsageSection } from "../Auth/AccountButton/TokenUsageSection";
 
 type SettingsSection =
-  | "appearance" | "search" | "behavior" | "tools" | "profile-share"
+  | "appearance" | "search" | "behavior" | "tools" | "profile-share" | "pricing"
   | "account-login" | "account-profile" | "account-memory" | "account-sync";
 
 function useIsDesktop() {
@@ -277,6 +279,7 @@ const SettingsMenu = () => {
     { id: "behavior" as SettingsSection, label: "Behavior", icon: AccountSetting01Icon },
     { id: "tools" as SettingsSection, label: "Tools", icon: MagicWand01Icon },
     { id: "profile-share" as SettingsSection, label: t("profileShare"), icon: Share01Icon },
+    { id: "pricing" as SettingsSection, label: "Pricing", icon: Crown02Icon },
   ];
 
   const ACCOUNT_NAV = isAuthenticated ? [
@@ -414,6 +417,82 @@ const SettingsMenu = () => {
             <HugeiconsIcon icon={Upload01Icon} size={24} strokeWidth={1.5} className="text-muted-foreground" />
             {t("importProfile")}
           </button>
+        </div>
+      </div>
+    );
+
+    if (activeSection === "pricing") return (
+      <div className="space-y-4">
+        <p className="text-sm text-muted-foreground">Choose a plan that fits your needs.</p>
+        <div className="grid grid-cols-2 gap-3">
+          {/* Lite card */}
+          <div className="flex flex-col rounded-2xl border border-border/50 bg-muted/10 p-5 gap-3">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <HugeiconsIcon icon={Crown02Icon} size={18} strokeWidth={1.5} className="text-amber-400" />
+                <span className="text-sm font-semibold text-foreground">Lite</span>
+              </div>
+              <TooltipProvider><Tooltip><TooltipTrigger asChild><span className="text-base font-bold text-foreground">৳50<span className="text-xs font-normal text-muted-foreground">/mo</span></span></TooltipTrigger><TooltipContent>50 Taka per month</TooltipContent></Tooltip></TooltipProvider>
+            </div>
+            <ul className="flex flex-col gap-1.5 flex-1">
+              {[
+                "700,000 tokens / 5 hours",
+                "MuradianAsk AI",
+                "Notes",
+                "Tab list",
+                "Settings cloud sync",
+              ].map((f) => (
+                <li key={f} className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                  <HugeiconsIcon icon={Tick01Icon} size={11} className="text-amber-400 shrink-0" />
+                  {f}
+                </li>
+              ))}
+            </ul>
+            <button
+              disabled
+              className="w-full rounded-xl bg-amber-400/10 border border-amber-400/30 py-2 text-xs font-semibold text-amber-500 opacity-60 cursor-not-allowed"
+            >
+              Coming Soon
+            </button>
+          </div>
+
+          {/* Plus card */}
+          <div className="flex flex-col rounded-2xl border border-primary/30 bg-primary/5 p-5 gap-3 relative overflow-hidden">
+            <div className="absolute top-2 right-2 rounded-full bg-primary px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-primary-foreground">
+              Best
+            </div>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <HugeiconsIcon icon={Crown02Icon} size={18} strokeWidth={1.5} className="text-primary" />
+                <span className="text-sm font-semibold text-foreground">Plus</span>
+              </div>
+              <TooltipProvider><Tooltip><TooltipTrigger asChild><span className="text-base font-bold text-foreground">৳299<span className="text-xs font-normal text-muted-foreground">/mo</span></span></TooltipTrigger><TooltipContent>299 Taka per month</TooltipContent></Tooltip></TooltipProvider>
+            </div>
+            <ul className="flex flex-col gap-1.5 flex-1">
+              {[
+                "Unlimited tokens",
+                "MuradianAsk AI",
+                "Notes",
+                "Tab list",
+                "Settings cloud sync",
+                "AI chat history",
+                "GPT 5.5",
+                "Gemini 3.1 Flash",
+                "DeepSeek V4 Pro / Flash",
+              ].map((f) => (
+                <li key={f} className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                  <HugeiconsIcon icon={Tick01Icon} size={11} className="text-primary shrink-0" />
+                  {f}
+                </li>
+              ))}
+            </ul>
+            <button
+              disabled
+              className="w-full rounded-xl bg-primary/10 border border-primary/30 py-2 text-xs font-semibold text-primary opacity-60 cursor-not-allowed"
+            >
+              Coming Soon
+            </button>
+          </div>
         </div>
       </div>
     );
@@ -634,7 +713,11 @@ const SettingsMenu = () => {
                   <div className="px-6 py-3.5 border-b border-border/20 shrink-0">
                     <h2 className="text-sm font-semibold text-foreground">
                       {[...APP_NAV, ...ACCOUNT_NAV].find((n) => n.id === activeSection)?.label
-                        ?? (activeSection === "account-sync" ? "Cloud Sync" : "")}
+                        ?? (activeSection === "account-sync" ? "Cloud Sync"
+                          : activeSection === "account-login" ? "Sign In"
+                          : activeSection === "account-profile" ? "My Profile"
+                          : activeSection === "account-memory" ? "Memory"
+                          : "")}
                     </h2>
                   </div>
                   <div className="flex-1 min-h-0 overflow-y-auto px-6 py-5">

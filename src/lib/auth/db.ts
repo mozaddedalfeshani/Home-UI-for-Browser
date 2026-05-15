@@ -8,6 +8,7 @@ export interface User {
   passwordHash: string;
   verified: boolean;
   createdAt: Date;
+  role: "free" | "lite" | "plus";
 }
 
 export interface TokenUsage {
@@ -25,7 +26,7 @@ export interface VerifyCode {
 export interface UserData {
   userId: string;
   tabs: ShareProfileTab[];
-  settings: ShareProfileSettings;
+  settings: ShareProfileSettings | null;
   updatedAt: Date;
 }
 
@@ -38,7 +39,8 @@ export interface UserMemoryProfile {
 
 export async function getUserByEmail(email: string): Promise<User | null> {
   const rows = await sql`
-    SELECT id, name, email, password_hash AS "passwordHash", verified, created_at AS "createdAt"
+    SELECT id, name, email, password_hash AS "passwordHash", verified, created_at AS "createdAt",
+           COALESCE(role, 'lite') AS role
     FROM users WHERE email = ${email}
   `;
   return (rows[0] as User) ?? null;
@@ -46,7 +48,8 @@ export async function getUserByEmail(email: string): Promise<User | null> {
 
 export async function getUserById(userId: string): Promise<User | null> {
   const rows = await sql`
-    SELECT id, name, email, password_hash AS "passwordHash", verified, created_at AS "createdAt"
+    SELECT id, name, email, password_hash AS "passwordHash", verified, created_at AS "createdAt",
+           COALESCE(role, 'lite') AS role
     FROM users WHERE id = ${userId}
   `;
   return (rows[0] as User) ?? null;

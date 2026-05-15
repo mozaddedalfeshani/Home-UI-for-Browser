@@ -174,6 +174,7 @@ export async function PUT(request: NextRequest) {
       userId: payload.userId,
       name,
       email: user.email,
+      role: payload.role,
     });
 
     const response = withCorsHeaders(

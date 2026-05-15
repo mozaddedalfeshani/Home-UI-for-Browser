@@ -29,17 +29,22 @@ export async function GET(request: NextRequest) {
         request,
       );
 
+    const role = payload.role ?? "free";
+    const isPlus = role === "plus";
+    const tokenLimit = role === "lite" ? 700_000 : 3_000;
+    const windowHours = role === "lite" ? 5 : 10;
     const usage = await getWindowTokenUsage(payload.userId);
     const resetAt = new Date(
-      usage.windowStart.getTime() + 10 * 60 * 60 * 1000,
+      usage.windowStart.getTime() + windowHours * 60 * 60 * 1000,
     );
 
     return withCorsHeaders(
       NextResponse.json({
-        tokensUsed: usage.tokensUsed,
-        tokenLimit: 5000,
-        windowHours: 10,
-        resetAt: resetAt.toISOString(),
+        tokensUsed: isPlus ? 0 : usage.tokensUsed,
+        tokenLimit: isPlus ? null : tokenLimit,
+        windowHours: isPlus ? null : windowHours,
+        resetAt: isPlus ? null : resetAt.toISOString(),
+        role,
       }),
       request,
     );

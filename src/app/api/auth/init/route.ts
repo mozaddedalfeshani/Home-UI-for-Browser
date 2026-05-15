@@ -34,12 +34,17 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const userData = await pullUserData(payload.userId);
+    const rawUserData = await pullUserData(payload.userId);
+    const isFreeInit = (payload.role ?? "free") === "free";
+    const userData = rawUserData && isFreeInit
+      ? { ...rawUserData, settings: null }
+      : rawUserData;
 
     const freshToken = signToken({
       userId: payload.userId,
       name: payload.name,
       email: payload.email,
+      role: payload.role,
     });
 
     const res = withCorsHeaders(

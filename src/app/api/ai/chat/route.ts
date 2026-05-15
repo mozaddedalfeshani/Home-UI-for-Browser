@@ -10,8 +10,10 @@ import {
 } from "@/lib/auth/db";
 import { getMuradianAskAgentForUse } from "@/lib/muradian-ask/db";
 
-const WINDOW_TOKEN_LIMIT = 5000;
-const WINDOW_HOURS = 10;
+const FREE_WINDOW_TOKEN_LIMIT = 3_000;
+const FREE_WINDOW_HOURS = 10;
+const LITE_WINDOW_TOKEN_LIMIT = 700_000;
+const LITE_WINDOW_HOURS = 5;
 const DEEPSEEK_ENDPOINT = "https://api.deepseek.com/chat/completions";
 const DEEPSEEK_MODEL = "deepseek-v4-flash";
 const MEMORY_MAX_WORDS = 200;
@@ -281,21 +283,26 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Invalid token" }, { status: 401 });
     const userId = authPayload.userId;
 
-    // 2. Check 10-hour window token limit
+    // 2. Check window token limit (free: 3k/10h, lite: 700k/5h, plus: unlimited)
+    const userRole = authPayload.role ?? "free";
+    const isPlus = userRole === "plus";
+    const windowTokenLimit = userRole === "lite" ? LITE_WINDOW_TOKEN_LIMIT : FREE_WINDOW_TOKEN_LIMIT;
+    const windowHours = userRole === "lite" ? LITE_WINDOW_HOURS : FREE_WINDOW_HOURS;
     const currentMonth = new Date().toISOString().slice(0, 7); // YYYY-MM (kept for history)
     const windowUsage = await getWindowTokenUsage(userId);
     const currentWindowTokens = windowUsage.tokensUsed;
     const windowStart = windowUsage.windowStart;
 
-    if (currentWindowTokens >= WINDOW_TOKEN_LIMIT) {
-      const resetAt = new Date(windowStart.getTime() + WINDOW_HOURS * 60 * 60 * 1000);
+    if (!isPlus && currentWindowTokens >= windowTokenLimit) {
+      const resetAt = new Date(windowStart.getTime() + windowHours * 60 * 60 * 1000);
       return NextResponse.json(
         {
           error: "out_of_context",
           message: "Token limit reached",
           resetAt: resetAt.toISOString(),
           tokensUsed: currentWindowTokens,
-          tokenLimit: WINDOW_TOKEN_LIMIT,
+          tokenLimit: windowTokenLimit,
+          windowHours,
         },
         { status: 403 },
       );
@@ -475,13 +482,15 @@ export async function POST(req: NextRequest) {
               const latest = await getWindowTokenUsage(userId);
               updatedWindowTokens = latest.tokensUsed;
               const resetAt = new Date(
-                latest.windowStart.getTime() + WINDOW_HOURS * 60 * 60 * 1000,
+                latest.windowStart.getTime() + windowHours * 60 * 60 * 1000,
               );
               const usageEvt = `data: ${JSON.stringify({
                 t: "usage",
-                tokensUsed: updatedWindowTokens,
-                tokenLimit: WINDOW_TOKEN_LIMIT,
-                resetAt: resetAt.toISOString(),
+                tokensUsed: isPlus ? 0 : updatedWindowTokens,
+                tokenLimit: isPlus ? null : windowTokenLimit,
+                windowHours: isPlus ? null : windowHours,
+                resetAt: isPlus ? null : resetAt.toISOString(),
+                role: userRole,
               })}\n\n`;
               controller.enqueue(new TextEncoder().encode(usageEvt));
             } catch {

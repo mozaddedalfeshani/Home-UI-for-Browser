@@ -87,24 +87,27 @@ export function useChatSession({ open, language, userName }: UseChatSessionParam
           resetAt?: string;
           tokensUsed?: number;
           tokenLimit?: number;
+          windowHours?: number;
         };
         if (errorData.error === "out_of_context") {
           const resetAt = errorData.resetAt ? new Date(errorData.resetAt) : null;
           const resetMsg = resetAt
             ? ` Resets at ${resetAt.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}.`
             : "";
+          const limitDisplay = errorData.tokenLimit?.toLocaleString() ?? "3,000";
+          const hoursDisplay = errorData.windowHours ?? 10;
           setMessages((prev) => [
             ...prev,
             {
               id: assistantMsgId,
               role: "assistant",
-              content: `⚠️ You've used all 5,000 tokens for this 10-hour window.${resetMsg}`,
+              content: `⚠️ You've used all ${limitDisplay} tokens for this ${hoursDisplay}-hour window.${resetMsg}`,
             },
           ]);
           if (errorData.tokensUsed !== undefined) {
             setTokenUsage({
               tokensUsed: errorData.tokensUsed,
-              tokenLimit: errorData.tokenLimit ?? 5000,
+              tokenLimit: errorData.tokenLimit ?? 3_000,
               resetAt: errorData.resetAt ?? "",
             });
           }
@@ -149,7 +152,7 @@ export function useChatSession({ open, language, userName }: UseChatSessionParam
             if (parsed.t === "usage") {
               setTokenUsage({
                 tokensUsed: parsed.tokensUsed ?? 0,
-                tokenLimit: parsed.tokenLimit ?? 5000,
+                tokenLimit: parsed.tokenLimit ?? 3_000,
                 resetAt: parsed.resetAt ?? "",
               });
               continue;

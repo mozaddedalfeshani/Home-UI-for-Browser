@@ -6,6 +6,7 @@ export interface TokenPayload {
   userId: string;
   name: string;
   email: string;
+  role?: "free" | "lite" | "plus";
 }
 
 export function signToken(payload: TokenPayload): string {
