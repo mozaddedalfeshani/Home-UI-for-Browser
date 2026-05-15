@@ -3,13 +3,15 @@ import { cookies } from "next/headers";
 import { verifyToken } from "@/lib/auth/jwt";
 import {
   getUserMemoryProfile,
-  getUserTokenUsage,
   incrementTokenUsage,
+  incrementWindowTokenUsage,
+  getWindowTokenUsage,
   upsertUserMemoryProfile,
 } from "@/lib/auth/db";
 import { getMuradianAskAgentForUse } from "@/lib/muradian-ask/db";
 
-const TOKEN_LIMIT = 100000;
+const WINDOW_TOKEN_LIMIT = 5000;
+const WINDOW_HOURS = 10;
 const DEEPSEEK_ENDPOINT = "https://api.deepseek.com/chat/completions";
 const DEEPSEEK_MODEL = "deepseek-v4-flash";
 const MEMORY_MAX_WORDS = 200;
@@ -23,6 +25,9 @@ interface ChatMessage {
 
 interface ChatRequestPayload {
   message?: string;
+  history?: ChatMessage[];
+  historySummary?: string;
+  newlyEvicted?: ChatMessage[];
   agentId?: string;
   uiLanguage?: "en" | "bn";
   userName?: string;
@@ -60,6 +65,8 @@ function getDeepSeekHeaders() {
 
 function buildChatMessages(params: {
   message: string;
+  history?: ChatMessage[];
+  historySummary?: string;
   memory: string | null;
   agentRules: string | null;
   uiLanguage: "en" | "bn";
@@ -95,10 +102,27 @@ function buildChatMessages(params: {
     );
   }
 
-  return [
+  if (params.historySummary?.trim()) {
+    systemParts.push(
+      `Earlier conversation summary (for context only):\n${params.historySummary.trim()}`,
+    );
+  }
+
+  const messages: ChatMessage[] = [
     { role: "system", content: systemParts.join("\n\n") },
-    { role: "user", content: params.message },
   ];
+
+  if (params.history?.length) {
+    for (const msg of params.history) {
+      if (msg.role === "user" || msg.role === "assistant") {
+        messages.push({ role: msg.role, content: msg.content });
+      }
+    }
+  }
+
+  messages.push({ role: "user", content: params.message });
+
+  return messages;
 }
 
 function normalizeMemoryText(memory: string) {
@@ -195,6 +219,55 @@ async function updateMemoryProfile(params: {
   }
 }
 
+async function generateRollingSummary(params: {
+  headers: Record<string, string>;
+  userId: string;
+  currentMonth: string;
+  newlyEvicted: ChatMessage[];
+  existingSummary: string;
+}): Promise<string> {
+  const { headers, userId, currentMonth, newlyEvicted, existingSummary } = params;
+
+  const historyText = newlyEvicted
+    .map((m) => `${m.role === "user" ? "User" : "Assistant"}: ${m.content}`)
+    .join("\n\n");
+
+  const userContent = existingSummary.trim()
+    ? `Previous summary:\n${existingSummary.trim()}\n\nNew messages to incorporate:\n${historyText}`
+    : historyText;
+
+  const res = await fetch(DEEPSEEK_ENDPOINT, {
+    method: "POST",
+    headers,
+    body: JSON.stringify({
+      model: DEEPSEEK_MODEL,
+      thinking: { type: "disabled" },
+      stream: false,
+      messages: [
+        {
+          role: "system",
+          content:
+            "Summarize this conversation history in under 120 words. Preserve key topics, decisions, context, and important details. Be concise and factual. No markdown. No labels.",
+        },
+        { role: "user", content: userContent },
+      ],
+    }),
+  });
+
+  if (!res.ok) return existingSummary;
+
+  const data = (await res.json()) as {
+    usage?: { total_tokens?: number };
+    choices?: Array<{ message?: { content?: string } }>;
+  };
+
+  if (data.usage?.total_tokens) {
+    await incrementTokenUsage(userId, currentMonth, data.usage.total_tokens).catch(() => {});
+  }
+
+  return data.choices?.[0]?.message?.content?.trim() ?? existingSummary;
+}
+
 export async function POST(req: NextRequest) {
   try {
     // 1. Authenticate user
@@ -208,13 +281,22 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Invalid token" }, { status: 401 });
     const userId = authPayload.userId;
 
-    // 2. Check token limit
-    const currentMonth = new Date().toISOString().slice(0, 7); // YYYY-MM
-    const currentUsage = await getUserTokenUsage(userId, currentMonth);
+    // 2. Check 10-hour window token limit
+    const currentMonth = new Date().toISOString().slice(0, 7); // YYYY-MM (kept for history)
+    const windowUsage = await getWindowTokenUsage(userId);
+    const currentWindowTokens = windowUsage.tokensUsed;
+    const windowStart = windowUsage.windowStart;
 
-    if (currentUsage >= TOKEN_LIMIT) {
+    if (currentWindowTokens >= WINDOW_TOKEN_LIMIT) {
+      const resetAt = new Date(windowStart.getTime() + WINDOW_HOURS * 60 * 60 * 1000);
       return NextResponse.json(
-        { error: "out_of_context", message: "You are out of context" },
+        {
+          error: "out_of_context",
+          message: "Token limit reached",
+          resetAt: resetAt.toISOString(),
+          tokensUsed: currentWindowTokens,
+          tokenLimit: WINDOW_TOKEN_LIMIT,
+        },
         { status: 403 },
       );
     }
@@ -223,6 +305,10 @@ export async function POST(req: NextRequest) {
     const message = requestPayload.message?.trim() ?? "";
     const uiLanguage = requestPayload.uiLanguage === "bn" ? "bn" : "en";
     const userName = requestPayload.userName?.trim().slice(0, 80) ?? null;
+    const history = requestPayload.history ?? [];
+    const historySummary = requestPayload.historySummary?.trim() ?? null;
+    const newlyEvicted = requestPayload.newlyEvicted ?? [];
+    const existingSummary = requestPayload.historySummary?.trim() ?? "";
 
     if (!message) {
       return NextResponse.json(
@@ -251,6 +337,8 @@ export async function POST(req: NextRequest) {
       : (persistedMemory?.memory ?? null);
     const trimmedMessages = buildChatMessages({
       message,
+      history,
+      historySummary: historySummary ?? undefined,
       memory: effectiveMemory,
       agentRules: selectedAgent?.systemInstruction ?? null,
       uiLanguage,
@@ -305,11 +393,10 @@ export async function POST(req: NextRequest) {
                 const parsed = JSON.parse(dataStr);
                 if (parsed.usage && parsed.usage.total_tokens) {
                   const tokens = parsed.usage.total_tokens;
-                  incrementTokenUsage(userId, currentMonth, tokens).catch(
-                    (err) => {
-                      console.error("Failed to increment tokens:", err);
-                    },
-                  );
+                  Promise.allSettled([
+                    incrementTokenUsage(userId, currentMonth, tokens),
+                    incrementWindowTokenUsage(userId, tokens),
+                  ]).catch((err) => console.error("Failed to increment tokens:", err));
                 }
 
                 const content = parsed.choices?.[0]?.delta?.content;
@@ -325,7 +412,8 @@ export async function POST(req: NextRequest) {
           // Ignore decode errors.
         }
       },
-      async flush() {
+      async flush(controller) {
+        let trailingTokens = 0;
         try {
           const trailingLine = pendingChunk.trim();
           if (
@@ -338,31 +426,69 @@ export async function POST(req: NextRequest) {
               assistantAnswer += content;
             }
             if (parsed.usage?.total_tokens) {
-              await incrementTokenUsage(
-                userId,
-                currentMonth,
-                parsed.usage.total_tokens,
-              );
+              trailingTokens = parsed.usage.total_tokens;
+              await Promise.allSettled([
+                incrementTokenUsage(userId, currentMonth, trailingTokens),
+                incrementWindowTokenUsage(userId, trailingTokens),
+              ]);
             }
           }
         } catch {
           // Ignore trailing chunk parsing failures.
         }
 
-        if (!isAgentMode) {
-          try {
-            await updateMemoryProfile({
-              headers,
-              userId,
-              currentMonth,
-              previousMemory: effectiveMemory,
-              userMessage: message,
-              assistantAnswer,
-            });
-          } catch (error) {
-            console.error("Failed to save user memory profile:", error);
-          }
-        }
+        // Run memory update and summary generation in parallel (both non-critical)
+        let updatedWindowTokens = currentWindowTokens;
+
+        await Promise.allSettled([
+          isAgentMode
+            ? Promise.resolve()
+            : updateMemoryProfile({
+                headers,
+                userId,
+                currentMonth,
+                previousMemory: effectiveMemory,
+                userMessage: message,
+                assistantAnswer,
+              }).catch((err) => console.error("Failed to save user memory profile:", err)),
+
+          (async () => {
+            if (!newlyEvicted.length) return;
+            try {
+              const updatedSummary = await generateRollingSummary({
+                headers,
+                userId,
+                currentMonth,
+                newlyEvicted,
+                existingSummary,
+              });
+              const evt = `data: ${JSON.stringify({ t: "s", v: updatedSummary })}\n\n`;
+              controller.enqueue(new TextEncoder().encode(evt));
+            } catch (err) {
+              console.error("Failed to generate rolling summary:", err);
+            }
+          })(),
+
+          // Fetch updated window usage to return to client
+          (async () => {
+            try {
+              const latest = await getWindowTokenUsage(userId);
+              updatedWindowTokens = latest.tokensUsed;
+              const resetAt = new Date(
+                latest.windowStart.getTime() + WINDOW_HOURS * 60 * 60 * 1000,
+              );
+              const usageEvt = `data: ${JSON.stringify({
+                t: "usage",
+                tokensUsed: updatedWindowTokens,
+                tokenLimit: WINDOW_TOKEN_LIMIT,
+                resetAt: resetAt.toISOString(),
+              })}\n\n`;
+              controller.enqueue(new TextEncoder().encode(usageEvt));
+            } catch {
+              // non-critical
+            }
+          })(),
+        ]);
       },
     });
 

@@ -58,6 +58,11 @@ export function AccountButton() {
   } = useAuthStore();
   const [isAuthOpen, setIsAuthOpen] = useState(false);
   const [isSyncing, setIsSyncing] = useState(false);
+  const [tokenInfo, setTokenInfo] = useState<{
+    tokensUsed: number;
+    tokenLimit: number;
+    resetAt: string;
+  } | null>(null);
   const [isPushConfirmOpen, setIsPushConfirmOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isProfileLoading, setIsProfileLoading] = useState(false);
@@ -71,6 +76,16 @@ export function AccountButton() {
   const [profileMemory, setProfileMemory] = useState("");
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
+
+  const handleDropdownOpen = (open: boolean) => {
+    if (!open || !isAuthenticated) return;
+    fetch("/api/ai/usage")
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data: { tokensUsed: number; tokenLimit: number; resetAt: string } | null) => {
+        if (data) setTokenInfo(data);
+      })
+      .catch(() => {});
+  };
 
   const handleLogout = async () => {
     await logout();
@@ -254,7 +269,7 @@ export function AccountButton() {
 
   return (
     <div className="flex items-center gap-2">
-      <DropdownMenu>
+      <DropdownMenu onOpenChange={handleDropdownOpen}>
         <DropdownMenuTrigger asChild>
           <Button variant="ghost" className="relative h-8 w-8 rounded-full">
             <Avatar className="h-8 w-8">
@@ -273,6 +288,49 @@ export function AccountButton() {
               </p>
             </div>
           </DropdownMenuLabel>
+          {tokenInfo && (
+            <>
+              <DropdownMenuSeparator />
+              <div className="px-3 py-2 space-y-1.5">
+                <div className="flex items-center justify-between">
+                  <span className="text-[11px] font-medium text-muted-foreground">
+                    AI tokens (10h window)
+                  </span>
+                  <span
+                    className={`text-[11px] font-semibold tabular-nums ${
+                      tokenInfo.tokensUsed / tokenInfo.tokenLimit >= 0.9
+                        ? "text-destructive"
+                        : tokenInfo.tokensUsed / tokenInfo.tokenLimit >= 0.7
+                          ? "text-amber-500"
+                          : "text-foreground"
+                    }`}
+                  >
+                    {tokenInfo.tokensUsed.toLocaleString()} / {tokenInfo.tokenLimit.toLocaleString()}
+                  </span>
+                </div>
+                <div className="h-1 w-full rounded-full bg-muted overflow-hidden">
+                  <div
+                    className={`h-full rounded-full transition-all ${
+                      tokenInfo.tokensUsed / tokenInfo.tokenLimit >= 0.9
+                        ? "bg-destructive"
+                        : tokenInfo.tokensUsed / tokenInfo.tokenLimit >= 0.7
+                          ? "bg-amber-500"
+                          : "bg-primary"
+                    }`}
+                    style={{
+                      width: `${Math.min((tokenInfo.tokensUsed / tokenInfo.tokenLimit) * 100, 100)}%`,
+                    }}
+                  />
+                </div>
+                <p className="text-[10px] text-muted-foreground/60">
+                  {Math.max(tokenInfo.tokenLimit - tokenInfo.tokensUsed, 0).toLocaleString()} remaining
+                  {tokenInfo.resetAt
+                    ? ` · resets ${new Date(tokenInfo.resetAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`
+                    : ""}
+                </p>
+              </div>
+            </>
+          )}
           <DropdownMenuSeparator />
           <DropdownMenuItem
             onClick={() => setIsPushConfirmOpen(true)}

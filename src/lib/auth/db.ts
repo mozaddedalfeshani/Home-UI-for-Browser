@@ -98,6 +98,54 @@ export async function incrementTokenUsage(
   `;
 }
 
+export interface WindowUsage {
+  tokensUsed: number;
+  windowStart: Date;
+  isExpired: boolean;
+}
+
+export async function getWindowTokenUsage(userId: string): Promise<WindowUsage> {
+  const rows = await sql`
+    SELECT tokens_used, window_start,
+      window_start < NOW() - INTERVAL '10 hours' AS is_expired
+    FROM token_usage_windows WHERE user_id = ${userId}
+  `;
+  if (!rows[0]) {
+    return { tokensUsed: 0, windowStart: new Date(), isExpired: false };
+  }
+  const row = rows[0] as { tokens_used: number; window_start: Date; is_expired: boolean };
+  return {
+    tokensUsed: row.is_expired ? 0 : row.tokens_used,
+    windowStart: row.is_expired ? new Date() : new Date(row.window_start),
+    isExpired: row.is_expired,
+  };
+}
+
+// Atomically increment window usage; auto-resets if window expired.
+// Returns updated tokens_used after increment.
+export async function incrementWindowTokenUsage(
+  userId: string,
+  tokens: number,
+): Promise<number> {
+  const rows = await sql`
+    INSERT INTO token_usage_windows (user_id, tokens_used, window_start)
+    VALUES (${userId}, ${tokens}, NOW())
+    ON CONFLICT (user_id) DO UPDATE SET
+      tokens_used = CASE
+        WHEN token_usage_windows.window_start < NOW() - INTERVAL '10 hours'
+        THEN EXCLUDED.tokens_used
+        ELSE token_usage_windows.tokens_used + EXCLUDED.tokens_used
+      END,
+      window_start = CASE
+        WHEN token_usage_windows.window_start < NOW() - INTERVAL '10 hours'
+        THEN NOW()
+        ELSE token_usage_windows.window_start
+      END
+    RETURNING tokens_used, window_start
+  `;
+  return (rows[0] as { tokens_used: number }).tokens_used;
+}
+
 export async function verifyUser(email: string): Promise<void> {
   await sql`UPDATE users SET verified = true WHERE email = ${email}`;
 }

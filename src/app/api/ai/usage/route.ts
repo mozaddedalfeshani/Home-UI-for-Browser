@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { cookies } from "next/headers";
 import { verifyToken } from "@/lib/auth/jwt";
-import { getUserTokenUsage } from "@/lib/auth/db";
+import { getWindowTokenUsage } from "@/lib/auth/db";
 import { corsGuard, handleCorsOptions, withCorsHeaders } from "@/lib/auth/cors";
 
 export async function OPTIONS(request: NextRequest) {
@@ -29,14 +29,17 @@ export async function GET(request: NextRequest) {
         request,
       );
 
-    const currentMonth = new Date().toISOString().slice(0, 7); // YYYY-MM
-    const currentUsage = await getUserTokenUsage(payload.userId, currentMonth);
+    const usage = await getWindowTokenUsage(payload.userId);
+    const resetAt = new Date(
+      usage.windowStart.getTime() + 10 * 60 * 60 * 1000,
+    );
 
     return withCorsHeaders(
       NextResponse.json({
-        tokensUsed: currentUsage,
-        tokenLimit: 100000,
-        month: currentMonth,
+        tokensUsed: usage.tokensUsed,
+        tokenLimit: 5000,
+        windowHours: 10,
+        resetAt: resetAt.toISOString(),
       }),
       request,
     );
