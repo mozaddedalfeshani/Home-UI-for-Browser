@@ -3,7 +3,6 @@
 import { useState, useEffect, useRef } from "react";
 import TabsZone from "@/components/Home/TabsZone";
 import SettingsMenu from "@/components/SettingsMenu";
-import Notepad from "@/components/Notepad";
 import SearchModal from "@/components/SearchModal";
 import MuradianAIModal from "@/components/MuradianAIModal";
 import StickyAlarmDialog from "@/components/Notepad/StickyAlarmDialog";

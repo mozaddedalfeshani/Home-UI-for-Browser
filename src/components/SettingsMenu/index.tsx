@@ -1,10 +1,9 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { useTheme } from "next-themes";
 import { Button } from "@/components/ui/button";
-import { Slider } from "@/components/ui/slider";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -29,16 +28,9 @@ import {
   Theme,
   DEFAULT_DYNAMIC_WALLPAPERS,
   normalizeDynamicWallpaper,
-  ClockPosition,
 } from "@/store/settingsStore";
 import { useAuthStore } from "@/store/authStore";
-import { useSearchHistoryStore } from "@/store/searchHistoryStore";
-import { useTabClickHistoryStore } from "@/store/tabClickHistoryStore";
-import {
-  Language,
-  useTranslation,
-  getTranslation,
-} from "@/constants/languages";
+import { Language, useTranslation } from "@/constants/languages";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { HugeiconsIcon } from "@hugeicons/react";
@@ -70,14 +62,6 @@ import {
   Crown02Icon,
   AiNetworkIcon,
   ArrowRight01Icon,
-  ArrowLeft01Icon,
-  Delete02Icon,
-  Search01Icon as SearchHistoryIcon,
-  Globe02Icon as GlobeHistoryIcon,
-  ColorPickerIcon,
-  TimeSetting01Icon,
-  MoveIcon,
-  ViewIcon,
 } from "@hugeicons/core-free-icons";
 
 // Mobile-only section components (unchanged)
@@ -122,23 +106,6 @@ import {
   MAX_NAME_LENGTH,
 } from "../Auth/AccountButton/types";
 import { TokenUsageSection } from "../Auth/AccountButton/TokenUsageSection";
-
-const CLOCK_COLORS = [
-  "#eab308",
-  "#22c55e",
-  "#3b82f6",
-  "#8b5cf6",
-  "#ef4444",
-  "#06b6d4",
-  "#ffffff",
-  "#f97316",
-];
-
-const CLOCK_POSITIONS: { value: ClockPosition; label: string }[] = [
-  { value: "top-left", label: "Left" },
-  { value: "top-center", label: "Center" },
-  { value: "top-right", label: "Right" },
-];
 
 type SettingsSection =
   | "appearance"
@@ -217,22 +184,6 @@ const SettingsMenu = () => {
     useState<SettingsSection>("appearance");
   const [isHistoryDialogOpen, setIsHistoryDialogOpen] = useState(false);
 
-  // Resize shortcuts inline state
-  const [tempSize, setTempSize] = useState(0);
-  const [tempRadius, setTempRadius] = useState(0);
-
-  // Clock settings inline state
-  const [tempClockShow, setTempClockShow] = useState(false);
-  const [tempClockColor, setTempClockColor] = useState("#eab308");
-  const [tempClockGlow, setTempClockGlow] = useState(false);
-  const [tempClockFormat, setTempClockFormat] = useState<"12h" | "24h">("12h");
-  const [tempClockSeconds, setTempClockSeconds] = useState(false);
-  const [tempClockPosition, setTempClockPosition] =
-    useState<ClockPosition>("top-left");
-  const [tempClockStyle, setTempClockStyle] = useState<"classic" | "modern">(
-    "classic",
-  );
-
   const [isMobileProfileDialogOpen, setIsMobileProfileDialogOpen] =
     useState(false);
   const [showMore, setShowMore] = useState(false);
@@ -273,16 +224,6 @@ const SettingsMenu = () => {
   >("login");
   const [verifyEmail, setVerifyEmail] = useState("");
 
-  // History stores
-  const searchEntries = useSearchHistoryStore((s) => s.entries);
-  const removeSearchEntry = useSearchHistoryStore(
-    (s) => s.removeSearchHistoryEntry,
-  );
-  const tabEntries = useTabClickHistoryStore((s) => s.entries);
-  const removeTabEntry = useTabClickHistoryStore(
-    (s) => s.removeTabClickHistoryEntry,
-  );
-
   const {
     language,
     theme,
@@ -298,15 +239,6 @@ const SettingsMenu = () => {
     isClockDialogOpen,
     isBackgroundDialogOpen,
     isResizeDialogOpen,
-    cardSize,
-    cardRadius,
-    showClock,
-    clockColor,
-    showClockGlow,
-    clockFormat,
-    showSeconds,
-    clockPosition,
-    clockStyle,
     setTheme: setSettingsTheme,
     setLanguage,
     setSearchEngine,
@@ -321,40 +253,10 @@ const SettingsMenu = () => {
     setClockDialogOpen,
     setBackgroundDialogOpen,
     setResizeDialogOpen,
-    setCardSize,
-    setCardRadius,
-    toggleShowClock,
-    setClockColor,
-    setShowClockGlow,
-    setClockFormat,
-    setShowSeconds,
-    setClockPosition,
-    setClockStyle,
   } = useSettingsStore();
 
   const { setTheme } = useTheme();
   const t = useTranslation(language);
-  const tClock = useMemo(
-    () => (key: string) => getTranslation(language, key),
-    [language],
-  );
-
-  // Sync temp state when entering sub-sections
-  useEffect(() => {
-    if (activeSection === "resize-shortcuts") {
-      setTempSize(cardSize);
-      setTempRadius(cardRadius);
-    }
-    if (activeSection === "clock-settings") {
-      setTempClockShow(showClock);
-      setTempClockColor(clockColor);
-      setTempClockGlow(showClockGlow);
-      setTempClockFormat(clockFormat);
-      setTempClockSeconds(showSeconds);
-      setTempClockPosition(clockPosition);
-      setTempClockStyle(clockStyle);
-    }
-  }, [activeSection]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleOpen = (open: boolean) => {
     setIsSettingsOpen(open);
@@ -590,8 +492,6 @@ const SettingsMenu = () => {
     await pullSync(true);
     setIsSyncing(false);
   };
-
-  const initials = user?.email?.substring(0, 2).toUpperCase() ?? "??";
 
   const userRole = user?.role ?? "free";
   const APP_NAV = [
