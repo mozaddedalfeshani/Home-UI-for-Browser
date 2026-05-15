@@ -1,10 +1,8 @@
-import { getMongoDb } from "@/lib/mongodb";
-import { ObjectId } from "mongodb";
-
-import { ShareProfileTab, ShareProfileSettings } from "@/lib/shareProfile";
+import sql from "@/lib/db";
+import type { ShareProfileTab, ShareProfileSettings } from "@/lib/shareProfile";
 
 export interface User {
-  _id?: ObjectId;
+  id: string;
   name: string;
   email: string;
   passwordHash: string;
@@ -14,7 +12,7 @@ export interface User {
 
 export interface TokenUsage {
   userId: string;
-  month: string; // Format: YYYY-MM
+  month: string;
   tokensUsed: number;
 }
 
@@ -39,34 +37,31 @@ export interface UserMemoryProfile {
 }
 
 export async function getUserByEmail(email: string): Promise<User | null> {
-  const db = await getMongoDb();
-  return db.collection<User>("users").findOne({ email });
+  const rows = await sql`
+    SELECT id, name, email, password_hash AS "passwordHash", verified, created_at AS "createdAt"
+    FROM users WHERE email = ${email}
+  `;
+  return (rows[0] as User) ?? null;
 }
 
 export async function getUserById(userId: string): Promise<User | null> {
-  if (!ObjectId.isValid(userId)) {
-    return null;
-  }
-
-  const db = await getMongoDb();
-  return db.collection<User>("users").findOne({ _id: new ObjectId(userId) });
+  const rows = await sql`
+    SELECT id, name, email, password_hash AS "passwordHash", verified, created_at AS "createdAt"
+    FROM users WHERE id = ${userId}
+  `;
+  return (rows[0] as User) ?? null;
 }
 
 export async function updateUserProfile(
   userId: string,
   updates: { name?: string; passwordHash?: string },
 ): Promise<void> {
-  if (!ObjectId.isValid(userId)) {
-    return;
-  }
-
-  const db = await getMongoDb();
-  await db.collection<User>("users").updateOne(
-    { _id: new ObjectId(userId) },
-    {
-      $set: updates,
-    },
-  );
+  await sql`
+    UPDATE users SET
+      name = COALESCE(${updates.name ?? null}, name),
+      password_hash = COALESCE(${updates.passwordHash ?? null}, password_hash)
+    WHERE id = ${userId}
+  `;
 }
 
 export async function createUser(
@@ -74,25 +69,21 @@ export async function createUser(
   email: string,
   passwordHash: string,
 ): Promise<void> {
-  const db = await getMongoDb();
-  await db.collection<User>("users").insertOne({
-    name,
-    email,
-    passwordHash,
-    verified: false,
-    createdAt: new Date(),
-  });
+  await sql`
+    INSERT INTO users (name, email, password_hash, verified, created_at)
+    VALUES (${name}, ${email}, ${passwordHash}, false, NOW())
+    ON CONFLICT (email) DO NOTHING
+  `;
 }
 
 export async function getUserTokenUsage(
   userId: string,
   month: string,
 ): Promise<number> {
-  const db = await getMongoDb();
-  const record = await db
-    .collection<TokenUsage>("token_usage")
-    .findOne({ userId, month });
-  return record?.tokensUsed || 0;
+  const rows = await sql`
+    SELECT tokens_used FROM token_usage WHERE user_id = ${userId} AND month = ${month}
+  `;
+  return (rows[0] as { tokens_used: number } | undefined)?.tokens_used ?? 0;
 }
 
 export async function incrementTokenUsage(
@@ -100,21 +91,15 @@ export async function incrementTokenUsage(
   month: string,
   tokens: number,
 ): Promise<void> {
-  const db = await getMongoDb();
-  await db
-    .collection<TokenUsage>("token_usage")
-    .updateOne(
-      { userId, month },
-      { $inc: { tokensUsed: tokens } },
-      { upsert: true },
-    );
+  await sql`
+    INSERT INTO token_usage (user_id, month, tokens_used)
+    VALUES (${userId}, ${month}, ${tokens})
+    ON CONFLICT (user_id, month) DO UPDATE SET tokens_used = token_usage.tokens_used + ${tokens}
+  `;
 }
 
 export async function verifyUser(email: string): Promise<void> {
-  const db = await getMongoDb();
-  await db
-    .collection<User>("users")
-    .updateOne({ email }, { $set: { verified: true } });
+  await sql`UPDATE users SET verified = true WHERE email = ${email}`;
 }
 
 export async function saveVerifyCode(
@@ -122,50 +107,41 @@ export async function saveVerifyCode(
   code: string,
   expiresAt: Date,
 ): Promise<void> {
-  const db = await getMongoDb();
-  await db
-    .collection<VerifyCode>("verify_codes")
-    .updateOne({ email }, { $set: { code, expiresAt } }, { upsert: true });
+  await sql`
+    INSERT INTO verify_codes (email, code, expires_at)
+    VALUES (${email}, ${code}, ${expiresAt})
+    ON CONFLICT (email) DO UPDATE SET code = ${code}, expires_at = ${expiresAt}
+  `;
 }
 
 export async function getVerifyCode(email: string): Promise<VerifyCode | null> {
-  const db = await getMongoDb();
-  return db.collection<VerifyCode>("verify_codes").findOne({ email });
+  const rows = await sql`
+    SELECT email, code, expires_at AS "expiresAt" FROM verify_codes WHERE email = ${email}
+  `;
+  return (rows[0] as VerifyCode) ?? null;
 }
 
 export async function deleteVerifyCode(email: string): Promise<void> {
-  const db = await getMongoDb();
-  await db.collection<VerifyCode>("verify_codes").deleteOne({ email });
+  await sql`DELETE FROM verify_codes WHERE email = ${email}`;
 }
 
 export async function getUserMemoryProfile(
   userId: string,
 ): Promise<UserMemoryProfile | null> {
-  const db = await getMongoDb();
-  return db
-    .collection<UserMemoryProfile>("user_memory_profiles")
-    .findOne({ userId });
+  const rows = await sql`
+    SELECT user_id AS "userId", memory, created_at AS "createdAt", updated_at AS "updatedAt"
+    FROM user_memory_profiles WHERE user_id = ${userId}
+  `;
+  return (rows[0] as UserMemoryProfile) ?? null;
 }
 
 export async function upsertUserMemoryProfile(
   userId: string,
   memory: string,
 ): Promise<void> {
-  const db = await getMongoDb();
-  const now = new Date();
-
-  await db.collection<UserMemoryProfile>("user_memory_profiles").updateOne(
-    { userId },
-    {
-      $set: {
-        userId,
-        memory,
-        updatedAt: now,
-      },
-      $setOnInsert: {
-        createdAt: now,
-      },
-    },
-    { upsert: true },
-  );
+  await sql`
+    INSERT INTO user_memory_profiles (user_id, memory, created_at, updated_at)
+    VALUES (${userId}, ${memory}, NOW(), NOW())
+    ON CONFLICT (user_id) DO UPDATE SET memory = ${memory}, updated_at = NOW()
+  `;
 }
