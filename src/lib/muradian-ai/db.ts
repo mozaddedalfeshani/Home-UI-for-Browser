@@ -1,5 +1,4 @@
-import { getMongoDb } from "@/lib/mongodb";
-import { ObjectId } from "mongodb";
+import sql from "@/lib/db";
 
 export interface AIChatMessage {
   id: string;
@@ -9,7 +8,7 @@ export interface AIChatMessage {
 }
 
 export interface AIChatSession {
-  _id?: ObjectId;
+  id: string;
   userId: string;
   title: string;
   messages: AIChatMessage[];
@@ -22,49 +21,53 @@ export async function saveChatSession(
   title: string,
   messages: AIChatMessage[],
   sessionId?: string,
-) {
-  const db = await getMongoDb();
-  const now = new Date();
+): Promise<{ insertedId: string } | { success: true }> {
+  const messagesJson = JSON.stringify(messages);
 
   if (sessionId) {
-    return db
-      .collection<AIChatSession>("ai_chat_sessions")
-      .updateOne(
-        { _id: new ObjectId(sessionId), userId },
-        { $set: { title, messages, updatedAt: now } },
-      );
-  } else {
-    return db.collection<AIChatSession>("ai_chat_sessions").insertOne({
-      userId,
-      title,
-      messages,
-      createdAt: now,
-      updatedAt: now,
-    });
+    await sql`
+      UPDATE ai_chat_sessions
+      SET title = ${title}, messages = ${messagesJson}::jsonb, updated_at = NOW()
+      WHERE id = ${sessionId} AND user_id = ${userId}
+    `;
+    return { success: true };
   }
+
+  const rows = await sql`
+    INSERT INTO ai_chat_sessions (user_id, title, messages, created_at, updated_at)
+    VALUES (${userId}, ${title}, ${messagesJson}::jsonb, NOW(), NOW())
+    RETURNING id
+  `;
+  return { insertedId: (rows[0] as { id: string }).id };
 }
 
-export async function getChatSessions(userId: string) {
-  const db = await getMongoDb();
-  return db
-    .collection<AIChatSession>("ai_chat_sessions")
-    .find({ userId })
-    .sort({ updatedAt: -1 })
-    .toArray();
+export async function getChatSessions(userId: string): Promise<AIChatSession[]> {
+  const rows = await sql`
+    SELECT id, user_id AS "userId", title, messages,
+           created_at AS "createdAt", updated_at AS "updatedAt"
+    FROM ai_chat_sessions WHERE user_id = ${userId}
+    ORDER BY updated_at DESC
+  `;
+  return rows as AIChatSession[];
 }
 
-export async function getChatSessionById(userId: string, sessionId: string) {
-  const db = await getMongoDb();
-  return db.collection<AIChatSession>("ai_chat_sessions").findOne({
-    _id: new ObjectId(sessionId),
-    userId,
-  });
+export async function getChatSessionById(
+  userId: string,
+  sessionId: string,
+): Promise<AIChatSession | null> {
+  const rows = await sql`
+    SELECT id, user_id AS "userId", title, messages,
+           created_at AS "createdAt", updated_at AS "updatedAt"
+    FROM ai_chat_sessions WHERE id = ${sessionId} AND user_id = ${userId}
+  `;
+  return (rows[0] as AIChatSession) ?? null;
 }
 
-export async function deleteChatSession(userId: string, sessionId: string) {
-  const db = await getMongoDb();
-  return db.collection<AIChatSession>("ai_chat_sessions").deleteOne({
-    _id: new ObjectId(sessionId),
-    userId,
-  });
+export async function deleteChatSession(
+  userId: string,
+  sessionId: string,
+): Promise<void> {
+  await sql`
+    DELETE FROM ai_chat_sessions WHERE id = ${sessionId} AND user_id = ${userId}
+  `;
 }
