@@ -17,7 +17,10 @@ function loadEnv(path) {
       const eqIdx = trimmed.indexOf("=");
       if (eqIdx === -1) continue;
       const key = trimmed.slice(0, eqIdx).trim();
-      const val = trimmed.slice(eqIdx + 1).trim().replace(/^["']|["']$/g, "");
+      const val = trimmed
+        .slice(eqIdx + 1)
+        .trim()
+        .replace(/^["']|["']$/g, "");
       if (!process.env[key]) process.env[key] = val;
     }
   } catch {
@@ -40,7 +43,7 @@ if (!DATABASE_URL) {
 const sql = neon(DATABASE_URL);
 
 const SITE_KEY = "site-homepage";
-const SEED_COUNT = 3000;
+const SEED_COUNT = 6389;
 
 async function seedVisitCount() {
   const result = await sql`
@@ -52,7 +55,9 @@ async function seedVisitCount() {
     RETURNING key, count
   `;
 
-  console.log(`visit_counts set: key="${result[0].key}", count=${result[0].count}`);
+  console.log(
+    `visit_counts set: key="${result[0].key}", count=${result[0].count}`,
+  );
 }
 
 seedVisitCount().catch((err) => {
