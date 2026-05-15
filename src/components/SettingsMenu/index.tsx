@@ -44,6 +44,7 @@ import {
   Tick01Icon,
   RotateRight01Icon,
   Crown02Icon,
+  AiNetworkIcon,
 } from "@hugeicons/core-free-icons";
 import { ChevronRight } from "lucide-react";
 
@@ -77,7 +78,7 @@ import { MAX_MEMORY_LENGTH, MAX_NAME_LENGTH } from "../Auth/AccountButton/types"
 import { TokenUsageSection } from "../Auth/AccountButton/TokenUsageSection";
 
 type SettingsSection =
-  | "appearance" | "search" | "behavior" | "tools" | "profile-share" | "pricing"
+  | "appearance" | "search" | "behavior" | "tools" | "profile-share" | "pricing" | "ai-models"
   | "account-login" | "account-profile" | "account-memory" | "account-sync";
 
 function useIsDesktop() {
@@ -273,6 +274,7 @@ const SettingsMenu = () => {
 
   const initials = user?.email?.substring(0, 2).toUpperCase() ?? "??";
 
+  const userRole = user?.role ?? "free";
   const APP_NAV = [
     { id: "appearance" as SettingsSection, label: "Appearance", icon: PaintBrush01Icon },
     { id: "search" as SettingsSection, label: "Search & Layout", icon: Search01Icon },
@@ -280,6 +282,9 @@ const SettingsMenu = () => {
     { id: "tools" as SettingsSection, label: "Tools", icon: MagicWand01Icon },
     { id: "profile-share" as SettingsSection, label: t("profileShare"), icon: Share01Icon },
     { id: "pricing" as SettingsSection, label: "Pricing", icon: Crown02Icon },
+    ...(userRole === "lite" || userRole === "plus"
+      ? [{ id: "ai-models" as SettingsSection, label: "AI Models", icon: AiNetworkIcon }]
+      : []),
   ];
 
   const ACCOUNT_NAV = isAuthenticated ? [
@@ -497,6 +502,50 @@ const SettingsMenu = () => {
       </div>
     );
 
+    if (activeSection === "ai-models") {
+      const AI_MODELS = [
+        { name: "GPT 5.5", provider: "OpenAI" },
+        { name: "Gemini 3.1 Flash", provider: "Google" },
+        { name: "DeepSeek V4 Pro", provider: "DeepSeek" },
+        { name: "DeepSeek V4 Flash", provider: "DeepSeek" },
+      ];
+      const isLite = userRole === "lite";
+      return (
+        <div className="space-y-3">
+          <p className="text-sm text-muted-foreground">
+            {isLite ? "Upgrade to Plus to access multiple AI models." : "Multi-model access — coming soon."}
+          </p>
+          <div className="space-y-2">
+            {AI_MODELS.map((model) => (
+              <button
+                key={model.name}
+                type="button"
+                onClick={() => isLite && toast.info("Please upgrade to Premium")}
+                className={cn(
+                  "flex w-full items-center gap-3 rounded-xl border border-border/40 bg-muted/10 px-4 py-3 text-sm text-foreground transition-colors",
+                  isLite ? "hover:bg-accent cursor-pointer" : "cursor-not-allowed opacity-50",
+                )}
+              >
+                <HugeiconsIcon icon={AiNetworkIcon} size={15} strokeWidth={1.5} className="text-muted-foreground shrink-0" />
+                <div className="flex-1 text-left">
+                  <p className="font-medium text-sm">{model.name}</p>
+                  <p className="text-xs text-muted-foreground">{model.provider}</p>
+                </div>
+                <span className={cn(
+                  "text-[10px] font-semibold uppercase tracking-wide px-2 py-0.5 rounded-full",
+                  isLite
+                    ? "bg-violet-500/10 text-violet-500 border border-violet-500/20"
+                    : "bg-muted/40 text-muted-foreground border border-border/30",
+                )}>
+                  {isLite ? "Plus only" : "Soon"}
+                </span>
+              </button>
+            ))}
+          </div>
+        </div>
+      );
+    }
+
     if (activeSection === "account-login") return (
       <div className="flex flex-col items-center justify-center h-full">
         <div className="w-full max-w-sm">
@@ -635,10 +684,14 @@ const SettingsMenu = () => {
           </Button>
 
           <Dialog open={isSettingsOpen} onOpenChange={handleOpen}>
-            <DialogContent hideDefaultClose className="p-0 overflow-hidden rounded-2xl w-full sm:max-w-3xl sm:h-[520px]">
+            <DialogContent hideDefaultClose className={cn(
+              "p-0 overflow-hidden rounded-2xl w-full sm:max-w-3xl sm:h-[520px]",
+              user?.role === "plus" && "border-violet-500/60",
+              user?.role === "lite" && "border-amber-400/60",
+            )}>
               <DialogTitle className="sr-only">{t("settings")}</DialogTitle>
 
-              <div className="flex h-full">
+              <div className="flex h-full overflow-hidden">
                 {/* Left sidebar */}
                 <div className="flex flex-col w-52 shrink-0 border-r border-border/20 bg-muted/20">
                   <div className="flex items-center justify-between px-4 py-3.5 border-b border-border/20">
@@ -709,11 +762,12 @@ const SettingsMenu = () => {
                 </div>
 
                 {/* Right content panel */}
-                <div className="flex flex-col flex-1 min-w-0">
+                <div className="flex flex-col flex-1 min-w-0 min-h-0 overflow-hidden">
                   <div className="px-6 py-3.5 border-b border-border/20 shrink-0">
                     <h2 className="text-sm font-semibold text-foreground">
                       {[...APP_NAV, ...ACCOUNT_NAV].find((n) => n.id === activeSection)?.label
                         ?? (activeSection === "account-sync" ? "Cloud Sync"
+                          : activeSection === "ai-models" ? "AI Models"
                           : activeSection === "account-login" ? "Sign In"
                           : activeSection === "account-profile" ? "My Profile"
                           : activeSection === "account-memory" ? "Memory"
