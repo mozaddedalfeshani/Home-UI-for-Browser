@@ -48,7 +48,7 @@ export async function POST(request: NextRequest) {
     }
 
     const token = signToken({
-      userId: user._id!.toString(),
+      userId: user.id,
       name: user.name,
       email: user.email,
     });
@@ -57,7 +57,7 @@ export async function POST(request: NextRequest) {
       NextResponse.json({
         message: "Logged in successfully",
         token,
-        user: { name: user.name, email: user.email, id: user._id!.toString() },
+        user: { name: user.name, email: user.email, id: user.id },
       }),
       request,
     );

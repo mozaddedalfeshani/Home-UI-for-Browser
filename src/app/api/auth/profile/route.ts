@@ -55,7 +55,7 @@ export async function GET(request: NextRequest) {
     return withCorsHeaders(
       NextResponse.json({
         user: {
-          id: user._id?.toString(),
+          id: user.id,
           name: user.name,
           email: user.email,
         },
