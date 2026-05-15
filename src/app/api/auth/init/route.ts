@@ -3,7 +3,7 @@ import type { NextRequest } from "next/server";
 import { cookies } from "next/headers";
 import { verifyToken, signToken } from "@/lib/auth/jwt";
 import { pullUserData } from "@/lib/auth/sync";
-import { UserData } from "@/lib/auth/db";
+import { getUserById, UserData } from "@/lib/auth/db";
 import { corsGuard, handleCorsOptions, withCorsHeaders } from "@/lib/auth/cors";
 
 export async function OPTIONS(request: NextRequest) {
@@ -34,8 +34,13 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const rawUserData = await pullUserData(payload.userId);
-    const isFreeInit = (payload.role ?? "free") === "free";
+    // Always fetch fresh role from DB (JWT may predate role column)
+    const [dbUser, rawUserData] = await Promise.all([
+      getUserById(payload.userId),
+      pullUserData(payload.userId),
+    ]);
+    const freshRole = dbUser?.role ?? payload.role ?? "free";
+    const isFreeInit = freshRole === "free";
     const userData = rawUserData && isFreeInit
       ? { ...rawUserData, settings: null }
       : rawUserData;
@@ -44,7 +49,7 @@ export async function GET(request: NextRequest) {
       userId: payload.userId,
       name: payload.name,
       email: payload.email,
-      role: payload.role,
+      role: freshRole as "free" | "lite" | "plus",
     });
 
     const res = withCorsHeaders(
@@ -54,7 +59,7 @@ export async function GET(request: NextRequest) {
         data: UserData | null;
       }>({
         authenticated: true,
-        user: { name: payload.name, email: payload.email, id: payload.userId, role: payload.role ?? "free" },
+        user: { name: payload.name, email: payload.email, id: payload.userId, role: freshRole },
         data: userData,
       }),
       request,
