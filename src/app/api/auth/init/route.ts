@@ -50,11 +50,11 @@ export async function GET(request: NextRequest) {
     const res = withCorsHeaders(
       NextResponse.json<{
         authenticated: boolean;
-        user: { name: string; email: string; id: string };
+        user: { name: string; email: string; id: string; role: string };
         data: UserData | null;
       }>({
         authenticated: true,
-        user: { name: payload.name, email: payload.email, id: payload.userId },
+        user: { name: payload.name, email: payload.email, id: payload.userId, role: payload.role ?? "free" },
         data: userData,
       }),
       request,

@@ -4,13 +4,15 @@ import { useTabsStore } from "./tabsStore";
 import { useSettingsStore } from "./settingsStore";
 import { toast } from "sonner";
 
+type UserRole = "free" | "lite" | "plus";
+
 interface AuthState {
-  user: { email: string; id: string; name: string } | null;
+  user: { email: string; id: string; name: string; role: UserRole } | null;
   isAuthenticated: boolean;
   isLoading: boolean;
   lastSynced: number | null;
 
-  setUser: (user: { email: string; id: string; name: string } | null) => void;
+  setUser: (user: { email: string; id: string; name: string; role?: UserRole } | null) => void;
   setLoading: (loading: boolean) => void;
 
   login: (
@@ -34,6 +36,25 @@ interface AuthState {
   pullSync: (autoApply?: boolean) => Promise<void>;
 }
 
+// Module-level: unsubscribe + debounce timer for auto-sync
+let tabsAutoSyncUnsub: (() => void) | null = null;
+let autoSyncTimer: ReturnType<typeof setTimeout> | null = null;
+
+function setupAutoSync(pushSync: () => Promise<void>) {
+  teardownAutoSync();
+  tabsAutoSyncUnsub = useTabsStore.subscribe((state, prev) => {
+    if (state.tabs === prev.tabs) return;
+    if (autoSyncTimer) clearTimeout(autoSyncTimer);
+    autoSyncTimer = setTimeout(() => { void pushSync(); }, 2000);
+  });
+}
+
+function teardownAutoSync() {
+  tabsAutoSyncUnsub?.();
+  tabsAutoSyncUnsub = null;
+  if (autoSyncTimer) { clearTimeout(autoSyncTimer); autoSyncTimer = null; }
+}
+
 export const useAuthStore = create<AuthState>()(
   persist(
     (set, get) => ({
@@ -42,7 +63,10 @@ export const useAuthStore = create<AuthState>()(
       isLoading: false,
       lastSynced: null,
 
-      setUser: (user) => set({ user, isAuthenticated: !!user }),
+      setUser: (user) => set({
+        user: user ? { ...user, role: user.role ?? "free" } : null,
+        isAuthenticated: !!user,
+      }),
       setLoading: (loading) => set({ isLoading: loading }),
 
       login: async (email, password) => {
@@ -54,7 +78,9 @@ export const useAuthStore = create<AuthState>()(
           });
           const data = await res.json();
           if (res.ok) {
-            set({ user: data.user, isAuthenticated: true, isLoading: false });
+            const user = { ...data.user, role: (data.user?.role ?? "free") as UserRole };
+            set({ user, isAuthenticated: true, isLoading: false });
+            if (user.role === "lite" || user.role === "plus") setupAutoSync(get().pushSync);
             return { success: true };
           }
           set({ isLoading: false });
@@ -91,7 +117,9 @@ export const useAuthStore = create<AuthState>()(
           });
           const data = await res.json();
           if (res.ok) {
-            set({ user: data.user, isAuthenticated: true, isLoading: false });
+            const user = { ...data.user, role: (data.user?.role ?? "free") as UserRole };
+            set({ user, isAuthenticated: true, isLoading: false });
+            if (user.role === "lite" || user.role === "plus") setupAutoSync(get().pushSync);
             return { success: true };
           }
           set({ isLoading: false });
@@ -103,6 +131,7 @@ export const useAuthStore = create<AuthState>()(
       },
 
       logout: async () => {
+        teardownAutoSync();
         await fetch("/api/auth/logout", { method: "POST" });
         set({ user: null, isAuthenticated: false, lastSynced: null });
       },
@@ -112,7 +141,8 @@ export const useAuthStore = create<AuthState>()(
           const res = await fetch("/api/auth/me");
           if (res.ok) {
             const data = await res.json();
-            set({ user: data.user, isAuthenticated: true });
+            const user = { ...data.user, role: (data.user?.role ?? "free") as UserRole };
+            set({ user, isAuthenticated: true });
           } else {
             set({ user: null, isAuthenticated: false });
           }
@@ -127,9 +157,8 @@ export const useAuthStore = create<AuthState>()(
           if (res.ok) {
             const data = await res.json();
             if (data.authenticated) {
-              set({ user: data.user, isAuthenticated: true });
-              // We don't auto-apply data anymore on init.
-              // We only set lastSynced if data was found to show the status.
+              const user = { ...data.user, role: (data.user?.role ?? "free") as UserRole };
+              set({ user, isAuthenticated: true });
               if (data.data) {
                 set({
                   lastSynced: data.data.updatedAt
@@ -137,6 +166,7 @@ export const useAuthStore = create<AuthState>()(
                     : Date.now(),
                 });
               }
+              if (user.role === "lite" || user.role === "plus") setupAutoSync(get().pushSync);
             } else {
               set({ user: null, isAuthenticated: false });
             }
@@ -189,7 +219,6 @@ export const useAuthStore = create<AuthState>()(
                 });
                 toast.success("Synced with cloud");
               }
-              // Else return data for confirmation UI if needed
             }
           }
         } catch (error) {
