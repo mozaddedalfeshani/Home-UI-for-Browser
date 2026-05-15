@@ -1,4 +1,4 @@
-import { getMongoDb } from "@/lib/mongodb";
+import sql from "@/lib/db";
 import { incrementLocalVisitCount } from "@/lib/localAnalytics";
 
 const siteVisitPayload = {
@@ -11,36 +11,20 @@ const siteVisitPayload = {
 
 export const incrementSiteVisitCount = async () => {
   try {
-    const db = await getMongoDb();
-    const visitsCollection = db.collection("visit_counts");
-
-    const result = await visitsCollection.findOneAndUpdate(
-      { key: siteVisitPayload.key },
-      {
-        $inc: { count: 1 },
-        $set: {
-          key: siteVisitPayload.key,
-          tabId: siteVisitPayload.tabId,
-          title: siteVisitPayload.title,
-          url: siteVisitPayload.url,
-          source: siteVisitPayload.source,
-          updatedAt: new Date(),
-        },
-        $setOnInsert: {
-          createdAt: new Date(),
-        },
-      },
-      {
-        upsert: true,
-        returnDocument: "after",
-        projection: { _id: 0, count: 1 },
-      },
-    );
-
-    return result?.count ?? 0;
+    const rows = await sql`
+      INSERT INTO visit_counts (key, tab_id, title, url, source, count, created_at, updated_at)
+      VALUES (
+        ${siteVisitPayload.key}, ${siteVisitPayload.tabId}, ${siteVisitPayload.title},
+        ${siteVisitPayload.url}, ${siteVisitPayload.source}, 1, NOW(), NOW()
+      )
+      ON CONFLICT (key) DO UPDATE SET
+        count = visit_counts.count + 1,
+        updated_at = NOW()
+      RETURNING count
+    `;
+    return (rows[0] as { count: number })?.count ?? 0;
   } catch (error) {
     console.error("Failed to increment SSR site visit count", error);
-
     const fallbackRow = await incrementLocalVisitCount(siteVisitPayload);
     return fallbackRow.count;
   }

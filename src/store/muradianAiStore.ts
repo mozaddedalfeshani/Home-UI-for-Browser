@@ -11,7 +11,7 @@ export interface Message {
 }
 
 export interface ChatSession {
-  _id: string;
+  id: string;
   title: string;
   messages: Message[];
   updatedAt: string;
@@ -76,7 +76,7 @@ export const useMuradianAiStore = create<MuradianAiState>()(
         if (messages.length === 0) return;
 
         const existingSession = sessions.find(
-          (s) => s._id === currentSessionId,
+          (s) => s.id === currentSessionId,
         );
         const finalTitle = title || existingSession?.title || "Chat Session";
 
