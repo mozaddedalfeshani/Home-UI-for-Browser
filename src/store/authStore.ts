@@ -208,13 +208,17 @@ export const useAuthStore = create<AuthState>()(
         try {
           const res = await fetch("/api/auth/sync/push", {
             method: "POST",
+            headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ tabs, settings }),
           });
           if (res.ok) {
             set({ lastSynced: Date.now() });
+          } else {
+            throw new Error(`Push failed: ${res.status}`);
           }
         } catch (error) {
           console.error("Failed to push sync:", error);
+          throw error;
         }
       },
 

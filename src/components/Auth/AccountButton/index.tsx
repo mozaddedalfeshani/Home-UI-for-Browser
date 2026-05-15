@@ -163,9 +163,14 @@ export function AccountButton() {
 
   const handlePushConfirm = async () => {
     setIsSyncing(true);
-    await pushSync();
-    setIsSyncing(false);
-    toast.success("Data synced to cloud");
+    try {
+      await pushSync();
+      toast.success("Data synced to cloud");
+    } catch {
+      toast.error("Sync failed. Please try again.");
+    } finally {
+      setIsSyncing(false);
+    }
   };
 
   const handlePull = async () => {

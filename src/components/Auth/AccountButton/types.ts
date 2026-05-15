@@ -9,8 +9,8 @@ export interface ProfileResponse extends MemoryResponse {
 
 export interface TokenInfo {
   tokensUsed: number;
-  tokenLimit: number;
-  resetAt: string;
+  tokenLimit: number | null;
+  resetAt: string | null;
 }
 
 export const MAX_MEMORY_LENGTH = 200;

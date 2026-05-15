@@ -4,6 +4,7 @@ import { cn } from "@/lib/utils";
 import type { TokenInfo } from "./types";
 
 export function TokenUsageSection({ tokenInfo }: { tokenInfo: TokenInfo }) {
+  if (tokenInfo.tokenLimit === null) return null;
   const pct = tokenInfo.tokensUsed / tokenInfo.tokenLimit;
   const remaining = Math.max(tokenInfo.tokenLimit - tokenInfo.tokensUsed, 0);
 
