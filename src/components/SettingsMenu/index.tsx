@@ -60,6 +60,10 @@ import { HistoryDialog } from "./History/HistoryDialog";
 import { ResetDialog } from "./Reset/ResetDialog";
 import { ProfileDialog } from "./Profile/ProfileDialog";
 import { AccountButton } from "../Auth/AccountButton";
+import { LoginForm } from "../Auth/AuthDialog/LoginForm";
+import { SignupForm } from "../Auth/AuthDialog/SignupForm";
+import { VerifyForm } from "../Auth/AuthDialog/VerifyForm";
+import { PullPrompt } from "../Auth/AuthDialog/PullPrompt";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -72,7 +76,7 @@ import { TokenUsageSection } from "../Auth/AccountButton/TokenUsageSection";
 
 type SettingsSection =
   | "appearance" | "search" | "behavior" | "tools" | "profile-share"
-  | "account-profile" | "account-memory" | "account-sync";
+  | "account-login" | "account-profile" | "account-memory" | "account-sync";
 
 function useIsDesktop() {
   const [isDesktop, setIsDesktop] = useState(false);
@@ -131,6 +135,8 @@ const SettingsMenu = () => {
   const [isMemorySaving, setIsMemorySaving] = useState(false);
   const [memory, setMemory] = useState("");
   const [memoryDraft, setMemoryDraft] = useState("");
+  const [authTab, setAuthTab] = useState<"login" | "signup" | "verify" | "pull-prompt">("login");
+  const [verifyEmail, setVerifyEmail] = useState("");
 
   const {
     language, theme, searchEngine, tabsPosition,
@@ -221,6 +227,11 @@ const SettingsMenu = () => {
     finally { setIsMemoryLoading(false); }
   };
   const handleSectionChange = (s: SettingsSection) => {
+    if (!isAuthenticated && (s === "account-profile" || s === "account-memory" || s === "account-sync")) {
+      setAuthTab("login");
+      setActiveSection("account-login");
+      return;
+    }
     setActiveSection(s);
     if (s === "account-profile" && !isProfileLoading && !profileName) void loadProfile();
     if (s === "account-memory" && !isMemoryLoading && !memory && !memoryDraft) void loadMemory();
@@ -254,7 +265,7 @@ const SettingsMenu = () => {
     } catch (err) { toast.error(err instanceof Error ? err.message : "Failed"); }
     finally { setIsMemorySaving(false); }
   };
-  const handleLogout = async () => { setIsSettingsOpen(false); await logout(); toast.success("Logged out"); };
+  const handleLogout = async () => { setIsSettingsOpen(false); await logout(); toast.success("Logged out"); setActiveSection("appearance"); };
   const handlePushConfirm = async () => { setIsSyncing(true); await pushSync(); setIsSyncing(false); toast.success("Data synced to cloud"); };
   const handlePull = async () => { setIsSyncing(true); await pullSync(true); setIsSyncing(false); };
 
@@ -407,6 +418,47 @@ const SettingsMenu = () => {
       </div>
     );
 
+    if (activeSection === "account-login") return (
+      <div className="flex flex-col items-center justify-center h-full">
+        <div className="w-full max-w-sm">
+          <div className="mb-5 text-center">
+            <h3 className="text-base font-semibold text-foreground">LaunchTab Cloud</h3>
+            <p className="mt-1 text-sm text-muted-foreground">
+              {authTab === "pull-prompt" ? "Finalize your sync settings" : "Sync your tabs and settings across all devices."}
+            </p>
+          </div>
+
+          {authTab !== "verify" && authTab !== "pull-prompt" && (
+            <div className="flex rounded-xl border border-border/50 bg-muted/20 p-1 mb-4">
+              {(["login", "signup"] as const).map((tab) => (
+                <button key={tab} type="button" onClick={() => setAuthTab(tab)}
+                  className={cn("flex-1 rounded-lg py-1.5 text-sm font-medium transition-colors capitalize",
+                    authTab === tab ? "bg-background text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground")}>
+                  {tab === "login" ? "Login" : "Sign Up"}
+                </button>
+              ))}
+            </div>
+          )}
+
+          {authTab === "login" && (
+            <LoginForm onSuccess={() => setAuthTab("pull-prompt")} />
+          )}
+          {authTab === "signup" && (
+            <SignupForm onVerify={(email) => { setVerifyEmail(email); setAuthTab("verify"); }} />
+          )}
+          {authTab === "verify" && (
+            <VerifyForm email={verifyEmail} onSuccess={() => setAuthTab("pull-prompt")} />
+          )}
+          {authTab === "pull-prompt" && (
+            <PullPrompt onComplete={() => {
+              setActiveSection("account-profile");
+              void loadProfile();
+            }} />
+          )}
+        </div>
+      </div>
+    );
+
     if (activeSection === "account-profile") return (
       <div className="flex flex-col h-full">
         <div className="flex-1 min-h-0 overflow-y-auto space-y-4">
@@ -530,25 +582,41 @@ const SettingsMenu = () => {
                       </button>
                     ))}
 
-                    {/* Account section */}
+                    {/* Account section — always shown */}
+                    <div className="mx-4 my-2 border-t border-border/20" />
+                    <p className="px-4 pb-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/50">Account</p>
+
+                    {!isAuthenticated && (
+                      <button type="button" onClick={() => handleSectionChange("account-login")}
+                        className={cn("flex w-full items-center gap-2.5 px-4 py-2.5 text-sm transition-colors",
+                          activeSection === "account-login" ? "bg-accent text-foreground font-medium" : "text-muted-foreground hover:bg-accent/60 hover:text-foreground")}>
+                        <HugeiconsIcon icon={UserIcon} size={15} strokeWidth={1.5} className="shrink-0 opacity-80" />
+                        Sign in
+                      </button>
+                    )}
+
+                    {[
+                      { id: "account-profile" as SettingsSection, label: "My Profile", icon: UserIcon },
+                      { id: "account-memory" as SettingsSection, label: "Memory", icon: AiBrain01Icon },
+                      { id: "account-sync" as SettingsSection, label: "Cloud Sync", icon: CloudUploadIcon },
+                    ].map((item) => (
+                      <button key={item.id} type="button" onClick={() => handleSectionChange(item.id)}
+                        className={cn(
+                          "flex w-full items-center gap-2.5 px-4 py-2.5 text-sm transition-colors",
+                          !isAuthenticated && "opacity-40 cursor-not-allowed",
+                          activeSection === item.id ? "bg-accent text-foreground font-medium" : "text-muted-foreground hover:bg-accent/60 hover:text-foreground",
+                        )}>
+                        <HugeiconsIcon icon={item.icon} size={15} strokeWidth={1.5} className="shrink-0 opacity-80" />
+                        {item.label}
+                      </button>
+                    ))}
+
                     {isAuthenticated && (
-                      <>
-                        <div className="mx-4 my-2 border-t border-border/20" />
-                        <p className="px-4 pb-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/50">Account</p>
-                        {ACCOUNT_NAV.map((item) => (
-                          <button key={item.id} type="button" onClick={() => handleSectionChange(item.id)}
-                            className={cn("flex w-full items-center gap-2.5 px-4 py-2.5 text-sm transition-colors",
-                              activeSection === item.id ? "bg-accent text-foreground font-medium" : "text-muted-foreground hover:bg-accent/60 hover:text-foreground")}>
-                            <HugeiconsIcon icon={item.icon} size={15} strokeWidth={1.5} className="shrink-0 opacity-80" />
-                            {item.label}
-                          </button>
-                        ))}
-                        <button type="button" onClick={handleLogout}
-                          className="flex w-full items-center gap-2.5 px-4 py-2.5 text-sm text-red-500 hover:bg-accent/60 transition-colors">
-                          <HugeiconsIcon icon={Logout01Icon} size={15} strokeWidth={1.5} className="shrink-0" />
-                          Log out
-                        </button>
-                      </>
+                      <button type="button" onClick={handleLogout}
+                        className="flex w-full items-center gap-2.5 px-4 py-2.5 text-sm text-red-500 hover:bg-accent/60 transition-colors">
+                        <HugeiconsIcon icon={Logout01Icon} size={15} strokeWidth={1.5} className="shrink-0" />
+                        Log out
+                      </button>
                     )}
                   </nav>
 
