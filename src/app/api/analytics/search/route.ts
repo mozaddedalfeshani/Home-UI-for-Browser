@@ -191,6 +191,13 @@ export async function POST(request: Request) {
       );
     }
 
+    // Skip saving URLs — they are not useful as search suggestions
+    const urlPattern =
+      /^(https?:\/\/)|(\.(com|org|net|io|dev|app|co|edu|gov|biz|info)(\.[a-z]{2,})?(\/.*)?$)/i;
+    if (urlPattern.test(query)) {
+      return NextResponse.json({ success: true, skipped: true });
+    }
+
     normalizedQuery = query.toLowerCase();
 
     const inserted = await sql`

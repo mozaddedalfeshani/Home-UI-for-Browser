@@ -218,9 +218,9 @@ const SearchModal = ({
     let url: string;
 
     addSearchHistoryEntry(trimmedValue);
-    trackSearch(trimmedValue, searchEngine);
 
     if (isUrl(trimmedValue)) {
+      // Never save URLs as search queries
       // It's a URL - add https:// if missing
       if (
         trimmedValue.startsWith("http://") ||
@@ -233,6 +233,7 @@ const SearchModal = ({
     } else {
       // It's a search query - use selected search engine
       url = getSearchUrl(trimmedValue);
+      trackSearch(trimmedValue, searchEngine);
     }
 
     // Open in same tab
