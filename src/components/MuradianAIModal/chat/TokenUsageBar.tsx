@@ -3,7 +3,7 @@
 import { cn } from "@/lib/utils";
 import type { TokenUsage } from "../types";
 
-function formatTimeUntil(resetAt: string): string {
+function formatTimeUntil(resetAt: string | null): string {
   if (!resetAt) return "";
   const ms = new Date(resetAt).getTime() - Date.now();
   if (ms <= 0) return "soon";
@@ -14,6 +14,16 @@ function formatTimeUntil(resetAt: string): string {
 }
 
 export function TokenUsageBar({ usage }: { usage: TokenUsage }) {
+  if (usage.tokenLimit === null) {
+    return (
+      <div className="mt-1.5 px-1">
+        <span className="text-[10px] font-medium text-muted-foreground/60">
+          Unlimited tokens
+        </span>
+      </div>
+    );
+  }
+
   const pct = Math.min((usage.tokensUsed / usage.tokenLimit) * 100, 100);
   const remaining = Math.max(usage.tokenLimit - usage.tokensUsed, 0);
   const isWarning = pct >= 70;
