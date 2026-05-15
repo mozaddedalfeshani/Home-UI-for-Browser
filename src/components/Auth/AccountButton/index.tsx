@@ -1,14 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { useAuthStore } from "@/store/authStore";
 import dynamic from "next/dynamic";
-const AuthDialog = dynamic(
-  () => import("../AuthDialog").then((mod) => mod.AuthDialog),
-  {
-    ssr: false,
-  },
-);
+import { useAuthStore } from "@/store/authStore";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -19,7 +13,6 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Input } from "@/components/ui/input";
 import { HugeiconsIcon } from "@hugeicons/react";
 import {
   UserIcon,
@@ -31,59 +24,49 @@ import {
 } from "@hugeicons/core-free-icons";
 import { toast } from "sonner";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
-import { Textarea } from "@/components/ui/textarea";
+import { TokenUsageSection } from "./TokenUsageSection";
+import { ProfileDialog } from "./ProfileDialog";
+import { MemoryDialog } from "./MemoryDialog";
+import {
+  type MemoryResponse,
+  type ProfileResponse,
+  type TokenInfo,
+  MAX_MEMORY_LENGTH,
+  MAX_NAME_LENGTH,
+} from "./types";
 
-interface MemoryResponse {
-  memory?: string;
-  error?: string;
-}
-
-interface ProfileResponse extends MemoryResponse {
-  user?: { id: string; name: string; email: string };
-}
-
-const MAX_MEMORY_LENGTH = 200;
-const MAX_NAME_LENGTH = 80;
+const AuthDialog = dynamic(
+  () => import("../AuthDialog").then((mod) => mod.AuthDialog),
+  { ssr: false },
+);
 
 export function AccountButton() {
-  const {
-    user,
-    isAuthenticated,
-    logout,
-    pushSync,
-    pullSync,
-    lastSynced,
-    setUser,
-  } = useAuthStore();
+  const { user, isAuthenticated, logout, pushSync, pullSync, lastSynced, setUser } = useAuthStore();
+
   const [isAuthOpen, setIsAuthOpen] = useState(false);
   const [isSyncing, setIsSyncing] = useState(false);
-  const [tokenInfo, setTokenInfo] = useState<{
-    tokensUsed: number;
-    tokenLimit: number;
-    resetAt: string;
-  } | null>(null);
+  const [tokenInfo, setTokenInfo] = useState<TokenInfo | null>(null);
   const [isPushConfirmOpen, setIsPushConfirmOpen] = useState(false);
+
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isProfileLoading, setIsProfileLoading] = useState(false);
   const [isProfileSaving, setIsProfileSaving] = useState(false);
-  const [isMemoryOpen, setIsMemoryOpen] = useState(false);
-  const [isMemoryLoading, setIsMemoryLoading] = useState(false);
-  const [isMemorySaving, setIsMemorySaving] = useState(false);
-  const [memory, setMemory] = useState("");
-  const [memoryDraft, setMemoryDraft] = useState("");
   const [profileName, setProfileName] = useState("");
   const [profileMemory, setProfileMemory] = useState("");
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
 
+  const [isMemoryOpen, setIsMemoryOpen] = useState(false);
+  const [isMemoryLoading, setIsMemoryLoading] = useState(false);
+  const [isMemorySaving, setIsMemorySaving] = useState(false);
+  const [memory, setMemory] = useState("");
+  const [memoryDraft, setMemoryDraft] = useState("");
+
   const handleDropdownOpen = (open: boolean) => {
     if (!open || !isAuthenticated) return;
     fetch("/api/ai/usage")
       .then((r) => (r.ok ? r.json() : null))
-      .then((data: { tokensUsed: number; tokenLimit: number; resetAt: string } | null) => {
-        if (data) setTokenInfo(data);
-      })
+      .then((data: TokenInfo | null) => { if (data) setTokenInfo(data); })
       .catch(() => {});
   };
 
@@ -101,7 +84,6 @@ export function AccountButton() {
 
   const handlePull = async () => {
     setIsSyncing(true);
-    // pullSync(true) instantly replaces local tabs and settings
     await pullSync(true);
     setIsSyncing(false);
   };
@@ -109,22 +91,15 @@ export function AccountButton() {
   const handleOpenMemory = async () => {
     setIsMemoryOpen(true);
     setIsMemoryLoading(true);
-
     try {
       const response = await fetch("/api/ai/memory");
       const data = (await response.json().catch(() => ({}))) as MemoryResponse;
-
-      if (!response.ok) {
-        throw new Error(data.error || "Failed to load memory");
-      }
-
+      if (!response.ok) throw new Error(data.error || "Failed to load memory");
       const nextMemory = data.memory?.trim() ?? "";
       setMemory(nextMemory);
       setMemoryDraft(nextMemory);
     } catch (error) {
-      const message =
-        error instanceof Error ? error.message : "Failed to load memory";
-      toast.error(message);
+      toast.error(error instanceof Error ? error.message : "Failed to load memory");
       setMemory("");
       setMemoryDraft("");
     } finally {
@@ -139,21 +114,14 @@ export function AccountButton() {
     setProfileMemory("");
     setCurrentPassword("");
     setNewPassword("");
-
     try {
       const response = await fetch("/api/auth/profile");
       const data = (await response.json().catch(() => ({}))) as ProfileResponse;
-
-      if (!response.ok) {
-        throw new Error(data.error || "Failed to load profile");
-      }
-
+      if (!response.ok) throw new Error(data.error || "Failed to load profile");
       setProfileName(data.user?.name?.trim() ?? user?.name ?? "");
       setProfileMemory(data.memory?.trim() ?? "");
     } catch (error) {
-      const message =
-        error instanceof Error ? error.message : "Failed to load profile";
-      toast.error(message);
+      toast.error(error instanceof Error ? error.message : "Failed to load profile");
     } finally {
       setIsProfileLoading(false);
     }
@@ -162,53 +130,27 @@ export function AccountButton() {
   const handleSaveProfile = async () => {
     const nextName = profileName.trim();
     const nextMemory = profileMemory.trim();
-
-    if (!nextName) {
-      toast.error("Name is required.");
-      return;
-    }
-
-    if (nextName.length > MAX_NAME_LENGTH) {
-      toast.error(`Name must be ${MAX_NAME_LENGTH} characters or less.`);
-      return;
-    }
-
-    if (nextMemory.length > MAX_MEMORY_LENGTH) {
-      toast.error(`Memory must be ${MAX_MEMORY_LENGTH} characters or less.`);
-      return;
-    }
+    if (!nextName) { toast.error("Name is required."); return; }
+    if (nextName.length > MAX_NAME_LENGTH) { toast.error(`Name must be ${MAX_NAME_LENGTH} characters or less.`); return; }
+    if (nextMemory.length > MAX_MEMORY_LENGTH) { toast.error(`Memory must be ${MAX_MEMORY_LENGTH} characters or less.`); return; }
 
     setIsProfileSaving(true);
-
     try {
       const response = await fetch("/api/auth/profile", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name: nextName,
-          memory: nextMemory,
-          currentPassword,
-          newPassword,
-        }),
+        body: JSON.stringify({ name: nextName, memory: nextMemory, currentPassword, newPassword }),
       });
       const data = (await response.json().catch(() => ({}))) as ProfileResponse;
-
-      if (!response.ok) {
-        throw new Error(data.error || "Failed to update profile");
-      }
-
-      if (data.user) {
-        setUser(data.user);
-      }
+      if (!response.ok) throw new Error(data.error || "Failed to update profile");
+      if (data.user) setUser(data.user);
       setMemory(nextMemory);
       setMemoryDraft(nextMemory);
       setCurrentPassword("");
       setNewPassword("");
       toast.success("Profile updated");
     } catch (error) {
-      const message =
-        error instanceof Error ? error.message : "Failed to update profile";
-      toast.error(message);
+      toast.error(error instanceof Error ? error.message : "Failed to update profile");
     } finally {
       setIsProfileSaving(false);
     }
@@ -216,13 +158,9 @@ export function AccountButton() {
 
   const handleSaveMemory = async () => {
     const nextMemory = memoryDraft.trim();
-    if (nextMemory.length > MAX_MEMORY_LENGTH) {
-      toast.error(`Memory must be ${MAX_MEMORY_LENGTH} characters or less.`);
-      return;
-    }
+    if (nextMemory.length > MAX_MEMORY_LENGTH) { toast.error(`Memory must be ${MAX_MEMORY_LENGTH} characters or less.`); return; }
 
     setIsMemorySaving(true);
-
     try {
       const response = await fetch("/api/ai/memory", {
         method: "PUT",
@@ -230,19 +168,13 @@ export function AccountButton() {
         body: JSON.stringify({ memory: nextMemory }),
       });
       const data = (await response.json().catch(() => ({}))) as MemoryResponse;
-
-      if (!response.ok) {
-        throw new Error(data.error || "Failed to save memory");
-      }
-
+      if (!response.ok) throw new Error(data.error || "Failed to save memory");
       const savedMemory = data.memory?.trim() ?? "";
       setMemory(savedMemory);
       setMemoryDraft(savedMemory);
       toast.success("Memory updated");
     } catch (error) {
-      const message =
-        error instanceof Error ? error.message : "Failed to save memory";
-      toast.error(message);
+      toast.error(error instanceof Error ? error.message : "Failed to save memory");
     } finally {
       setIsMemorySaving(false);
     }
@@ -251,12 +183,7 @@ export function AccountButton() {
   if (!isAuthenticated) {
     return (
       <>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => setIsAuthOpen(true)}
-          className="gap-2 rounded-full px-4"
-        >
+        <Button variant="outline" size="sm" onClick={() => setIsAuthOpen(true)} className="gap-2 rounded-full px-4">
           <HugeiconsIcon icon={UserIcon} size={16} />
           <span>Login / Sync</span>
         </Button>
@@ -273,9 +200,7 @@ export function AccountButton() {
         <DropdownMenuTrigger asChild>
           <Button variant="ghost" className="relative h-8 w-8 rounded-full">
             <Avatar className="h-8 w-8">
-              <AvatarFallback className="bg-primary/10 text-primary text-xs">
-                {initials}
-              </AvatarFallback>
+              <AvatarFallback className="bg-primary/10 text-primary text-xs">{initials}</AvatarFallback>
             </Avatar>
           </Button>
         </DropdownMenuTrigger>
@@ -283,68 +208,24 @@ export function AccountButton() {
           <DropdownMenuLabel className="font-normal">
             <div className="flex flex-col space-y-1">
               <p className="text-sm font-medium leading-none">Account</p>
-              <p className="text-xs leading-none text-muted-foreground">
-                {user?.email}
-              </p>
+              <p className="text-xs leading-none text-muted-foreground">{user?.email}</p>
             </div>
           </DropdownMenuLabel>
+
           {tokenInfo && (
             <>
               <DropdownMenuSeparator />
-              <div className="px-3 py-2 space-y-1.5">
-                <div className="flex items-center justify-between">
-                  <span className="text-[11px] font-medium text-muted-foreground">
-                    AI tokens (10h window)
-                  </span>
-                  <span
-                    className={`text-[11px] font-semibold tabular-nums ${
-                      tokenInfo.tokensUsed / tokenInfo.tokenLimit >= 0.9
-                        ? "text-destructive"
-                        : tokenInfo.tokensUsed / tokenInfo.tokenLimit >= 0.7
-                          ? "text-amber-500"
-                          : "text-foreground"
-                    }`}
-                  >
-                    {tokenInfo.tokensUsed.toLocaleString()} / {tokenInfo.tokenLimit.toLocaleString()}
-                  </span>
-                </div>
-                <div className="h-1 w-full rounded-full bg-muted overflow-hidden">
-                  <div
-                    className={`h-full rounded-full transition-all ${
-                      tokenInfo.tokensUsed / tokenInfo.tokenLimit >= 0.9
-                        ? "bg-destructive"
-                        : tokenInfo.tokensUsed / tokenInfo.tokenLimit >= 0.7
-                          ? "bg-amber-500"
-                          : "bg-primary"
-                    }`}
-                    style={{
-                      width: `${Math.min((tokenInfo.tokensUsed / tokenInfo.tokenLimit) * 100, 100)}%`,
-                    }}
-                  />
-                </div>
-                <p className="text-[10px] text-muted-foreground/60">
-                  {Math.max(tokenInfo.tokenLimit - tokenInfo.tokensUsed, 0).toLocaleString()} remaining
-                  {tokenInfo.resetAt
-                    ? ` · resets ${new Date(tokenInfo.resetAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`
-                    : ""}
-                </p>
-              </div>
+              <TokenUsageSection tokenInfo={tokenInfo} />
             </>
           )}
+
           <DropdownMenuSeparator />
-          <DropdownMenuItem
-            onClick={() => setIsPushConfirmOpen(true)}
-            disabled={isSyncing}
-          >
+          <DropdownMenuItem onClick={() => setIsPushConfirmOpen(true)} disabled={isSyncing}>
             <HugeiconsIcon icon={CloudUploadIcon} size={16} className="mr-2" />
             <span>Push local to cloud</span>
           </DropdownMenuItem>
           <DropdownMenuItem onClick={handlePull} disabled={isSyncing}>
-            <HugeiconsIcon
-              icon={RefreshIcon}
-              size={16}
-              className={`mr-2 ${isSyncing ? "animate-spin" : ""}`}
-            />
+            <HugeiconsIcon icon={RefreshIcon} size={16} className={`mr-2 ${isSyncing ? "animate-spin" : ""}`} />
             <span>Pull from cloud</span>
           </DropdownMenuItem>
           <DropdownMenuItem onClick={handleOpenProfile}>
@@ -356,10 +237,7 @@ export function AccountButton() {
             <span>Memory</span>
           </DropdownMenuItem>
           <DropdownMenuSeparator />
-          <DropdownMenuItem
-            className="text-red-500 focus:text-red-500"
-            onClick={handleLogout}
-          >
+          <DropdownMenuItem className="text-red-500 focus:text-red-500" onClick={handleLogout}>
             <HugeiconsIcon icon={Logout01Icon} size={16} className="mr-2" />
             <span>Log out</span>
           </DropdownMenuItem>
@@ -376,177 +254,37 @@ export function AccountButton() {
         onConfirm={handlePushConfirm}
       />
 
-      <Dialog open={isProfileOpen} onOpenChange={setIsProfileOpen}>
-        <DialogContent className="max-w-xl rounded-2xl p-5">
-          <div className="space-y-5">
-            <div>
-              <h2 className="text-base font-semibold text-foreground">
-                Profile
-              </h2>
-              <p className="mt-1 text-sm text-muted-foreground">
-                Update your name, MuradianAsk memory, and password.
-              </p>
-            </div>
+      <ProfileDialog
+        isOpen={isProfileOpen}
+        isLoading={isProfileLoading}
+        isSaving={isProfileSaving}
+        profileName={profileName}
+        profileMemory={profileMemory}
+        currentPassword={currentPassword}
+        newPassword={newPassword}
+        onOpenChange={setIsProfileOpen}
+        onNameChange={setProfileName}
+        onMemoryChange={setProfileMemory}
+        onCurrentPasswordChange={setCurrentPassword}
+        onNewPasswordChange={setNewPassword}
+        onSave={handleSaveProfile}
+      />
 
-            {isProfileLoading ? (
-              <div className="min-h-[220px] rounded-xl border border-border/70 bg-muted/30 p-3 text-sm text-muted-foreground">
-                Loading profile...
-              </div>
-            ) : (
-              <>
-                <div className="space-y-2">
-                  <p className="text-xs font-medium text-muted-foreground">
-                    Display name
-                  </p>
-                  <Input
-                    value={profileName}
-                    onChange={(event) => setProfileName(event.target.value)}
-                    maxLength={MAX_NAME_LENGTH}
-                    placeholder="Your name"
-                    disabled={isProfileSaving}
-                    className="rounded-xl bg-muted/30"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <p className="text-xs font-medium text-muted-foreground">
-                    Memory
-                  </p>
-                  <Textarea
-                    value={profileMemory}
-                    onChange={(event) => setProfileMemory(event.target.value)}
-                    placeholder="What should MuradianAsk remember?"
-                    className="min-h-[120px] resize-none rounded-xl bg-muted/30 text-sm leading-6"
-                    maxLength={MAX_MEMORY_LENGTH}
-                    disabled={isProfileSaving}
-                  />
-                  <p className="text-xs text-muted-foreground">
-                    {profileMemory.trim().length}/{MAX_MEMORY_LENGTH}
-                  </p>
-                </div>
-
-                <div className="grid gap-3 sm:grid-cols-2">
-                  <div className="space-y-2">
-                    <p className="text-xs font-medium text-muted-foreground">
-                      Current password
-                    </p>
-                    <Input
-                      type="password"
-                      value={currentPassword}
-                      onChange={(event) =>
-                        setCurrentPassword(event.target.value)
-                      }
-                      placeholder="Required to change password"
-                      disabled={isProfileSaving}
-                      className="rounded-xl bg-muted/30"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <p className="text-xs font-medium text-muted-foreground">
-                      New password
-                    </p>
-                    <Input
-                      type="password"
-                      value={newPassword}
-                      onChange={(event) => setNewPassword(event.target.value)}
-                      placeholder="Leave blank to keep current"
-                      disabled={isProfileSaving}
-                      className="rounded-xl bg-muted/30"
-                    />
-                  </div>
-                </div>
-
-                <div className="flex justify-end gap-2 border-t border-border/60 pt-3">
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    className="rounded-full"
-                    onClick={() => setIsProfileOpen(false)}
-                    disabled={isProfileSaving}
-                  >
-                    Cancel
-                  </Button>
-                  <Button
-                    type="button"
-                    size="sm"
-                    className="rounded-full"
-                    onClick={handleSaveProfile}
-                    disabled={isProfileSaving}
-                  >
-                    {isProfileSaving ? "Saving..." : "Save profile"}
-                  </Button>
-                </div>
-              </>
-            )}
-          </div>
-        </DialogContent>
-      </Dialog>
-
-      <Dialog open={isMemoryOpen} onOpenChange={setIsMemoryOpen}>
-        <DialogContent className="max-w-xl rounded-2xl p-5">
-          <div className="space-y-4">
-            <div>
-              <h2 className="text-base font-semibold text-foreground">
-                Memory
-              </h2>
-              <p className="mt-1 text-sm text-muted-foreground">
-                Edit what MuradianAsk remembers in normal ask mode.
-              </p>
-            </div>
-            {isMemoryLoading ? (
-              <div className="min-h-[160px] rounded-xl border border-border/70 bg-muted/30 p-3 text-sm text-muted-foreground">
-                Loading memory...
-              </div>
-            ) : (
-              <>
-                <Textarea
-                  value={memoryDraft}
-                  onChange={(event) => setMemoryDraft(event.target.value)}
-                  placeholder="No memory saved yet. You can write useful long-term context here."
-                  className="min-h-[180px] resize-none rounded-xl bg-muted/30 text-sm leading-6"
-                  maxLength={MAX_MEMORY_LENGTH}
-                  disabled={isMemorySaving}
-                />
-                <div className="flex items-center justify-between gap-3">
-                  <p className="text-xs text-muted-foreground">
-                    {memoryDraft.trim().length}/{MAX_MEMORY_LENGTH}
-                  </p>
-                  <div className="flex items-center gap-2">
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      className="rounded-full"
-                      onClick={() => setMemoryDraft(memory)}
-                      disabled={isMemorySaving || memoryDraft === memory}
-                    >
-                      Reset
-                    </Button>
-                    <Button
-                      type="button"
-                      size="sm"
-                      className="rounded-full"
-                      onClick={handleSaveMemory}
-                      disabled={isMemorySaving || memoryDraft.trim() === memory}
-                    >
-                      {isMemorySaving ? "Saving..." : "Save memory"}
-                    </Button>
-                  </div>
-                </div>
-              </>
-            )}
-          </div>
-        </DialogContent>
-      </Dialog>
+      <MemoryDialog
+        isOpen={isMemoryOpen}
+        isLoading={isMemoryLoading}
+        isSaving={isMemorySaving}
+        memory={memory}
+        memoryDraft={memoryDraft}
+        onOpenChange={setIsMemoryOpen}
+        onDraftChange={setMemoryDraft}
+        onSave={handleSaveMemory}
+        onReset={() => setMemoryDraft(memory)}
+      />
 
       {lastSynced && (
         <div className="hidden md:flex items-center text-[10px] text-muted-foreground gap-1 bg-muted/50 px-2 py-1 rounded-full border border-border/50">
-          <HugeiconsIcon
-            icon={Tick01Icon}
-            size={12}
-            className="text-green-500"
-          />
+          <HugeiconsIcon icon={Tick01Icon} size={12} className="text-green-500" />
           <span>Synced</span>
         </div>
       )}

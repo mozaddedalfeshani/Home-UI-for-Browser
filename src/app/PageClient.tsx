@@ -1,27 +1,25 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import DigitalClock from "@/components/Home/ClockZone/Clock";
 import TabsZone from "@/components/Home/TabsZone";
 import SettingsMenu from "@/components/SettingsMenu";
 import Notepad from "@/components/Notepad";
 import SearchModal from "@/components/SearchModal";
 import MuradianAIModal from "@/components/MuradianAIModal";
-import {
-  normalizeDynamicWallpaper,
-  useSettingsStore,
-} from "@/store/settingsStore";
+import StickyAlarmDialog from "@/components/Notepad/StickyAlarmDialog";
+import { AuthDialog } from "@/components/Auth/AuthDialog";
+import GithubLink from "@/components/Home/GithubLink";
+import { normalizeDynamicWallpaper, useSettingsStore } from "@/store/settingsStore";
+import { useAuthStore } from "@/store/authStore";
 import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
 import { useMediaUrl } from "@/hooks/useMediaUrl";
 import { useDefaultAssets } from "@/hooks/useDefaultAssets";
 import { useStickyNoteAlarms } from "@/hooks/useStickyNoteAlarms";
-import Image from "next/image";
-import GithubLink from "@/components/Home/GithubLink";
-import { cn } from "@/lib/utils";
-import StickyAlarmDialog from "@/components/Notepad/StickyAlarmDialog";
-import { useAuthStore } from "@/store/authStore";
-import { AuthDialog } from "@/components/Auth/AuthDialog";
 import { useTheme } from "next-themes";
+import { BackgroundLayer } from "./_components/BackgroundLayer";
+import { ClockSection } from "./_components/ClockSection";
+import { SidebarOverlay } from "./_components/SidebarOverlay";
+import { SearchHoverZone } from "./_components/SearchHoverZone";
 
 type SearchOpenRequest = {
   id: number;
@@ -48,7 +46,6 @@ export function PageClient() {
   const { url: backgroundImageUrl } = useMediaUrl(backgroundImage);
   const [bgOpacity, setBgOpacity] = useState(0);
 
-  // Smooth Wallpaper Transition
   useEffect(() => {
     if (backgroundImageUrl) {
       setBgOpacity(0);
@@ -58,15 +55,11 @@ export function PageClient() {
   }, [backgroundImageUrl]);
 
   const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
-  const [searchOpenRequest, setSearchOpenRequest] = useState<SearchOpenRequest>(
-    {
-      id: 0,
-      seedText: "",
-    },
-  );
+  const [searchOpenRequest, setSearchOpenRequest] = useState<SearchOpenRequest>({ id: 0, seedText: "" });
   const [isSidebarVisible, setIsSidebarVisible] = useState(false);
   const [isMuradianModalOpen, setIsMuradianModalOpen] = useState(false);
   const [isAuthDialogOpen, setIsAuthDialogOpen] = useState(false);
+
   const hasPickedDynamicWallpaperRef = useRef(false);
   const lastDynamicWallpaperThemeRef = useRef<string | null>(null);
   const isSearchModalOpenRef = useRef(false);
@@ -74,87 +67,50 @@ export function PageClient() {
   const isAuthDialogOpenRef = useRef(false);
   const isSearchInputReadyRef = useRef(false);
 
-  useEffect(() => {
-    isSearchModalOpenRef.current = isSearchModalOpen;
-  }, [isSearchModalOpen]);
-
-  useEffect(() => {
-    isMuradianModalOpenRef.current = isMuradianModalOpen;
-  }, [isMuradianModalOpen]);
-
-  useEffect(() => {
-    isAuthDialogOpenRef.current = isAuthDialogOpen;
-  }, [isAuthDialogOpen]);
+  useEffect(() => { isSearchModalOpenRef.current = isSearchModalOpen; }, [isSearchModalOpen]);
+  useEffect(() => { isMuradianModalOpenRef.current = isMuradianModalOpen; }, [isMuradianModalOpen]);
+  useEffect(() => { isAuthDialogOpenRef.current = isAuthDialogOpen; }, [isAuthDialogOpen]);
 
   const handleSearchModalOpenChange = (nextOpen: boolean) => {
     isSearchModalOpenRef.current = nextOpen;
     isSearchInputReadyRef.current = false;
     setIsSearchModalOpen(nextOpen);
-
     if (!nextOpen) {
-      setSearchOpenRequest((currentRequest) => ({
-        id: currentRequest.id,
-        seedText: "",
-      }));
+      setSearchOpenRequest((r) => ({ id: r.id, seedText: "" }));
     }
   };
 
-  // Dynamic Wallpaper Logic: Pick a new one on every refresh
   useEffect(() => {
-    if (!isHydrated) {
+    if (!isHydrated || !isDynamicWallpaper) {
+      if (!isDynamicWallpaper) {
+        hasPickedDynamicWallpaperRef.current = false;
+        lastDynamicWallpaperThemeRef.current = null;
+      }
       return;
     }
 
-    if (!isDynamicWallpaper) {
-      hasPickedDynamicWallpaperRef.current = false;
-      lastDynamicWallpaperThemeRef.current = null;
-      return;
-    }
+    if (hasPickedDynamicWallpaperRef.current && lastDynamicWallpaperThemeRef.current === activeWallpaperTheme) return;
 
-    if (
-      hasPickedDynamicWallpaperRef.current &&
-      lastDynamicWallpaperThemeRef.current === activeWallpaperTheme
-    ) {
-      return;
-    }
-
-    const normalizedWallpapers = dynamicWallpapers.map(
-      normalizeDynamicWallpaper,
-    );
+    const normalizedWallpapers = dynamicWallpapers.map(normalizeDynamicWallpaper);
     const themeWallpapers = normalizedWallpapers.filter(
-      (wallpaper) =>
-        wallpaper.mode === "both" || wallpaper.mode === activeWallpaperTheme,
+      (w) => w.mode === "both" || w.mode === activeWallpaperTheme,
     );
-    const availableWallpapers =
-      themeWallpapers.length > 0 ? themeWallpapers : normalizedWallpapers;
-
-    if (availableWallpapers.length === 0) {
-      return;
-    }
+    const available = themeWallpapers.length > 0 ? themeWallpapers : normalizedWallpapers;
+    if (available.length === 0) return;
 
     hasPickedDynamicWallpaperRef.current = true;
     lastDynamicWallpaperThemeRef.current = activeWallpaperTheme;
 
     const fetchNewWallpaper = async () => {
       try {
-        // Use sessionStorage to keep track of the last index across refreshes in the same session
         const lastIndexStr = sessionStorage.getItem("lastWallpaperIndex");
         const lastIndex = lastIndexStr ? parseInt(lastIndexStr, 10) : -1;
-
-        let randomIndex;
-        if (availableWallpapers.length > 1) {
-          // Ensure we pick a DIFFERENT index than the last one if possible
-          do {
-            randomIndex = Math.floor(Math.random() * availableWallpapers.length);
-          } while (randomIndex === lastIndex);
-        } else {
-          randomIndex = 0;
+        let randomIndex = 0;
+        if (available.length > 1) {
+          do { randomIndex = Math.floor(Math.random() * available.length); } while (randomIndex === lastIndex);
         }
-
         sessionStorage.setItem("lastWallpaperIndex", randomIndex.toString());
-        const selectedUrl = availableWallpapers[randomIndex].url;
-
-        await setBackgroundImage(selectedUrl);
+        await setBackgroundImage(available[randomIndex].url);
       } catch {
         hasPickedDynamicWallpaperRef.current = false;
         lastDynamicWallpaperThemeRef.current = null;
@@ -162,80 +118,50 @@ export function PageClient() {
     };
 
     fetchNewWallpaper();
-  }, [
-    activeWallpaperTheme,
-    dynamicWallpapers,
-    isDynamicWallpaper,
-    isHydrated,
-    setBackgroundImage,
-  ]);
+  }, [activeWallpaperTheme, dynamicWallpapers, isDynamicWallpaper, isHydrated, setBackgroundImage]);
 
   const shouldShowRightSidebar = showRightSidebar && layoutPreset !== "focus";
-  const clockPaddingClass =
-    layoutPreset === "compact"
-      ? "pt-10 pb-2 px-2"
-      : layoutPreset === "focus"
-        ? "pt-24 pb-6 px-6"
-        : "pt-16 pb-4 px-4";
 
   const { isAuthenticated, initCloudSession } = useAuthStore();
 
-  // Restore cloud data once local stores are hydrated (silent, non-blocking)
   useEffect(() => {
-    if (isHydrated) {
-      initCloudSession();
-    }
+    if (isHydrated) initCloudSession();
   }, [isHydrated, initCloudSession]);
 
-  // Initialize keyboard shortcuts
   useKeyboardShortcuts({
     onAIModalOpen: () => {
-      if (isSearchModalOpenRef.current || isAuthDialogOpenRef.current) {
-        return;
-      }
-
+      if (isSearchModalOpenRef.current || isAuthDialogOpenRef.current) return;
       if (!isAuthenticated) {
         isAuthDialogOpenRef.current = true;
         setIsAuthDialogOpen(true);
         return;
       }
-
       isMuradianModalOpenRef.current = true;
       setIsMuradianModalOpen(true);
     },
     onSearchModalOpen: (initialQuery) => {
-      if (isMuradianModalOpenRef.current || isAuthDialogOpenRef.current) {
-        return;
-      }
-
+      if (isMuradianModalOpenRef.current || isAuthDialogOpenRef.current) return;
       if (initialQuery) {
-        setSearchOpenRequest((currentRequest) => ({
-          id: currentRequest.id + 1,
+        setSearchOpenRequest((r) => ({
+          id: r.id + 1,
           seedText:
             isSearchModalOpenRef.current && !isSearchInputReadyRef.current
-              ? `${currentRequest.seedText}${initialQuery}`
+              ? `${r.seedText}${initialQuery}`
               : initialQuery,
         }));
       } else if (!isSearchModalOpenRef.current) {
-        setSearchOpenRequest((currentRequest) => ({
-          id: currentRequest.id + 1,
-          seedText: "",
-        }));
+        setSearchOpenRequest((r) => ({ id: r.id + 1, seedText: "" }));
       }
-
       isSearchModalOpenRef.current = true;
       isSearchInputReadyRef.current = false;
       setIsSearchModalOpen(true);
     },
   });
-  // Ensure default background image on first visit
+
   useDefaultAssets();
-  // Keep sticky-note reminders active while dashboard tab is open
   useStickyNoteAlarms();
 
   const hasAutoOpenedRef = useRef(false);
-
-  // Auto-focus search on visit
   useEffect(() => {
     if (isHydrated && !hasAutoOpenedRef.current && autoFocusSearch) {
       setIsSearchModalOpen(true);
@@ -245,87 +171,45 @@ export function PageClient() {
 
   return (
     <div className="min-h-screen w-full relative overflow-hidden">
-      {backgroundImageUrl && (
-        <Image
-          src={backgroundImageUrl}
-          alt="Dashboard Background"
-          fill
-          priority
-          className={cn(
-            "object-cover -z-10 transition-opacity duration-1000",
-            bgOpacity === 1 ? "opacity-100" : "opacity-0",
-          )}
-          unoptimized={backgroundImageUrl.startsWith("blob:")}
-        />
-      )}
+      <BackgroundLayer url={backgroundImageUrl} opacity={bgOpacity} />
 
-      {/* Main Content (Always Centered) */}
       <div className="relative z-10 flex flex-col h-screen overflow-hidden">
         <div className="flex-1 flex flex-col overflow-hidden">
-          {/* Clock positioned within left side only */}
           {showClock && (
-            <div
-              className={`flex justify-${clockPosition === "top-left" ? "start" : clockPosition === "top-center" ? "center" : "end"} ${clockPaddingClass}`}
-            >
-              <DigitalClock />
-            </div>
+            <ClockSection clockPosition={clockPosition} layoutPreset={layoutPreset} />
           )}
           <TabsZone />
         </div>
       </div>
 
-      {/* Sidebar Hover Trigger Zone (Far Right) */}
-      {shouldShowRightSidebar && !isSidebarVisible && (
-        <div
-          className="fixed right-0 top-0 bottom-0 w-8 z-40 cursor-w-resize"
+      {shouldShowRightSidebar && (
+        <SidebarOverlay
+          isVisible={isSidebarVisible}
           onMouseEnter={() => setIsSidebarVisible(true)}
+          onMouseLeave={() => setIsSidebarVisible(false)}
         />
       )}
 
-      {/* Sidebar Overlay */}
-      {shouldShowRightSidebar && (
-        <div
-          className={cn(
-            "fixed right-0 top-0 bottom-0 w-80 md:w-96 z-50 transform transition-all duration-500 ease-out",
-            isSidebarVisible ? "translate-x-0" : "translate-x-full",
-          )}
-          onMouseLeave={() => setIsSidebarVisible(false)}
-        >
-          <Notepad />
-        </div>
-      )}
-
-      {/* Search Hover Zone (Bottom Center) */}
       {enableSearchHoverZone && (
-        <div
-          className="fixed bottom-0 left-1/2 -translate-x-1/2 h-16 w-64 z-40 cursor-pointer"
-          onMouseEnter={() => {
-            if (
-              !isSearchModalOpenRef.current &&
-              !isMuradianModalOpenRef.current &&
-              !isAuthDialogOpenRef.current
-            ) {
-              setSearchOpenRequest((currentRequest) => ({
-                id: currentRequest.id + 1,
-                seedText: "",
-              }));
-              isSearchModalOpenRef.current = true;
-              isSearchInputReadyRef.current = false;
-              setIsSearchModalOpen(true);
-            }
+        <SearchHoverZone
+          onEnter={() => {
+            if (isSearchModalOpenRef.current || isMuradianModalOpenRef.current || isAuthDialogOpenRef.current) return;
+            setSearchOpenRequest((r) => ({ id: r.id + 1, seedText: "" }));
+            isSearchModalOpenRef.current = true;
+            isSearchInputReadyRef.current = false;
+            setIsSearchModalOpen(true);
           }}
         />
       )}
 
       <SettingsMenu />
       <GithubLink />
+
       <SearchModal
         open={isSearchModalOpen}
         onOpenChange={handleSearchModalOpenChange}
         openRequest={searchOpenRequest}
-        onInputReady={() => {
-          isSearchInputReadyRef.current = true;
-        }}
+        onInputReady={() => { isSearchInputReadyRef.current = true; }}
       />
       <MuradianAIModal
         open={isAuthenticated && isMuradianModalOpen}
