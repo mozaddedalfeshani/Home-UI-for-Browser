@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { cookies } from "next/headers";
-import { verifyToken } from "@/lib/auth/jwt";
+import { verifyToken, signToken } from "@/lib/auth/jwt";
 import { pullUserData } from "@/lib/auth/sync";
 import { UserData } from "@/lib/auth/db";
 import { corsGuard, handleCorsOptions, withCorsHeaders } from "@/lib/auth/cors";
@@ -36,7 +36,13 @@ export async function GET(request: NextRequest) {
 
     const userData = await pullUserData(payload.userId);
 
-    return withCorsHeaders(
+    const freshToken = signToken({
+      userId: payload.userId,
+      name: payload.name,
+      email: payload.email,
+    });
+
+    const res = withCorsHeaders(
       NextResponse.json<{
         authenticated: boolean;
         user: { name: string; email: string; id: string };
@@ -48,6 +54,15 @@ export async function GET(request: NextRequest) {
       }),
       request,
     );
+
+    res.cookies.set("__lt_session", freshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      maxAge: 7 * 24 * 60 * 60,
+    });
+
+    return res;
   } catch (error) {
     console.error("Init API error:", error);
     return withCorsHeaders(
