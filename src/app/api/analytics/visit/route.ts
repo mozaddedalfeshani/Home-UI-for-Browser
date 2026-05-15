@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getMongoDb } from "@/lib/mongodb";
+import sql from "@/lib/db";
 import { incrementLocalVisitCount } from "@/lib/localAnalytics";
 
 export const runtime = "nodejs";
@@ -34,36 +34,22 @@ export async function POST(request: Request) {
 
     key = tabId || url || "unknown";
 
-    const db = await getMongoDb();
-    const visitsCollection = db.collection("visit_counts");
-
-    const row = await visitsCollection.findOneAndUpdate(
-      { key },
-      {
-        $inc: { count: 1 },
-        $set: {
-          key,
-          tabId: tabId ?? null,
-          title,
-          url: url ?? null,
-          source,
-          updatedAt: new Date(),
-        },
-        $setOnInsert: {
-          createdAt: new Date(),
-        },
-      },
-      {
-        upsert: true,
-        returnDocument: "after",
-        projection: { _id: 0, key: 1, tabId: 1, count: 1 },
-      },
-    );
+    const rows = await sql`
+      INSERT INTO visit_counts (key, tab_id, title, url, source, count, created_at, updated_at)
+      VALUES (${key}, ${tabId ?? null}, ${title}, ${url ?? null}, ${source}, 1, NOW(), NOW())
+      ON CONFLICT (key) DO UPDATE SET
+        count = visit_counts.count + 1,
+        title = ${title},
+        url = ${url ?? null},
+        source = ${source},
+        updated_at = NOW()
+      RETURNING key, tab_id AS "tabId", count
+    `;
 
     return NextResponse.json({
       success: true,
-      source: "mongodb",
-      data: row,
+      source: "postgresql",
+      data: rows[0],
     });
   } catch (error) {
     console.error("Failed to save visit analytics", error);
@@ -84,7 +70,7 @@ export async function POST(request: Request) {
         url: fallbackRow.url,
         count: fallbackRow.count,
       },
-      error: "MongoDB save failed. Saved locally instead.",
+      error: "PostgreSQL save failed. Saved locally instead.",
     });
   }
 }
@@ -104,30 +90,15 @@ export async function GET(request: Request) {
   const key = tabId || url || "unknown";
 
   try {
-    const db = await getMongoDb();
-    const visitsCollection = db.collection("visit_counts");
-    const row = await visitsCollection.findOneAndUpdate(
-      { key },
-      {
-        $inc: { count: 1 },
-        $set: {
-          key,
-          tabId: tabId ?? null,
-          title: null,
-          url: url ?? null,
-          source: "visit-get",
-          updatedAt: new Date(),
-        },
-        $setOnInsert: {
-          createdAt: new Date(),
-        },
-      },
-      {
-        upsert: true,
-        returnDocument: "after",
-        projection: { _id: 0, key: 1, tabId: 1, url: 1, count: 1 },
-      },
-    );
+    const rows = await sql`
+      INSERT INTO visit_counts (key, tab_id, title, url, source, count, created_at, updated_at)
+      VALUES (${key}, ${tabId ?? null}, null, ${url ?? null}, 'visit-get', 1, NOW(), NOW())
+      ON CONFLICT (key) DO UPDATE SET
+        count = visit_counts.count + 1,
+        source = 'visit-get',
+        updated_at = NOW()
+      RETURNING key, tab_id AS "tabId", url, count
+    `;
 
     return NextResponse.json({
       success: true,
@@ -136,7 +107,7 @@ export async function GET(request: Request) {
         key,
         tabId: tabId ?? null,
         url: url ?? null,
-        count: row?.count ?? 0,
+        count: (rows[0] as { count: number })?.count ?? 0,
       },
     });
   } catch (error) {
@@ -158,7 +129,7 @@ export async function GET(request: Request) {
         url: fallbackRow.url ?? url ?? null,
         count: fallbackRow.count ?? 0,
       },
-      error: "MongoDB read failed. Read local fallback instead.",
+      error: "PostgreSQL read failed. Read local fallback instead.",
     });
   }
 }
