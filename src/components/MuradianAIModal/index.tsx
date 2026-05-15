@@ -123,13 +123,11 @@ export default function MuradianAIModal({ open, onOpenChange }: MuradianAIModalP
                   <ChatInput
                     query={chat.query}
                     isLoading={chat.isLoading}
-                    hasMessages={chat.messages.length > 0}
                     open={open}
                     tokenUsage={chat.tokenUsage}
                     inputRef={chat.inputRef}
                     onQueryChange={chat.setQuery}
                     onSend={() => chat.handleSend(agentMgr.selectedAgentId)}
-                    onClear={chat.handleClearChat}
                     userRole={userRole}
                     agentPickerSlot={
                       <>
@@ -140,11 +138,11 @@ export default function MuradianAIModal({ open, onOpenChange }: MuradianAIModalP
                               <Button
                                 type="button"
                                 variant="ghost"
-                                className="group h-8 w-8 shrink-0 overflow-hidden rounded-full border border-border/50 bg-background/55 px-0 text-muted-foreground shadow-sm backdrop-blur-md transition-all duration-200 hover:w-auto hover:px-3 hover:bg-accent hover:text-foreground"
+                                className="group h-8 w-8 shrink-0 overflow-hidden rounded-full border border-border/50 bg-background/55 px-0 text-muted-foreground shadow-sm backdrop-blur-md transition-all duration-500 hover:w-auto hover:px-3 hover:bg-accent hover:text-foreground"
                                 aria-label="Select AI model"
                               >
                                 <HugeiconsIcon icon={AiNetworkIcon} size={14} strokeWidth={2} className="shrink-0" />
-                                <span className="max-w-0 overflow-hidden whitespace-nowrap text-xs font-medium opacity-0 transition-all duration-200 group-hover:max-w-[80px] group-hover:ml-1.5 group-hover:opacity-100">
+                                <span className="max-w-0 overflow-hidden whitespace-nowrap text-xs font-medium opacity-0 transition-all duration-500 group-hover:max-w-[80px] group-hover:ml-1.5 group-hover:opacity-100">
                                   AI Models
                                 </span>
                               </Button>
@@ -184,7 +182,7 @@ export default function MuradianAIModal({ open, onOpenChange }: MuradianAIModalP
                           type="button"
                           variant="ghost"
                           onClick={handleOpenMarketplace}
-                          className="group h-8 w-8 shrink-0 overflow-hidden rounded-full border border-border/50 bg-background/55 px-0 text-muted-foreground shadow-sm backdrop-blur-md transition-all duration-200 hover:w-auto hover:px-3 hover:bg-accent hover:text-foreground"
+                          className="group h-8 w-8 shrink-0 overflow-hidden rounded-full border border-border/50 bg-background/55 px-0 text-muted-foreground shadow-sm backdrop-blur-md transition-all duration-500 hover:w-auto hover:px-3 hover:bg-accent hover:text-foreground"
                           aria-label="Open agent marketplace"
                         >
                           <HugeiconsIcon
@@ -193,7 +191,7 @@ export default function MuradianAIModal({ open, onOpenChange }: MuradianAIModalP
                             strokeWidth={2}
                             className={cn("shrink-0", agentMgr.selectedAgent ? "text-primary" : "")}
                           />
-                          <span className="max-w-0 overflow-hidden whitespace-nowrap text-xs font-medium opacity-0 transition-all duration-200 group-hover:max-w-[120px] group-hover:ml-1.5 group-hover:opacity-100">
+                          <span className="max-w-0 overflow-hidden whitespace-nowrap text-xs font-medium opacity-0 transition-all duration-500 group-hover:max-w-[120px] group-hover:ml-1.5 group-hover:opacity-100">
                             {agentMgr.selectedAgent?.name ?? "Normal ask"}
                           </span>
                           {agentMgr.selectedAgent?.visibility === "public" && (
