@@ -63,19 +63,57 @@ export async function getMuradianAskAgentForUse(
 export async function searchPublicMuradianAskAgents(
   userId: string,
   query: string,
-): Promise<MuradianAskAgentDocument[]> {
+  limit = 12,
+  offset = 0,
+): Promise<{ agents: MuradianAskAgentDocument[]; total: number }> {
   const pattern = `%${query}%`;
-  const rows = await sql`
-    SELECT id, user_id AS "userId", name, description,
-           system_instruction AS "systemInstruction",
-           visibility, created_at AS "createdAt", updated_at AS "updatedAt"
-    FROM muradian_ask_agents
-    WHERE user_id != ${userId} AND visibility = 'public'
-      AND (name ILIKE ${pattern} OR description ILIKE ${pattern})
-    ORDER BY updated_at DESC
-    LIMIT 8
-  `;
-  return rows as MuradianAskAgentDocument[];
+  const [rows, countRows] = await Promise.all([
+    sql`
+      SELECT id, user_id AS "userId", name, description,
+             system_instruction AS "systemInstruction",
+             visibility, created_at AS "createdAt", updated_at AS "updatedAt"
+      FROM muradian_ask_agents
+      WHERE user_id != ${userId} AND visibility = 'public'
+        AND (name ILIKE ${pattern} OR description ILIKE ${pattern})
+      ORDER BY name ASC
+      LIMIT ${limit} OFFSET ${offset}
+    `,
+    sql`
+      SELECT COUNT(*)::int AS total FROM muradian_ask_agents
+      WHERE user_id != ${userId} AND visibility = 'public'
+        AND (name ILIKE ${pattern} OR description ILIKE ${pattern})
+    `,
+  ]);
+  return {
+    agents: rows as MuradianAskAgentDocument[],
+    total: (countRows[0] as { total: number }).total,
+  };
+}
+
+export async function listPublicMuradianAskAgents(
+  userId: string,
+  limit = 12,
+  offset = 0,
+): Promise<{ agents: MuradianAskAgentDocument[]; total: number }> {
+  const [rows, countRows] = await Promise.all([
+    sql`
+      SELECT id, user_id AS "userId", name, description,
+             system_instruction AS "systemInstruction",
+             visibility, created_at AS "createdAt", updated_at AS "updatedAt"
+      FROM muradian_ask_agents
+      WHERE user_id != ${userId} AND visibility = 'public'
+      ORDER BY name ASC
+      LIMIT ${limit} OFFSET ${offset}
+    `,
+    sql`
+      SELECT COUNT(*)::int AS total FROM muradian_ask_agents
+      WHERE user_id != ${userId} AND visibility = 'public'
+    `,
+  ]);
+  return {
+    agents: rows as MuradianAskAgentDocument[],
+    total: (countRows[0] as { total: number }).total,
+  };
 }
 
 export async function getRandomPublicMuradianAskAgents(

@@ -1,6 +1,6 @@
 "use client";
 
-import { type KeyboardEvent, type RefObject, useEffect, useRef } from "react";
+import { type KeyboardEvent, type RefObject, useEffect, useRef, useState } from "react";
 import { Loader2, RotateCcw } from "lucide-react";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { SentIcon } from "@hugeicons/core-free-icons";
@@ -9,6 +9,17 @@ import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 import { TokenUsageBar } from "./TokenUsageBar";
 import type { TokenUsage } from "../types";
+
+interface SlashCommand {
+  cmd: string;
+  label: string;
+  description: string;
+}
+
+const SLASH_COMMANDS: SlashCommand[] = [
+  { cmd: "/clear", label: "Clear", description: "Remove all messages and reset context" },
+  { cmd: "/compact", label: "Compact", description: "Compress history using existing summary" },
+];
 
 interface ChatInputProps {
   query: string;
@@ -36,6 +47,7 @@ export function ChatInput({
   onClear,
 }: ChatInputProps) {
   const prevOpenRef = useRef(false);
+  const [activeIndex, setActiveIndex] = useState(0);
 
   useEffect(() => {
     if (open && !prevOpenRef.current) {
@@ -52,14 +64,75 @@ export function ChatInput({
     input.style.overflowY = input.scrollHeight > 76 ? "auto" : "hidden";
   }, [query, open, inputRef]);
 
+  const showCommands = query.startsWith("/") && !query.includes(" ");
+  const filteredCommands = showCommands
+    ? SLASH_COMMANDS.filter((c) => c.cmd.startsWith(query.toLowerCase()))
+    : [];
+
+  useEffect(() => {
+    setActiveIndex(0);
+  }, [query]);
+
+  const pickCommand = (cmd: string) => {
+    onQueryChange(cmd);
+    setTimeout(() => inputRef.current?.focus(), 0);
+  };
+
   const handleKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
+    if (filteredCommands.length > 0) {
+      if (e.key === "ArrowUp") {
+        e.preventDefault();
+        setActiveIndex((i) => (i - 1 + filteredCommands.length) % filteredCommands.length);
+        return;
+      }
+      if (e.key === "ArrowDown") {
+        e.preventDefault();
+        setActiveIndex((i) => (i + 1) % filteredCommands.length);
+        return;
+      }
+      if (e.key === "Tab") {
+        e.preventDefault();
+        onQueryChange(filteredCommands[activeIndex].cmd);
+        return;
+      }
+      if (e.key === "Escape") {
+        onQueryChange("");
+        return;
+      }
+    }
     if (e.key !== "Enter" || e.shiftKey) return;
     e.preventDefault();
+    if (filteredCommands.length > 0 && query !== filteredCommands[activeIndex].cmd) {
+      onQueryChange(filteredCommands[activeIndex].cmd);
+      return;
+    }
     onSend();
   };
 
   return (
     <div className="shrink-0 border-t border-border/20 p-1.5">
+      {filteredCommands.length > 0 && (
+        <div className="mb-1.5 overflow-hidden rounded-2xl border border-border/40 bg-background/95 shadow-lg backdrop-blur-xl">
+          {filteredCommands.map((c, i) => (
+            <button
+              key={c.cmd}
+              type="button"
+              onMouseDown={(e) => e.preventDefault()}
+              onClick={() => pickCommand(c.cmd)}
+              className={cn(
+                "flex w-full items-center gap-3 px-4 py-2.5 text-left transition-colors",
+                i === activeIndex ? "bg-accent" : "hover:bg-accent/50",
+              )}
+            >
+              <span className="min-w-[4.5rem] font-mono text-xs font-semibold text-primary">
+                {c.cmd}
+              </span>
+              <span className="text-xs text-muted-foreground">{c.description}</span>
+            </button>
+          ))}
+        </div>
+      )}
+
       <div className="flex items-center gap-1.5">
         <Textarea
           ref={inputRef}

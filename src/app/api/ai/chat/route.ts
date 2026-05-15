@@ -196,7 +196,7 @@ async function updateMemoryProfile(params: {
   }
 
   const memoryPayload = (await memoryResponse.json()) as {
-    usage?: { total_tokens?: number };
+    usage?: { completion_tokens?: number };
     choices?: Array<{ message?: { content?: string } }>;
   };
 
@@ -206,11 +206,11 @@ async function updateMemoryProfile(params: {
       "",
   );
 
-  if (memoryPayload.usage?.total_tokens) {
+  if (memoryPayload.usage?.completion_tokens) {
     await incrementTokenUsage(
       userId,
       currentMonth,
-      memoryPayload.usage.total_tokens,
+      memoryPayload.usage.completion_tokens,
     );
   }
 
@@ -257,12 +257,12 @@ async function generateRollingSummary(params: {
   if (!res.ok) return existingSummary;
 
   const data = (await res.json()) as {
-    usage?: { total_tokens?: number };
+    usage?: { completion_tokens?: number };
     choices?: Array<{ message?: { content?: string } }>;
   };
 
-  if (data.usage?.total_tokens) {
-    await incrementTokenUsage(userId, currentMonth, data.usage.total_tokens).catch(() => {});
+  if (data.usage?.completion_tokens) {
+    await incrementTokenUsage(userId, currentMonth, data.usage.completion_tokens).catch(() => {});
   }
 
   return data.choices?.[0]?.message?.content?.trim() ?? existingSummary;
@@ -391,8 +391,8 @@ export async function POST(req: NextRequest) {
               const dataStr = line.slice(6);
               try {
                 const parsed = JSON.parse(dataStr);
-                if (parsed.usage && parsed.usage.total_tokens) {
-                  const tokens = parsed.usage.total_tokens;
+                if (parsed.usage && parsed.usage.completion_tokens) {
+                  const tokens = parsed.usage.completion_tokens;
                   Promise.allSettled([
                     incrementTokenUsage(userId, currentMonth, tokens),
                     incrementWindowTokenUsage(userId, tokens),
@@ -425,8 +425,8 @@ export async function POST(req: NextRequest) {
             if (typeof content === "string") {
               assistantAnswer += content;
             }
-            if (parsed.usage?.total_tokens) {
-              trailingTokens = parsed.usage.total_tokens;
+            if (parsed.usage?.completion_tokens) {
+              trailingTokens = parsed.usage.completion_tokens;
               await Promise.allSettled([
                 incrementTokenUsage(userId, currentMonth, trailingTokens),
                 incrementWindowTokenUsage(userId, trailingTokens),

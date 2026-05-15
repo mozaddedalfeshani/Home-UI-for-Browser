@@ -23,6 +23,7 @@ export type MuradianAskAgentInput = Pick<
 
 interface MuradianAskAgentState {
   agents: MuradianAskAgent[];
+  installedAgents: MuradianAskAgent[];
   isLoading: boolean;
   fetchAgents: () => Promise<void>;
   createAgent: (input: MuradianAskAgentInput) => Promise<MuradianAskAgent>;
@@ -32,12 +33,15 @@ interface MuradianAskAgentState {
   ) => Promise<void>;
   deleteAgent: (id: MuradianAskAgentId) => Promise<void>;
   getAgentById: (id: MuradianAskAgentId) => MuradianAskAgent | undefined;
+  installAgent: (agent: MuradianAskAgent) => void;
+  uninstallAgent: (id: MuradianAskAgentId) => void;
 }
 
 export const useMuradianAskAgentStore = create<MuradianAskAgentState>()(
   persist(
     (set, get) => ({
       agents: [],
+      installedAgents: [],
       isLoading: false,
       fetchAgents: async () => {
         set({ isLoading: true });
@@ -114,11 +118,32 @@ export const useMuradianAskAgentStore = create<MuradianAskAgentState>()(
         }));
       },
       getAgentById: (id) => get().agents.find((agent) => agent.id === id),
+      installAgent: (agent) => {
+        set((state) => {
+          if (state.installedAgents.some((a) => a.id === agent.id)) return state;
+          return { installedAgents: [agent, ...state.installedAgents] };
+        });
+      },
+      uninstallAgent: (id) => {
+        set((state) => ({
+          installedAgents: state.installedAgents.filter((a) => a.id !== id),
+        }));
+      },
     }),
     {
       name: "muradian-ask-agent-store",
-      version: 2,
-      partialize: (state) => ({ agents: state.agents }),
+      version: 3,
+      migrate: (persisted, version) => {
+        const state = persisted as { agents?: MuradianAskAgent[]; installedAgents?: MuradianAskAgent[] };
+        return {
+          agents: state.agents ?? [],
+          installedAgents: version < 3 ? [] : (state.installedAgents ?? []),
+        };
+      },
+      partialize: (state) => ({
+        agents: state.agents,
+        installedAgents: state.installedAgents,
+      }),
     },
   ),
 );

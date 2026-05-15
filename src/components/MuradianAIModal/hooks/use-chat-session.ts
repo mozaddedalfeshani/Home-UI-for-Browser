@@ -35,6 +35,22 @@ export function useChatSession({ open, language, userName }: UseChatSessionParam
     if (!trimmedQuery || isLoading) return;
 
     const genId = () => `${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}`;
+
+    if (trimmedQuery === "/clear") {
+      setQuery("");
+      handleClearChat();
+      return;
+    }
+
+    if (trimmedQuery === "/compact") {
+      setQuery("");
+      if (messages.length === 0) return;
+      setMessages([{ id: genId(), role: "assistant", content: "Context compacted." }]);
+      summarizedCountRef.current = 0;
+      setTimeout(() => inputRef.current?.focus(), 50);
+      return;
+    }
+
     const userMsg: Message = { id: genId(), role: "user", content: trimmedQuery };
     const newMessages = [...messages, userMsg];
     setMessages(newMessages);
@@ -166,6 +182,7 @@ export function useChatSession({ open, language, userName }: UseChatSessionParam
       });
     } finally {
       setIsLoading(false);
+      setTimeout(() => inputRef.current?.focus(), 50);
     }
   };
 

@@ -27,12 +27,13 @@ export function useAgentManager({ open }: UseAgentManagerParams) {
   const [isSavingAgent, setIsSavingAgent] = useState(false);
 
   const agents = useMuradianAskAgentStore((state) => state.agents);
+  const installedAgents = useMuradianAskAgentStore((state) => state.installedAgents);
   const fetchAgents = useMuradianAskAgentStore((state) => state.fetchAgents);
   const createAgent = useMuradianAskAgentStore((state) => state.createAgent);
   const updateAgent = useMuradianAskAgentStore((state) => state.updateAgent);
   const deleteAgent = useMuradianAskAgentStore((state) => state.deleteAgent);
 
-  const selectedAgent = [...agents, ...publicAgents].find((a) => a.id === selectedAgentId);
+  const selectedAgent = [...agents, ...installedAgents, ...publicAgents].find((a) => a.id === selectedAgentId);
   const filteredAgents = agents.filter((a) =>
     a.name.toLowerCase().includes(agentSearch.trim().toLowerCase()),
   );
