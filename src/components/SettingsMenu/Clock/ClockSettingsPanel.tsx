@@ -33,7 +33,7 @@ const CLOCK_POSITIONS: { value: ClockPosition; label: string }[] = [
 ];
 
 interface ClockSettingsPanelProps {
-  onBack: () => void;
+  onBack?: () => void;
 }
 
 export function ClockSettingsPanel({ onBack }: ClockSettingsPanelProps) {
@@ -85,18 +85,20 @@ export function ClockSettingsPanel({ onBack }: ClockSettingsPanelProps) {
     setShowSeconds(tempSeconds);
     setClockPosition(tempPosition);
     setClockStyle(tempStyle);
-    onBack();
+    onBack?.();
   };
 
   return (
     <div className="space-y-4 overflow-y-auto">
-      <button
-        onClick={onBack}
-        className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors"
-      >
-        <HugeiconsIcon icon={ArrowLeft01Icon} size={13} strokeWidth={2} />
-        Back
-      </button>
+      {onBack && (
+        <button
+          onClick={onBack}
+          className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors"
+        >
+          <HugeiconsIcon icon={ArrowLeft01Icon} size={13} strokeWidth={2} />
+          Back
+        </button>
+      )}
 
       {/* Visibility */}
       <div className="flex items-center justify-between rounded-xl border border-border/30 bg-muted/10 p-3">
