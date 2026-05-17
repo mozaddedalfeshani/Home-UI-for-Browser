@@ -89,6 +89,7 @@ const SortableShortcutCard = ({
   incrementVisitCount,
   autoOrderTabs,
   cardSize,
+  cardRadius,
 }: SortableShortcutCardProps) => {
   const ref = useRef<HTMLDivElement | null>(null);
   const {
