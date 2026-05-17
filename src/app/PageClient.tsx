@@ -39,6 +39,7 @@ export function PageClient() {
     layoutPreset,
     isDynamicWallpaper,
     dynamicWallpapers,
+    dynamicWallpaperMode,
     autoFocusSearch,
     setBackgroundImage,
   } = useSettingsStore();
@@ -99,24 +100,47 @@ export function PageClient() {
       return;
     }
 
+    const hour = new Date().getHours();
+    const isDayTime = hour >= 6 && hour < 18;
+    const effectiveContext =
+      dynamicWallpaperMode === "auto"
+        ? "auto"
+        : dynamicWallpaperMode === "time"
+          ? isDayTime
+            ? "time:day"
+            : "time:night"
+          : `theme:${activeWallpaperTheme}`;
+
     if (
       hasPickedDynamicWallpaperRef.current &&
-      lastDynamicWallpaperThemeRef.current === activeWallpaperTheme
+      lastDynamicWallpaperThemeRef.current === effectiveContext
     )
       return;
 
     const normalizedWallpapers = dynamicWallpapers.map(
       normalizeDynamicWallpaper,
     );
-    const themeWallpapers = normalizedWallpapers.filter(
-      (w) => w.mode === "both" || w.mode === activeWallpaperTheme,
-    );
-    const available =
-      themeWallpapers.length > 0 ? themeWallpapers : normalizedWallpapers;
+
+    let available: typeof normalizedWallpapers;
+    if (dynamicWallpaperMode === "auto") {
+      available = normalizedWallpapers;
+    } else {
+      const filterTheme =
+        dynamicWallpaperMode === "time"
+          ? isDayTime
+            ? ("light" as const)
+            : ("dark" as const)
+          : activeWallpaperTheme;
+      const filtered = normalizedWallpapers.filter(
+        (w) => w.mode === "both" || w.mode === filterTheme,
+      );
+      available = filtered.length > 0 ? filtered : normalizedWallpapers;
+    }
+
     if (available.length === 0) return;
 
     hasPickedDynamicWallpaperRef.current = true;
-    lastDynamicWallpaperThemeRef.current = activeWallpaperTheme;
+    lastDynamicWallpaperThemeRef.current = effectiveContext;
 
     const fetchNewWallpaper = async () => {
       try {
@@ -141,6 +165,7 @@ export function PageClient() {
     activeWallpaperTheme,
     dynamicWallpapers,
     isDynamicWallpaper,
+    dynamicWallpaperMode,
     isHydrated,
     setBackgroundImage,
   ]);
