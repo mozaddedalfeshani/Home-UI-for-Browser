@@ -1,0 +1,15 @@
+export type SettingsSection =
+  | "appearance"
+  | "wallpaper"
+  | "layout"
+  | "behavior"
+  | "clock"
+  | "shortcuts"
+  | "history"
+  | "profile-share"
+  | "pricing"
+  | "ai-models"
+  | "account-login"
+  | "account-profile"
+  | "account-memory"
+  | "account-sync";
