@@ -9,6 +9,7 @@ import {
 } from "@/lib/shareProfile";
 
 import { Language } from "@/constants/languages";
+import wallpapersData from "@/data/wallpapers.json";
 
 export type Theme = "light" | "dark" | "system";
 export type ClockPosition = "top-left" | "top-center" | "top-right";
@@ -23,44 +24,8 @@ export interface DynamicWallpaper {
   mode: WallpaperMode;
 }
 
-export const DEFAULT_DYNAMIC_WALLPAPERS: DynamicWallpaper[] = [
-  {
-    url: "https://homewalpaper.imurad.me/1341419.png",
-    mode: "dark",
-  },
-  {
-    url: "https://homewalpaper.imurad.me/573653.jpg",
-    mode: "dark",
-  },
-  {
-    url: "https://homewalpaper.imurad.me/1043977.jpg",
-    mode: "dark",
-  },
-  {
-    url: "https://homewalpaper.imurad.me/1351306.png",
-    mode: "light",
-  },
-  {
-    url: "https://homewalpaper.imurad.me/323869.jpg",
-    mode: "light",
-  },
-  {
-    url: "https://homewalpaper.imurad.me/594870.jpg",
-    mode: "light",
-  },
-  {
-    url: "https://homewalpaper.imurad.me/356154.jpg",
-    mode: "both",
-  },
-  {
-    url: "https://homewalpaper.imurad.me/1362858.jpeg",
-    mode: "both",
-  },
-  {
-    url: "https://homewalpaper.imurad.me/97548.jpg",
-    mode: "both",
-  },
-];
+export const DEFAULT_DYNAMIC_WALLPAPERS: DynamicWallpaper[] =
+  wallpapersData as DynamicWallpaper[];
 
 export const normalizeDynamicWallpaper = (
   wallpaper: DynamicWallpaper | string,
@@ -364,21 +329,19 @@ export const useSettingsStore = create<SettingsState>()(
     }),
     {
       name: "settings-store",
-      version: 2,
+      version: 3,
       migrate: (persistedState) => {
+        if (!persistedState || typeof persistedState !== "object")
+          return persistedState;
+        const state = persistedState as Record<string, unknown>;
         if (
-          persistedState &&
-          typeof persistedState === "object" &&
-          "cardSize" in persistedState &&
-          persistedState.cardSize === LEGACY_DEFAULT_CARD_SIZE
+          "cardSize" in state &&
+          state.cardSize === LEGACY_DEFAULT_CARD_SIZE
         ) {
-          return {
-            ...persistedState,
-            cardSize: DEFAULT_CARD_SIZE,
-          };
+          state.cardSize = DEFAULT_CARD_SIZE;
         }
-
-        return persistedState;
+        state.dynamicWallpapers = DEFAULT_DYNAMIC_WALLPAPERS;
+        return state;
       },
       partialize: (state) => {
         const persistedState = { ...state } as Record<string, unknown>;
