@@ -14,7 +14,7 @@ import { useSearchHistoryStore } from "@/store/searchHistoryStore";
 import { useTabClickHistoryStore } from "@/store/tabClickHistoryStore";
 
 interface HistoryPanelProps {
-  onBack: () => void;
+  onBack?: () => void;
 }
 
 export function HistoryPanel({ onBack }: HistoryPanelProps) {
@@ -49,13 +49,15 @@ export function HistoryPanel({ onBack }: HistoryPanelProps) {
 
   return (
     <div className="flex flex-col gap-4 h-full">
-      <button
-        onClick={onBack}
-        className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors"
-      >
-        <HugeiconsIcon icon={ArrowLeft01Icon} size={13} strokeWidth={2} />
-        Back
-      </button>
+      {onBack && (
+        <button
+          onClick={onBack}
+          className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors"
+        >
+          <HugeiconsIcon icon={ArrowLeft01Icon} size={13} strokeWidth={2} />
+          Back
+        </button>
+      )}
 
       {entries.length > 0 ? (
         <div className="space-y-2 overflow-y-auto flex-1">

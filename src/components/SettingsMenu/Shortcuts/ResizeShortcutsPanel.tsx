@@ -8,7 +8,7 @@ import { Slider } from "@/components/ui/slider";
 import { useSettingsStore } from "@/store/settingsStore";
 
 interface ResizeShortcutsPanelProps {
-  onBack: () => void;
+  onBack?: () => void;
 }
 
 export function ResizeShortcutsPanel({ onBack }: ResizeShortcutsPanelProps) {
@@ -19,13 +19,15 @@ export function ResizeShortcutsPanel({ onBack }: ResizeShortcutsPanelProps) {
 
   return (
     <div className="space-y-6">
-      <button
-        onClick={onBack}
-        className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors"
-      >
-        <HugeiconsIcon icon={ArrowLeft01Icon} size={13} strokeWidth={2} />
-        Back
-      </button>
+      {onBack && (
+        <button
+          onClick={onBack}
+          className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors"
+        >
+          <HugeiconsIcon icon={ArrowLeft01Icon} size={13} strokeWidth={2} />
+          Back
+        </button>
+      )}
 
       <div className="space-y-5">
         <div className="space-y-3">
@@ -102,7 +104,7 @@ export function ResizeShortcutsPanel({ onBack }: ResizeShortcutsPanelProps) {
           onClick={() => {
             setTempSize(cardSize);
             setTempRadius(cardRadius);
-            onBack();
+            onBack?.();
           }}
         >
           Cancel
@@ -113,7 +115,7 @@ export function ResizeShortcutsPanel({ onBack }: ResizeShortcutsPanelProps) {
           onClick={() => {
             setCardSize(tempSize);
             setCardRadius(tempRadius);
-            onBack();
+            onBack?.();
           }}
         >
           Apply

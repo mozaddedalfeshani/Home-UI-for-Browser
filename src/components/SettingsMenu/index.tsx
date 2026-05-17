@@ -109,12 +109,12 @@ import { TokenUsageSection } from "../Auth/AccountButton/TokenUsageSection";
 
 type SettingsSection =
   | "appearance"
-  | "search"
+  | "wallpaper"
+  | "layout"
   | "behavior"
-  | "tools"
-  | "resize-shortcuts"
+  | "clock"
+  | "shortcuts"
   | "history"
-  | "clock-settings"
   | "profile-share"
   | "pricing"
   | "ai-models"
@@ -231,6 +231,7 @@ const SettingsMenu = () => {
     tabsPosition,
     backgroundImage,
     isDynamicWallpaper,
+    dynamicWallpaperMode,
     autoOrderTabs,
     showRightSidebar,
     autoFocusSearch,
@@ -245,6 +246,7 @@ const SettingsMenu = () => {
     setTabsPosition,
     setBackgroundImage,
     setDynamicWallpaper,
+    setDynamicWallpaperMode,
     toggleAutoOrderTabs,
     toggleShowRightSidebar,
     toggleAutoFocusSearch,
@@ -255,7 +257,7 @@ const SettingsMenu = () => {
     setResizeDialogOpen,
   } = useSettingsStore();
 
-  const { setTheme } = useTheme();
+  const { setTheme, resolvedTheme } = useTheme();
   const t = useTranslation(language);
 
   const handleOpen = (open: boolean) => {
@@ -501,8 +503,13 @@ const SettingsMenu = () => {
       icon: PaintBrush01Icon,
     },
     {
-      id: "search" as SettingsSection,
-      label: "Search & Layout",
+      id: "wallpaper" as SettingsSection,
+      label: "Wallpaper",
+      icon: Image01Icon,
+    },
+    {
+      id: "layout" as SettingsSection,
+      label: "Layout",
       icon: Search01Icon,
     },
     {
@@ -510,7 +517,21 @@ const SettingsMenu = () => {
       label: "Behavior",
       icon: AccountSetting01Icon,
     },
-    { id: "tools" as SettingsSection, label: "Tools", icon: MagicWand01Icon },
+    {
+      id: "clock" as SettingsSection,
+      label: "Clock",
+      icon: Clock01Icon,
+    },
+    {
+      id: "shortcuts" as SettingsSection,
+      label: "Shortcuts",
+      icon: Maximize01Icon,
+    },
+    {
+      id: "history" as SettingsSection,
+      label: t("history"),
+      icon: TimeScheduleIcon,
+    },
     {
       id: "profile-share" as SettingsSection,
       label: t("profileShare"),
@@ -606,8 +627,109 @@ const SettingsMenu = () => {
               ))}
             </div>
           </div>
+        </div>
+      );
+
+    if (activeSection === "wallpaper")
+      return (
+        <div className="space-y-6">
           <div>
-            <SectionLabel>{t("backgroundImage")}</SectionLabel>
+            <SectionLabel>Dynamic Wallpaper</SectionLabel>
+            <ToggleRow
+              label="Randomize on every refresh"
+              checked={isDynamicWallpaper}
+              onChange={() => setDynamicWallpaper(!isDynamicWallpaper)}
+            />
+          </div>
+
+          {isDynamicWallpaper && (
+            <div className="space-y-3">
+              <SectionLabel>Wallpaper Mode</SectionLabel>
+              <div className="grid grid-cols-3 gap-2">
+                {(
+                  [
+                    {
+                      value: "auto",
+                      label: "Auto",
+                      desc: "All images",
+                    },
+                    {
+                      value: "theme",
+                      label: "Theme",
+                      desc: "Light / dark",
+                    },
+                    {
+                      value: "time",
+                      label: "Time",
+                      desc: "Day / night",
+                    },
+                  ] as const
+                ).map(({ value, label, desc }) => (
+                  <button
+                    key={value}
+                    onClick={() => setDynamicWallpaperMode(value)}
+                    className={cn(
+                      "flex flex-col items-center gap-1 rounded-xl border-2 p-3 text-xs font-medium transition-all",
+                      dynamicWallpaperMode === value
+                        ? "border-primary bg-primary/5 text-foreground"
+                        : "border-border/40 text-muted-foreground hover:border-border hover:bg-accent/40",
+                    )}
+                  >
+                    <span className="font-semibold">{label}</span>
+                    <span className="text-[10px] opacity-70">{desc}</span>
+                  </button>
+                ))}
+              </div>
+
+              {/* Preview pool for current mode */}
+              {(() => {
+                const all = DEFAULT_DYNAMIC_WALLPAPERS.map(normalizeDynamicWallpaper);
+                let pool: typeof all;
+                let poolLabel: string;
+                if (dynamicWallpaperMode === "auto") {
+                  pool = all;
+                  poolLabel = `All ${all.length} wallpapers in pool`;
+                } else if (dynamicWallpaperMode === "theme") {
+                  const activeTheme = resolvedTheme === "dark" ? "dark" : "light";
+                  pool = all.filter((w) => w.mode === "both" || w.mode === activeTheme);
+                  poolLabel = `${pool.length} wallpapers for ${activeTheme} mode`;
+                } else {
+                  const hour = new Date().getHours();
+                  const isDayTime = hour >= 6 && hour < 18;
+                  const timeTheme = isDayTime ? "light" : "dark";
+                  pool = all.filter((w) => w.mode === "both" || w.mode === timeTheme);
+                  poolLabel = `${pool.length} wallpapers for ${isDayTime ? "day" : "night"} (${hour}:00)`;
+                }
+                return (
+                  <div className="space-y-2">
+                    <p className="text-[11px] text-muted-foreground">{poolLabel}</p>
+                    <div className="flex flex-wrap gap-1.5">
+                      {pool.map((w, idx) => (
+                        <div
+                          key={w.url}
+                          className="relative h-10 w-14 overflow-hidden rounded-lg border border-border/40"
+                        >
+                          <Image
+                            src={w.url}
+                            alt={`Pool ${idx}`}
+                            width={56}
+                            height={40}
+                            className="h-full w-full object-cover"
+                          />
+                          <span className="absolute bottom-0.5 right-0.5 rounded bg-black/55 px-0.5 text-[7px] font-semibold uppercase leading-3 text-white">
+                            {w.mode === "both" ? "all" : w.mode.charAt(0)}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                );
+              })()}
+            </div>
+          )}
+
+          <div>
+            <SectionLabel>Gallery</SectionLabel>
             <input
               type="file"
               ref={fileInputRef}
@@ -658,19 +780,19 @@ const SettingsMenu = () => {
         </div>
       );
 
-    if (activeSection === "search")
+    if (activeSection === "layout")
       return (
         <div className="space-y-6">
           <div>
             <SectionLabel>{t("searchEngine")}</SectionLabel>
-            <div className="grid grid-cols-3 gap-2">
-              {(["google", "duckduckgo", "bing"] as SearchEngine[]).map(
+            <div className="grid grid-cols-2 gap-2">
+              {(["google", "duckduckgo", "bing", "brave"] as SearchEngine[]).map(
                 (engine) => (
                   <button
                     key={engine}
                     onClick={() => setSearchEngine(engine)}
                     className={cn(
-                      "flex items-center justify-center gap-2 rounded-xl border-2 p-3 text-sm font-medium transition-all",
+                      "flex items-center gap-2 rounded-xl border-2 p-3 text-sm font-medium transition-all",
                       searchEngine === engine
                         ? "border-primary bg-primary/5 text-foreground"
                         : "border-border/40 text-muted-foreground hover:border-border hover:bg-accent/40",
@@ -682,7 +804,7 @@ const SettingsMenu = () => {
                       strokeWidth={1.5}
                     />
                     <span className="capitalize">
-                      {engine === "duckduckgo" ? "DDG" : engine}
+                      {engine === "duckduckgo" ? "DuckDuckGo" : engine.charAt(0).toUpperCase() + engine.slice(1)}
                     </span>
                   </button>
                 ),
@@ -744,65 +866,17 @@ const SettingsMenu = () => {
             checked={enableSearchHoverZone}
             onChange={toggleSearchHoverZone}
           />
-          <ToggleRow
-            label={t("dynamicWallpaper")}
-            checked={isDynamicWallpaper}
-            onChange={() => setDynamicWallpaper(!isDynamicWallpaper)}
-          />
         </div>
       );
 
-    if (activeSection === "tools")
-      return (
-        <div className="space-y-2">
-          {[
-            {
-              icon: Maximize01Icon,
-              label: t("resizeShortcuts"),
-              onClick: () => setActiveSection("resize-shortcuts"),
-            },
-            {
-              icon: TimeScheduleIcon,
-              label: t("history"),
-              onClick: () => setActiveSection("history"),
-            },
-            {
-              icon: Clock01Icon,
-              label: t("clockSettings"),
-              onClick: () => setActiveSection("clock-settings"),
-            },
-          ].map((item) => (
-            <button
-              key={item.label}
-              onClick={item.onClick}
-              className="flex w-full items-center gap-3 rounded-xl border border-border/30 bg-muted/10 px-4 py-3 text-sm text-foreground transition-colors hover:bg-accent"
-            >
-              <HugeiconsIcon
-                icon={item.icon}
-                size={16}
-                strokeWidth={1.5}
-                className="text-muted-foreground shrink-0"
-              />
-              <span className="flex-1 text-left font-medium">{item.label}</span>
-              <HugeiconsIcon
-                icon={ArrowRight01Icon}
-                size={14}
-                strokeWidth={1.5}
-                className="text-muted-foreground/50 shrink-0"
-              />
-            </button>
-          ))}
-        </div>
-      );
+    if (activeSection === "clock")
+      return <ClockSettingsPanel />;
 
-    if (activeSection === "resize-shortcuts")
-      return <ResizeShortcutsPanel onBack={() => setActiveSection("tools")} />;
+    if (activeSection === "shortcuts")
+      return <ResizeShortcutsPanel />;
 
     if (activeSection === "history")
-      return <HistoryPanel onBack={() => setActiveSection("tools")} />;
-
-    if (activeSection === "clock-settings")
-      return <ClockSettingsPanel onBack={() => setActiveSection("tools")} />;
+      return <HistoryPanel />;
 
     if (activeSection === "profile-share")
       return (
@@ -852,7 +926,67 @@ const SettingsMenu = () => {
           <p className="text-sm text-muted-foreground">
             Choose a plan that fits your needs.
           </p>
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-3 gap-3">
+            {/* Free card */}
+            <div
+              className={cn(
+                "flex flex-col rounded-2xl border p-5 gap-3 relative overflow-hidden",
+                userRole === "free"
+                  ? "border-border bg-muted/20"
+                  : "border-border/50 bg-muted/10",
+              )}
+            >
+              {userRole === "free" && (
+                <div className="absolute top-2 right-2 rounded-full bg-muted px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-muted-foreground">
+                  Active
+                </div>
+              )}
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <HugeiconsIcon
+                    icon={Crown02Icon}
+                    size={18}
+                    strokeWidth={1.5}
+                    className="text-muted-foreground"
+                  />
+                  <span className="text-sm font-semibold text-foreground">
+                    Free
+                  </span>
+                </div>
+                <span className="text-base font-bold text-foreground">
+                  ৳0
+                  <span className="text-xs font-normal text-muted-foreground">
+                    /mo
+                  </span>
+                </span>
+              </div>
+              <ul className="flex flex-col gap-1.5 flex-1">
+                {[
+                  "Tab shortcuts",
+                  "Sticky notes",
+                  "Search history",
+                  "Wallpaper gallery",
+                  "Clock widget",
+                ].map((f, i) => (
+                  <li
+                    key={f}
+                    className="flex items-center gap-1.5 text-xs text-muted-foreground opacity-0 animate-[fadeSlideIn_0.3s_ease_forwards]"
+                    style={{ animationDelay: `${i * 60}ms` }}
+                  >
+                    <HugeiconsIcon
+                      icon={Tick01Icon}
+                      size={11}
+                      className="text-muted-foreground/60 shrink-0"
+                    />
+                    {f}
+                  </li>
+                ))}
+              </ul>
+              <div className="w-full rounded-xl bg-muted/30 border border-border/30 py-2 text-center text-xs font-semibold text-muted-foreground">
+                {userRole === "free" ? "Current Plan" : "Free"}
+              </div>
+            </div>
+
             {/* Lite card */}
             <div
               className={cn(
@@ -1490,13 +1624,7 @@ const SettingsMenu = () => {
                                 ? "My Profile"
                                 : activeSection === "account-memory"
                                   ? "Memory"
-                                  : activeSection === "resize-shortcuts"
-                                    ? t("resizeShortcuts")
-                                    : activeSection === "history"
-                                      ? t("history")
-                                      : activeSection === "clock-settings"
-                                        ? t("clockSettings")
-                                        : "")}
+                                  : "")}
                     </h2>
                   </div>
                   <div className="flex-1 min-h-0 overflow-y-auto px-6 py-5">

@@ -18,6 +18,7 @@ export type LayoutPreset = "default" | "compact" | "focus";
 export type ClockStyle = "classic" | "modern";
 export type TabsPosition = "top" | "center";
 export type WallpaperMode = "light" | "dark" | "both";
+export type DynamicWallpaperMode = "auto" | "theme" | "time";
 
 export interface DynamicWallpaper {
   url: string;
@@ -77,6 +78,7 @@ interface SettingsState {
   dynamicWallpapers: Array<DynamicWallpaper | string>;
   alarmSoundRef: string | null;
   autoFocusSearch: boolean;
+  dynamicWallpaperMode: DynamicWallpaperMode;
   setTheme: (theme: Theme) => void;
   toggleAutoOrderTabs: () => void;
   toggleShowClock: () => void;
@@ -103,6 +105,7 @@ interface SettingsState {
   setResizeDialogOpen: (open: boolean) => void;
   setTabsPosition: (position: TabsPosition) => void;
   setDynamicWallpaper: (enabled: boolean) => void;
+  setDynamicWallpaperMode: (mode: DynamicWallpaperMode) => void;
   ensureAlarmSoundCached: () => Promise<string | null>;
   getShareableSettings: () => ShareProfileSettings;
   applyShareProfileSettings: (settings: ShareProfileSettings) => void;
@@ -140,6 +143,7 @@ export const useSettingsStore = create<SettingsState>()(
       dynamicWallpapers: DEFAULT_DYNAMIC_WALLPAPERS,
       alarmSoundRef: null,
       autoFocusSearch: SHARE_SETTINGS_DEFAULTS.autoFocusSearch,
+      dynamicWallpaperMode: "auto" as DynamicWallpaperMode,
       setTheme: (theme) => set({ theme }),
       toggleAutoOrderTabs: () =>
         set((state) => ({ autoOrderTabs: !state.autoOrderTabs })),
@@ -225,6 +229,7 @@ export const useSettingsStore = create<SettingsState>()(
       setResizeDialogOpen: (open) => set({ isResizeDialogOpen: open }),
       setTabsPosition: (position) => set({ tabsPosition: position }),
       setDynamicWallpaper: (enabled) => set({ isDynamicWallpaper: enabled }),
+      setDynamicWallpaperMode: (mode) => set({ dynamicWallpaperMode: mode }),
       ensureAlarmSoundCached: async () => {
         const existingRef = get().alarmSoundRef;
         if (existingRef) {
