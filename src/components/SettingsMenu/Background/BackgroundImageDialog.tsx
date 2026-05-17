@@ -4,6 +4,7 @@ import { useState, useRef } from "react";
 import { Upload, X, Image as ImageIcon } from "lucide-react";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 import {
   Dialog,
   DialogContent,
@@ -12,7 +13,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { useSettingsStore } from "@/store/settingsStore";
+import { useSettingsStore, type DynamicWallpaperMode } from "@/store/settingsStore";
 
 interface BackgroundImageDialogProps {
   open: boolean;
@@ -28,6 +29,8 @@ export function BackgroundImageDialog({
     setBackgroundImage,
     isDynamicWallpaper,
     setDynamicWallpaper,
+    dynamicWallpaperMode,
+    setDynamicWallpaperMode,
   } = useSettingsStore();
   const [tempBackgroundImage, setTempBackgroundImage] = useState<
     string | File | null
@@ -113,7 +116,7 @@ export function BackgroundImageDialog({
             )}
           </div>
 
-          <div className="space-y-4 rounded-lg bg-accent/30 p-4 border border-border/40">
+          <div className="space-y-3 rounded-lg bg-accent/30 p-4 border border-border/40">
             <div className="flex items-center justify-between">
               <div className="space-y-0.5">
                 <span className="text-sm font-semibold">Dynamic Wallpaper</span>
@@ -131,6 +134,59 @@ export function BackgroundImageDialog({
                 />
               </button>
             </div>
+
+            {isDynamicWallpaper && (
+              <div className="space-y-1.5 pt-1 border-t border-border/30">
+                <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wide">
+                  Wallpaper Mode
+                </p>
+                <div className="grid grid-cols-3 gap-1.5">
+                  {(
+                    [
+                      {
+                        value: "auto" as DynamicWallpaperMode,
+                        label: "Auto",
+                        desc: "All images",
+                      },
+                      {
+                        value: "theme" as DynamicWallpaperMode,
+                        label: "Theme",
+                        desc: "Light / dark",
+                      },
+                      {
+                        value: "time" as DynamicWallpaperMode,
+                        label: "Time",
+                        desc: "Day / night",
+                      },
+                    ] as const
+                  ).map(({ value, label, desc }) => (
+                    <button
+                      key={value}
+                      type="button"
+                      onClick={() => setDynamicWallpaperMode(value)}
+                      className={cn(
+                        "flex flex-col items-center gap-0.5 rounded-lg border px-2 py-2 text-xs transition-colors",
+                        dynamicWallpaperMode === value
+                          ? "border-primary bg-primary text-primary-foreground"
+                          : "border-border/40 hover:bg-accent",
+                      )}
+                    >
+                      <span className="font-semibold">{label}</span>
+                      <span
+                        className={cn(
+                          "text-[10px]",
+                          dynamicWallpaperMode === value
+                            ? "opacity-80"
+                            : "text-muted-foreground",
+                        )}
+                      >
+                        {desc}
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
 
           {tempBackgroundImage && !isDynamicWallpaper && (
