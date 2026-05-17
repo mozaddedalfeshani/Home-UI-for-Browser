@@ -13,7 +13,10 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { useSettingsStore, type DynamicWallpaperMode } from "@/store/settingsStore";
+import {
+  useSettingsStore,
+  type DynamicWallpaperMode,
+} from "@/store/settingsStore";
 
 interface BackgroundImageDialogProps {
   open: boolean;
