@@ -191,7 +191,7 @@ const SortableShortcutCard = ({
                     width: `${cardSize}rem`,
                     height: `${cardSize}rem`,
                     border: "0.5px solid rgba(255,255,255,0.42)",
-                    borderRadius: `${cardSize * 0.15}rem`,
+                    borderRadius: `${cardRadius}rem`,
                     background: "rgba(255,255,255,0.12)",
                     backdropFilter: "blur(14px) saturate(1.2)",
                     boxShadow: "0 8px 20px rgba(15,23,42,0.12)",
